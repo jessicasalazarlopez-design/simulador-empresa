@@ -235,6 +235,27 @@ table.items{min-width:520px;font-size:.88rem}
 .org>.ob{min-width:220px}
 .bars{display:grid;gap:8px;margin-top:16px}.bars div{display:flex;align-items:center;gap:10px}.bars span{width:70px;font-size:.88rem;color:var(--muted)}
 .bars i{display:block;height:14px;border-radius:4px;background:var(--bank);min-width:2px}.bars i.b2{background:var(--acct)}
+/* ---- Nube: empresa compartida por código ---- */
+.cloudbar{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin-top:14px;padding:10px 14px;background:var(--surface);border:1px solid var(--line);border-radius:10px;font-size:.92rem}
+.cloudbar .who{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;font-weight:600}
+.cloudbar .grow{flex:1}
+.cloudbar .dot{width:10px;height:10px;border-radius:50%;background:var(--muted);display:inline-block}
+.cloudbar .dot.ok{background:var(--ok)} .cloudbar .dot.busy{background:var(--warn)} .cloudbar .dot.bad{background:var(--bad)}
+.cloudbar .code{font-family:var(--f-mono);font-weight:600;letter-spacing:.06em;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r);padding:2px 8px}
+.cloudbar.ro{border-color:var(--warn);background:color-mix(in srgb,var(--warn) 10%,var(--surface))}
+body.ro-mode .wrap input,body.ro-mode .wrap select,body.ro-mode .wrap textarea{pointer-events:none;opacity:.8}
+.cmodal{position:fixed;inset:0;background:rgba(10,18,28,.62);display:flex;align-items:flex-start;justify-content:center;padding:16px;z-index:60;overflow:auto}
+.cmbox{background:var(--surface);color:var(--ink);border-radius:12px;max-width:640px;width:100%;margin:auto;padding:22px;display:flex;flex-direction:column;gap:16px;border:1px solid var(--line)}
+.cmbox h2{font-size:1.4rem}
+.cmopt{border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--surface-2);display:flex;flex-direction:column;gap:8px}
+.cmopt h3{font-size:1.05rem}
+.cmopt .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.cmopt input[type=text]{flex:1 1 180px;min-height:44px;font:600 1.1rem var(--f-mono);letter-spacing:.08em;text-transform:uppercase;padding:0 12px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);color:var(--ink)}
+.cmcode{font:700 2rem var(--f-mono);letter-spacing:.12em;text-align:center;padding:14px;border:2px dashed var(--accent);border-radius:10px;background:var(--surface-2)}
+.cmerr{color:var(--bad);font-weight:600;min-height:1.2em}
+.cmlist{display:flex;flex-direction:column;gap:8px}
+.cmitem{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;background:var(--surface)}
+.cmitem .nm{display:flex;flex-direction:column;min-width:0}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 @media (max-width:520px){.card{padding:16px}.doc{padding:16px}.kv{grid-template-columns:1fr;gap:2px}.kv dd{margin-bottom:8px}}
 </style>
@@ -243,11 +264,12 @@ table.items{min-width:520px;font-size:.88rem}
   <header class="top">
     <div>
       <h1>Empresa de práctica</h1>
-      <p class="lead">Crea tu empresa, conoce sus cinco departamentos y practica el trabajo de cada uno. Todo se queda en este navegador.</p>
+      <p class="lead">Crea tu empresa, conoce sus cinco departamentos y practica el trabajo de cada uno. Si entras con el código de tu equipo, todos ven la misma empresa; si trabajas solo, los datos se quedan en este navegador.</p>
       <p class="cochip">Tu empresa: <strong id="cname"></strong></p>
     </div>
     <p class="flag">Simulación educativa<br>No es dinero real ni tiene validez tributaria</p>
   </header>
+  <div class="cloudbar" id="cloudBar" aria-live="polite"></div>
 
   <div class="tabs dnav" role="tablist" aria-label="Departamentos">
     <button class="tab t-home" role="tab" id="dt-home" aria-selected="true" data-dept="home">Portada</button>
@@ -373,6 +395,8 @@ table.items{min-width:520px;font-size:.88rem}
   </section>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 </div>
+<div class="cmodal" id="cloudModal" role="dialog" aria-modal="true" aria-labelledby="cmTitle" hidden></div>
+<input type="file" id="cloudFile" accept="application/json,.json" hidden>
 
 <script>
 (function(){
@@ -444,6 +468,8 @@ const dayKey=(ts)=>{const p=crParts(new Date(ts||Date.now()));return `${p.year}-
 
 /* ---------- Estado ---------- */
 const KEY='simulador-banco-factura-v1';
+/* Estado de la nube (el módulo completo está al final del script) */
+const cloud={on:false,ro:false,code:'',mods:null,db:null,auth:null,ref:null,unsub:null,last:{},timer:0,status:'solo',err:'',busy:false,pendingRender:false,blurHook:false,renderTimer:0};
 function blankDraft(){return{type:'01',rec:{name:'',idType:'02',id:'',mail:''},cond:'01',plazo:'',pago:'04',obs:'',lines:[{det:'',code:'',qty:1,unit:'Unid',price:'',disc:0,iva:13}]}}
 function sampleDraft(){return{type:'01',rec:{name:'Cliente de Práctica S.A. (ejemplo)',idType:'02',id:'3-101-654321',mail:'compras@cliente.example'},cond:'01',plazo:'',pago:'04',obs:'',lines:[
   {det:'Impresión de afiches (ejemplo)',code:'1234567890123',qty:10,unit:'Unid',price:3500,disc:0,iva:13},
@@ -459,7 +485,7 @@ function defaults(){const now=Date.now();
     invoices:[],receipts:{},purchases:[],decls:[],checks:{},draft:blankDraft()}}
 function load(){try{const raw=localStorage.getItem(KEY);if(raw){const o=JSON.parse(raw);if(o&&o.v===1&&o.accounts&&o.draft)return o}}catch(e){}return defaults()}
 let S=load();S.ger=S.ger||null;S.th=S.th||null;S.mk=S.mk||null;S.pr=S.pr||null;S.company=Object.assign({act:'',lema:'',color:'#0A6A62'},S.company);S.receipts=S.receipts||{};S.purchases=S.purchases||[];S.decls=S.decls||[];S.checks=S.checks||{};
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function save(){if(cloud.ro)return;try{localStorage.setItem(cloud.on?KEY+':'+cloud.code:KEY,JSON.stringify(S))}catch(e){}if(cloud.on)cloudPush()}
 const view={dept:'home',tab:'bank',acc:'cc',prev:null,ac:'resumen',ym:dayKey().slice(0,7),pf:null,perr:[]};view.pf=newPF();
 let sending=false,tt;
 
@@ -851,7 +877,7 @@ document.addEventListener('click',e=>{
     case 'copy-cons':{const d=S.invoices.find(x=>x.id===view.prev);if(d)copyText(d.cons,$('#kbCons'));break}
     case 'reset-ask':$('#resetAsk').hidden=true;$('#resetConfirm').hidden=false;break;
     case 'reset-cancel':$('#resetAsk').hidden=false;$('#resetConfirm').hidden=true;break;
-    case 'reset-ok':S=defaults();save();view.acc='cc';view.prev=null;flow=newFlow();$('#resetAsk').hidden=false;$('#resetConfirm').hidden=true;renderAll();toast('Práctica reiniciada.');break;
+    case 'reset-ok':if(cloud.ro){toast('Vista de docente: solo lectura.');break}if(cloud.on&&!confirm('Esto reinicia la empresa para TODO el equipo, en todas las computadoras. ¿Seguro?'))break;S=defaults();normalizeS();save();view.acc='cc';view.prev=null;flow=newFlow();$('#resetAsk').hidden=false;$('#resetConfirm').hidden=true;renderAll();toast('Práctica reiniciada.');break;
   }});
 $('#payCard').addEventListener('submit',e=>{e.preventDefault();bankSubmit()});
 $('#payCard').addEventListener('input',e=>{if(flow.step!==1)return;readForm();if(e.target.id==='bf-phone'){const h=$('#phoneHint');if(h)h.innerHTML=phoneHint(e.target.value)}});
@@ -2115,7 +2141,256 @@ document.addEventListener('click',e=>{
   const lh=e.target.closest('[data-act="lh-pdf"]');if(lh)savePdf(mk(()=>buildLetterheadPdf()),'hoja-membretada.pdf')});
 
 function renderAll(){renderDepts();renderGer();renderTh();renderMk();renderPr();renderCompany();renderAccts();renderMoves();renderPay();renderTaxForm();renderPreview();renderHist();renderAcct()}
-renderAll();setDept('home');
+/* ---------- Nube: empresa compartida por código (Firebase) ---------- */
+const FB_CONFIG={apiKey:"AIzaSyDcWs4CUq-rSv1FKSX82s3OHR-OC17KdzM",authDomain:"simulador-empresa-1ceed.firebaseapp.com",projectId:"simulador-empresa-1ceed",storageBucket:"simulador-empresa-1ceed.firebasestorage.app",messagingSenderId:"930736900267",appId:"1:930736900267:web:379d0acb563c72f349cfee"};
+const FB_BASE='https://www.gstatic.com/firebasejs/13.0.0/';
+const LS_MODE='sim-empresa-modo',LS_CODE='sim-empresa-codigo',LS_DOC='sim-empresa-docente',LS_DEV='sim-empresa-equipo-id';
+const ALPHA='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
+const lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
+const lsDel=k=>{try{localStorage.removeItem(k)}catch(e){}};
+const devId=(()=>{let v=lsGet(LS_DEV);if(!v){v=Math.random().toString(36).slice(2,10);lsSet(LS_DEV,v)}return v})();
+const withTimeout=(p,ms,msg)=>Promise.race([p,new Promise((_,rej)=>setTimeout(()=>rej(Object.assign(new Error(msg||'timeout'),{code:'timeout'})),ms))]);
+const syncKeys=()=>Object.keys(S).filter(k=>k!=='draft'&&k!=='v');
+const enc=k=>JSON.stringify(S[k]===undefined?null:S[k]);
+const isDirty=()=>syncKeys().some(k=>enc(k)!==cloud.last[k]);
+function normalizeS(){S.ger=S.ger||null;S.th=S.th||null;S.mk=S.mk||null;S.pr=S.pr||null;S.company=Object.assign({act:'',lema:'',color:'#0A6A62'},S.company);S.receipts=S.receipts||{};S.purchases=S.purchases||[];S.decls=S.decls||[];S.checks=S.checks||{};S.draft=S.draft||blankDraft();S.sinpe=S.sinpe||{day:'',total:0}}
+function newCode(){const a=new Uint8Array(8);crypto.getRandomValues(a);let s='';for(let i=0;i<8;i++){s+=ALPHA[a[i]%32];if(i===3)s+='-'}return s}
+function normCode(v){const s=String(v||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(s.length!==8)return null;for(const ch of s)if(ALPHA.indexOf(ch)<0)return null;return s.slice(0,4)+'-'+s.slice(4)}
+function errText(e){const c=(e&&e.code)||'',m=String((e&&e.message)||'');
+  if(c==='not-found-company')return 'No encontramos una empresa con ese código. Revisa que esté bien escrito.';
+  if(c==='permission-denied')return 'La nube rechazó la conexión. Avisa a tu docente: puede faltar configurar las reglas de Firebase.';
+  if(c==='invalid-argument')return 'La empresa es demasiado grande para la nube. Quita el logo o reinicia datos de práctica.';
+  if(c==='timeout'||c==='unavailable'||/network|fetch|import|load|module/i.test(m))return 'No hay conexión con la nube. Revisa el internet e inténtalo de nuevo.';
+  return 'No se pudo conectar ('+(c||'error')+').'}
+
+async function fbInit(){
+  if(cloud.mods)return cloud.mods;
+  const [a,au,fs]=await withTimeout(Promise.all([import(FB_BASE+'firebase-app.js'),import(FB_BASE+'firebase-auth.js'),import(FB_BASE+'firebase-firestore.js')]),20000,'No se pudo cargar Firebase');
+  const app=a.initializeApp(FB_CONFIG),auth=au.getAuth(app),db=fs.getFirestore(app);
+  if(auth.authStateReady)await withTimeout(auth.authStateReady(),10000);
+  if(!auth.currentUser)await withTimeout(au.signInAnonymously(auth),15000);
+  cloud.auth=auth;cloud.db=db;cloud.mods={a,au,fs};return cloud.mods}
+
+/* barra de estado */
+const STATUS_TXT={ok:['ok','Sincronizado'],busy:['busy','Guardando…'],off:['bad','Sin conexión: se enviará al reconectar'],err:['bad','No se pudo sincronizar']};
+function setStatus(s,err){cloud.status=s;cloud.err=err?String(err.code||err.message||err):'';updateBar()}
+function updateBar(){
+  const el=$('#cloudBar');if(!el)return;
+  el.classList.toggle('ro',cloud.on&&cloud.ro);document.body.classList.toggle('ro-mode',cloud.on&&cloud.ro);
+  const btn=(a,t)=>`<button type="button" class="link" data-cl="${a}">${t}</button>`;
+  if(!cloud.on){el.innerHTML=`<span class="who"><span class="dot"></span>Trabajando solo en esta computadora</span><span class="grow"></span>${btn('open','Entrar o crear empresa del equipo')}${btn('save','Guardar avance en archivo')}${btn('load','Cargar avance')}`;return}
+  const st=STATUS_TXT[cloud.status]||STATUS_TXT.ok,ro=cloud.ro;
+  el.innerHTML=`<span class="who"><span class="dot ${st[0]}"></span>${ro?'Vista de docente (solo lectura):':'Empresa en la nube:'} <strong>${esc(S.company&&S.company.name||'')}</strong> <span class="code">${esc(cloud.code)}</span> <span class="sub" style="font-weight:400">${esc(st[1])}${cloud.err&&cloud.status==='err'?' ('+esc(cloud.err)+')':''}</span></span><span class="grow"></span>${ro?btn('docente','Panel docente'):btn('copy','Copiar código')}${btn('save','Guardar avance en archivo')}${ro?'':btn('load','Cargar avance')}${btn('leave',ro?'Salir de la vista docente':'Salir de esta empresa')}`}
+
+/* ventanas */
+function showModal(html){const m=$('#cloudModal');m.innerHTML=`<div class="cmbox">${html}</div>`;m.hidden=false;const f=m.querySelector('input[type=text],button');if(f)setTimeout(()=>f.focus(),30)}
+function closeModal(){const m=$('#cloudModal');m.hidden=true;m.innerHTML=''}
+function modalErr(t){const e=$('#cmErr');if(e){e.style.color='';e.textContent=t||''}}
+function setModalBusy(t){const m=$('#cloudModal');m.querySelectorAll('button').forEach(b=>{b.disabled=!!t});const e=$('#cmErr');if(e){if(t){e.style.color='var(--muted)';e.textContent=t}else e.style.color=''}}
+function openEntry(msg){
+  showModal(`<h2 id="cmTitle">¿Cómo quieres trabajar?</h2>
+  <p class="hint">Elige una opción. Después puedes cambiarla desde la barra de arriba.</p>
+  <div class="cmopt"><h3>1. Crear la empresa de mi equipo</h3><p class="hint">Recibes un código. Tus compañeros lo escriben en otra computadora y ven la misma empresa. Se crea con lo que ya hay en esta computadora.</p><div class="row"><button type="button" class="btn" data-cl="create">Crear empresa y obtener código</button></div></div>
+  <div class="cmopt"><h3>2. Entrar con el código de mi equipo</h3><div class="row"><input type="text" id="cmCode" maxlength="9" placeholder="XXXX-XXXX" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Código de la empresa"><button type="button" class="btn" data-cl="join">Entrar</button></div></div>
+  <div class="cmopt"><h3>3. Trabajar solo en esta computadora</h3><p class="hint">Los datos se quedan en este navegador y no se comparten.</p><div class="row"><button type="button" class="btn sec" data-cl="solo">Trabajar solo</button></div></div>
+  <div class="cmopt"><h3>4. Soy docente</h3><p class="hint">Ver las empresas de mis estudiantes, solo lectura.</p><div class="row"><button type="button" class="btn sec" data-cl="docente">Abrir panel docente</button></div></div>
+  <p class="cmerr" id="cmErr" role="alert">${esc(msg||'')}</p>
+  <p class="hint">Los datos de práctica se guardan en un servicio de Google (Firebase). No escribas datos personales reales de estudiantes, como cédulas verdaderas o fotos de personas.</p>`)}
+function showCreated(code){
+  showModal(`<h2 id="cmTitle">¡Empresa creada!</h2>
+  <p>Este es el código de tu empresa. Anótalo y compártelo con tu equipo:</p>
+  <div class="cmcode" aria-label="Código de la empresa">${esc(code)}</div>
+  <p class="hint">Tus compañeros abren el simulador, eligen "Entrar con el código de mi equipo" y lo escriben. Desde ese momento todos trabajan en la misma empresa.</p>
+  <div class="row cmopt" style="background:none;border:0;padding:0"><div class="row"><button type="button" class="btn" data-cl="copy">Copiar código</button><button type="button" class="btn sec" data-cl="ok">Entendido</button></div></div>`)}
+
+/* sincronización */
+function cloudPush(){
+  if(!cloud.on||cloud.ro)return;
+  if(!isDirty())return;
+  if(cloud.status!=='off')setStatus('busy');
+  clearTimeout(cloud.timer);cloud.timer=setTimeout(doPush,700)}
+async function doPush(){
+  clearTimeout(cloud.timer);
+  if(!cloud.on||cloud.ro||!cloud.mods)return;
+  const dirty=syncKeys().filter(k=>enc(k)!==cloud.last[k]);
+  if(!dirty.length){if(cloud.status!=='ok'&&cloud.status!=='off')setStatus('ok');return}
+  const fs=cloud.mods.fs,data={};
+  dirty.forEach(k=>{data['k_'+k]=enc(k)});
+  data.by=devId;data.t=fs.serverTimestamp();
+  if(dirty.indexOf('company')>=0)data.name=String(S.company&&S.company.name||'').slice(0,80);
+  const size=Object.keys(data).reduce((a,f)=>a+(typeof data[f]==='string'?data[f].length:0),0);
+  if(size>900000)toast('La empresa ya es muy grande para la nube. Guarda un archivo de avance.');
+  const prev={},mine=cloud.ref;
+  dirty.forEach(k=>{prev[k]=cloud.last[k];cloud.last[k]=data['k_'+k]});
+  try{
+    await fs.updateDoc(mine,data);
+    if(cloud.ref===mine&&cloud.status!=='off'&&!isDirty())setStatus('ok')
+  }catch(e){
+    if(cloud.ref!==mine)return;
+    dirty.forEach(k=>{if(cloud.last[k]===data['k_'+k]){if(prev[k]===undefined)delete cloud.last[k];else cloud.last[k]=prev[k]}});
+    setStatus('err',e);clearTimeout(cloud.timer);cloud.timer=setTimeout(doPush,6000)}}
+let lastTypeAt=0;
+document.addEventListener('input',()=>{lastTypeAt=Date.now()},true);
+function scheduleRender(){
+  clearTimeout(cloud.renderTimer);
+  const ae=document.activeElement,typing=ae&&/^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName)&&!ae.closest('#cloudModal');
+  if(typing&&Date.now()-lastTypeAt<3000){cloud.renderTimer=setTimeout(scheduleRender,1000);return}
+  let back=null;
+  if(typing){back={id:ae.id,gp:ae.getAttribute('data-gp')||ae.getAttribute('data-mp')||'',s:ae.selectionStart,e:ae.selectionEnd}}
+  renderAll();updateBar();
+  if(back){
+    let el=back.id?document.getElementById(back.id):null;
+    if(!el&&back.gp)el=document.querySelector('[data-gp="'+back.gp+'"],[data-mp="'+back.gp+'"]');
+    if(el&&el.focus){try{el.focus();if(back.s!=null&&el.setSelectionRange)el.setSelectionRange(back.s,back.e)}catch(err){}}}}
+function onRemote(snap){
+  if(!cloud.on)return;
+  if(!snap.exists()){setStatus('err',{code:'empresa-no-existe'});return}
+  const d=snap.data();let changed=false;
+  Object.keys(d).forEach(f=>{
+    if(f.slice(0,2)!=='k_')return;
+    const k=f.slice(2),raw=d[f];
+    if(raw===cloud.last[k])return;
+    if(!cloud.ro&&(k in S)&&enc(k)!==cloud.last[k])return;
+    let v;try{v=JSON.parse(raw)}catch(e){return}
+    S[k]=v;cloud.last[k]=raw;changed=true});
+  if(changed){normalizeS();if(!cloud.ro)lsSet(KEY+':'+cloud.code,JSON.stringify(S));scheduleRender();if(!cloud.ro)cloudPush()}
+  if(cloud.status==='err'||cloud.status==='busy'&&!isDirty())setStatus('ok')}
+function applyFull(d){
+  const n=defaults();n.draft=(S&&S.draft)||n.draft;cloud.last={};
+  Object.keys(d).forEach(f=>{if(f.slice(0,2)!=='k_')return;const k=f.slice(2);try{n[k]=JSON.parse(d[f]);cloud.last[k]=d[f]}catch(e){}});
+  S=n;normalizeS()}
+function leaveCloud(){
+  clearTimeout(cloud.timer);
+  if(cloud.unsub){try{cloud.unsub()}catch(e){}cloud.unsub=null}
+  cloud.on=false;cloud.ro=false;cloud.code='';cloud.ref=null;cloud.last={};cloud.status='solo';cloud.err='';cloud.pendingRender=false;clearTimeout(cloud.renderTimer)}
+
+async function joinCompany(code,opt){
+  opt=opt||{};
+  if(cloud.busy)return;cloud.busy=true;
+  setModalBusy('Conectando…');
+  try{
+    const m=await fbInit(),fs=m.fs,ref=fs.doc(cloud.db,'empresas',code);
+    const snap=await withTimeout(fs.getDoc(ref),15000,'Tiempo agotado');
+    if(!snap.exists())throw Object.assign(new Error('No existe'),{code:'not-found-company'});
+    if(cloud.on&&!cloud.ro){try{await withTimeout(doPush(),8000)}catch(e){}}
+    if(cloud.on){leaveCloud();S=load();normalizeS()}
+    cloud.code=code;cloud.ref=ref;cloud.ro=!!opt.ro;cloud.on=true;cloud.status='ok';cloud.err='';
+    applyFull(snap.data());
+    if(!cloud.ro){lsSet(LS_MODE,'nube');lsSet(LS_CODE,code);lsSet(KEY+':'+code,JSON.stringify(S))}
+    cloud.unsub=fs.onSnapshot(ref,onRemote,err=>setStatus('err',err));
+    closeModal();renderAll();updateBar();
+    if(!cloud.ro)cloudPush();
+    toast(cloud.ro?'Vista de docente: solo lectura.':'Entraste a la empresa.')
+  }catch(e){
+    if(opt.auto)openEntry(errText(e));else{setModalBusy('');modalErr(errText(e))}
+  }finally{cloud.busy=false}}
+async function createCompany(){
+  if(cloud.busy)return;cloud.busy=true;
+  setModalBusy('Creando la empresa…');
+  try{
+    const m=await fbInit(),fs=m.fs;normalizeS();
+    const code=newCode(),ref=fs.doc(cloud.db,'empresas',code),keys=syncKeys(),data={};
+    keys.forEach(k=>{data['k_'+k]=enc(k)});
+    data.by=devId;data.t=fs.serverTimestamp();data.created=fs.serverTimestamp();data.name=String(S.company.name||'').slice(0,80);
+    await withTimeout(fs.setDoc(ref,data),15000,'Tiempo agotado');
+    cloud.code=code;cloud.ref=ref;cloud.ro=false;cloud.on=true;cloud.status='ok';cloud.err='';cloud.last={};
+    keys.forEach(k=>{cloud.last[k]=data['k_'+k]});
+    lsSet(LS_MODE,'nube');lsSet(LS_CODE,code);lsSet(KEY+':'+code,JSON.stringify(S));
+    cloud.unsub=fs.onSnapshot(ref,onRemote,err=>setStatus('err',err));
+    renderAll();updateBar();showCreated(code)
+  }catch(e){setModalBusy('');modalErr(errText(e))}
+  finally{cloud.busy=false}}
+function setSolo(){
+  leaveCloud();lsSet(LS_MODE,'solo');lsDel(LS_CODE);
+  S=load();normalizeS();closeModal();renderAll();updateBar()}
+async function leaveCompany(){
+  const ro=cloud.ro;
+  if(!ro&&!confirm('¿Salir de esta empresa? Los datos quedan guardados en la nube. Para volver necesitas el código.'))return;
+  if(!ro){try{await withTimeout(doPush(),8000)}catch(e){}}
+  leaveCloud();lsDel(LS_MODE);if(!ro)lsDel(LS_CODE);
+  S=load();normalizeS();renderAll();updateBar();openEntry()}
+
+/* panel docente */
+const docList=()=>{try{const a=JSON.parse(lsGet(LS_DOC)||'[]');return Array.isArray(a)?a.filter(x=>x&&normCode(x.code)):[]}catch(e){return[]}};
+const docSave=a=>lsSet(LS_DOC,JSON.stringify(a));
+function openDocente(){
+  const list=docList();
+  showModal(`<h2 id="cmTitle">Panel docente</h2>
+  <p class="hint">Escribe el código que te da cada equipo para ver su empresa en tiempo real, solo lectura. Los códigos se guardan solo en esta computadora.</p>
+  <div class="cmopt"><div class="row"><input type="text" id="cmCode" maxlength="9" placeholder="XXXX-XXXX" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Código del equipo"><input type="text" id="cmLabel" maxlength="40" placeholder="Nombre del equipo (opcional)" aria-label="Nombre del equipo" style="text-transform:none;letter-spacing:0;font:600 1rem var(--f-body)"><button type="button" class="btn" data-cl="docadd">Agregar</button></div></div>
+  <div class="cmlist" id="cmList">${list.length?'<p class="hint">Cargando equipos…</p>':'<p class="hint">Aún no has agregado equipos.</p>'}</div>
+  <p class="cmerr" id="cmErr" role="alert"></p>
+  <div class="row"><button type="button" class="btn sec" data-cl="back">Volver</button></div>`);
+  if(list.length)fillDocList(list)}
+async function fillDocList(list){
+  const box=$('#cmList');if(!box)return;
+  try{await fbInit()}catch(e){box.innerHTML='<p class="cmerr">'+esc(errText(e))+'</p>';return}
+  const fs=cloud.mods.fs;
+  const rows=await Promise.all(list.map(async it=>{
+    try{
+      const s=await withTimeout(fs.getDoc(fs.doc(cloud.db,'empresas',it.code)),12000);
+      if(!s.exists())return{it,miss:true};
+      const d=s.data();let bancos=null,nf=null;
+      try{bancos=JSON.parse(d.k_accounts).reduce((a,x)=>a+(Number(x.bal)||0),0)}catch(e){}
+      try{nf=JSON.parse(d.k_invoices).length}catch(e){}
+      return{it,name:d.name||'(sin nombre)',bancos,nf,t:d.t&&d.t.toMillis?d.t.toMillis():0}
+    }catch(e){return{it,err:true}}}));
+  const b2=$('#cmList');if(!b2)return;
+  b2.innerHTML=rows.map(r=>{
+    const lab=r.it.label||r.name||'Equipo';
+    const info=r.miss?'No existe (¿código mal escrito?)':r.err?'No se pudo leer ahora':`${esc(r.name)} · Bancos: ${r.bancos==null?'—':fmt(r.bancos)} · Facturas: ${r.nf==null?'—':r.nf}${r.t?' · Última actividad: '+esc(fmtDate(r.t)):''}`;
+    return `<div class="cmitem"><span class="nm"><strong>${esc(lab)} <span class="mono">${esc(r.it.code)}</span></strong><span class="sub">${info}</span></span><span class="row">${r.miss||r.err?'':`<button type="button" class="btn sm" data-cl="docver" data-code="${esc(r.it.code)}">Ver</button>`}<button type="button" class="link" data-cl="docrm" data-code="${esc(r.it.code)}">Quitar</button></span></div>`}).join('')}
+
+/* archivo de avance */
+function exportFile(){
+  const slug=String(S.company&&S.company.name||'empresa').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^A-Za-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,30)||'empresa';
+  const blob=new Blob([JSON.stringify({app:'simulador-empresa',v:1,at:new Date().toISOString(),state:S})],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='avance-'+slug+'-'+dayKey()+'.json';document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500);toast('Avance guardado en un archivo.')}
+function importFile(file){
+  if(!file||cloud.ro)return;
+  const fr=new FileReader();fr.onerror=()=>toast('No se pudo leer el archivo.');
+  fr.onload=()=>{
+    let o;try{o=JSON.parse(fr.result)}catch(e){toast('Ese archivo no es un avance válido.');return}
+    const st=o&&o.app==='simulador-empresa'&&o.state;
+    if(!st||st.v!==1||!st.accounts||!st.draft){toast('Ese archivo no es un avance de este simulador.');return}
+    if(!confirm(cloud.on?'Esto reemplaza los datos de la empresa para TODO el equipo. ¿Cargar este avance?':'Esto reemplaza los datos de esta computadora. ¿Cargar este avance?'))return;
+    S=Object.assign(defaults(),st);normalizeS();save();renderAll();updateBar();toast('Avance cargado.')};
+  fr.readAsText(file)}
+
+/* acciones */
+function cloudAct(a,b){
+  switch(a){
+    case 'open':openEntry();break;
+    case 'create':createCompany();break;
+    case 'join':{const c=normCode(($('#cmCode')||{}).value);if(!c){modalErr('Escribe el código completo: 8 letras o números, como K7QM-X2RD.');break}joinCompany(c,{});break}
+    case 'solo':setSolo();break;
+    case 'docente':openDocente();break;
+    case 'docadd':{const c=normCode(($('#cmCode')||{}).value);if(!c){modalErr('Escribe el código completo del equipo.');break}
+      const lab=String(($('#cmLabel')||{}).value||'').trim().slice(0,40),l=docList().filter(x=>x.code!==c);l.push({code:c,label:lab});docSave(l);openDocente();break}
+    case 'docver':joinCompany(b.dataset.code,{ro:true});break;
+    case 'docrm':docSave(docList().filter(x=>x.code!==b.dataset.code));openDocente();break;
+    case 'back':if(cloud.on)closeModal();else openEntry();break;
+    case 'ok':closeModal();break;
+    case 'save':exportFile();break;
+    case 'load':if(!cloud.ro)$('#cloudFile').click();break;
+    case 'copy':copyText(cloud.code);break;
+    case 'leave':leaveCompany();break}}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-cl]');if(b)cloudAct(b.dataset.cl,b)});
+document.addEventListener('keydown',e=>{if(e.key!=='Enter'||e.target.id!=='cmCode')return;const j=$('[data-cl="join"]')||$('[data-cl="docadd"]');if(j)j.click()});
+$('#cloudFile').addEventListener('change',e=>{importFile(e.target.files&&e.target.files[0]);e.target.value=''});
+addEventListener('offline',()=>{if(cloud.on&&!cloud.ro)setStatus('off')});
+addEventListener('online',()=>{if(cloud.on&&!cloud.ro){setStatus('busy');cloudPush();setTimeout(doPush,50)}});
+addEventListener('beforeunload',()=>{if(cloud.on&&!cloud.ro&&isDirty())doPush()});
+function cloudBoot(){
+  const mode=lsGet(LS_MODE),code=normCode(lsGet(LS_CODE));
+  updateBar();
+  if(mode==='nube'&&code){showModal('<h2 id="cmTitle">Conectando con tu empresa…</h2><p class="cmerr" id="cmErr" style="color:var(--muted)">Un momento.</p>');joinCompany(code,{auto:true})}
+  else if(mode==='solo'){}
+  else openEntry()}
+
+renderAll();setDept('home');cloudBoot();
 })();
 </script>
 
