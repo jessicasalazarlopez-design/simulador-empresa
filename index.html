@@ -2557,7 +2557,7 @@ function openEntry(msg){
   <div class="cmopt"><h3>1. Crear la empresa de mi equipo</h3><p class="hint">Recibes un código. Tus compañeros lo escriben en otra computadora y ven la misma empresa. Se crea con lo que ya hay en esta computadora.</p><div class="row"><button type="button" class="btn" data-cl="create">Crear empresa y obtener código</button></div></div>
   <div class="cmopt"><h3>2. Entrar con el código de mi equipo</h3><div class="row"><input type="text" id="cmCode" maxlength="9" placeholder="XXXX-XXXX" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Código de la empresa"><button type="button" class="btn" data-cl="join">Entrar</button></div></div>
   <div class="cmopt"><h3>3. Trabajar solo en esta computadora</h3><p class="hint">Los datos se quedan en este navegador y no se comparten.</p><div class="row"><button type="button" class="btn sec" data-cl="solo">Trabajar solo</button></div></div>
-  <div class="cmopt"><h3>4. Soy docente</h3><p class="hint">Ver las empresas de mis estudiantes, solo lectura. Pide correo y contraseña de docente.</p><div class="row"><button type="button" class="btn sec" data-cl="docente">Abrir panel docente</button></div></div>
+  <div class="cmopt"><h3>4. Soy docente</h3><p class="hint">Ver las empresas de mis estudiantes, solo lectura. Pide la contraseña de docente.</p><div class="row"><button type="button" class="btn sec" data-cl="docente">Abrir panel docente</button></div></div>
   <p class="cmerr" id="cmErr" role="alert">${esc(msg||'')}</p>
   <p class="hint">Los datos de práctica se guardan en un servicio de Google (Firebase). No escribas datos personales reales de estudiantes, como cédulas verdaderas o fotos de personas.</p>`)}
 function showCreated(code){
@@ -2675,18 +2675,20 @@ async function leaveCompany(){
   S=load();normalizeS();renderAll();updateBar();openEntry()}
 
 /* acceso de docente (cuenta de Firebase con correo y contraseña) */
+const DOC_EMAIL='docente@ctp.cr';
 const isDoc=()=>{const u=cloud.auth&&cloud.auth.currentUser;return !!(u&&!u.isAnonymous&&u.email)};
 async function docGate(){
   try{await fbInit()}catch(e){showModal('<h2 id="cmTitle">Acceso de docente</h2><p class="cmerr">'+esc(errText(e))+'</p><div class="row"><button type="button" class="btn sec" data-cl="back">Volver</button></div>');return}
   if(isDoc()){openDocente();return}
   showModal(`<h2 id="cmTitle">Acceso de docente</h2>
-  <p class="hint">Escribe el correo y la contraseña de docente. Si no tienes una cuenta, pídesela a la persona que administra el simulador.</p>
-  <div class="cmopt"><div class="field"><label for="dlEmail">Correo</label><input type="email" id="dlEmail" autocomplete="username" autocapitalize="none" spellcheck="false"></div>
-  <div class="field" style="margin-top:8px"><label for="dlPass">Contraseña</label><input type="password" id="dlPass" autocomplete="current-password"></div>
+  <p class="hint">Escribe la contraseña de docente. Si no la tienes, pídesela a la persona que administra el simulador.</p>
+  <div class="cmopt"><div class="field" id="dlEmailBox" hidden><label for="dlEmail">Correo</label><input type="email" id="dlEmail" autocomplete="username" autocapitalize="none" spellcheck="false"></div>
+  <div class="field"><label for="dlPass">Contraseña</label><input type="password" id="dlPass" autocomplete="current-password"></div>
+  <p style="margin:8px 0 0"><button type="button" class="link" data-cl="dlother">Entrar con otro correo</button></p>
   <div class="row" style="margin-top:12px"><button type="button" class="btn" data-cl="doclogin">Entrar</button></div></div>
   <p class="cmerr" id="cmErr" role="alert"></p>
   <div class="row"><button type="button" class="btn sec" data-cl="back">Volver</button></div>`);
-  setTimeout(()=>{const f=$('#dlEmail');if(f)f.focus()},40)}
+  setTimeout(()=>{const f=$('#dlPass');if(f)f.focus()},40)}
 function docErr(e){const c=(e&&e.code)||'';
   if(/invalid-credential|invalid-login|wrong-password|user-not-found|invalid-email|missing-password/.test(c))return 'Correo o contraseña incorrectos.';
   if(c==='auth/too-many-requests')return 'Demasiados intentos. Espera unos minutos e inténtalo de nuevo.';
@@ -2694,11 +2696,11 @@ function docErr(e){const c=(e&&e.code)||'';
   if(c==='auth/user-disabled')return 'Esta cuenta está desactivada.';
   return errText(e)}
 async function docLogin(){
-  const em=String(($('#dlEmail')||{}).value||'').trim(),pw=String(($('#dlPass')||{}).value||'');
-  if(!em||!pw){modalErr('Escribe el correo y la contraseña.');return}
+  const box=$('#dlEmailBox'),em=(box&&!box.hidden?String(($('#dlEmail')||{}).value||'').trim():DOC_EMAIL),pw=String(($('#dlPass')||{}).value||'');
+  if(!em||!pw){modalErr(box&&!box.hidden?'Escribe el correo y la contraseña.':'Escribe la contraseña.');return}
   setModalBusy('Verificando…');
   try{await withTimeout(cloud.mods.au.signInWithEmailAndPassword(cloud.auth,em,pw),15000);setModalBusy('');openDocente()}
-  catch(e){setModalBusy('');modalErr(docErr(e))}}
+  catch(e){setModalBusy('');let m=docErr(e);if(box&&box.hidden&&m==='Correo o contraseña incorrectos.')m='Contraseña incorrecta.';modalErr(m)}}
 async function docLogout(){
   try{await cloud.mods.au.signOut(cloud.auth);await cloud.mods.au.signInAnonymously(cloud.auth)}catch(e){}
   if(cloud.on&&cloud.ro){leaveCloud();updateBar()}
@@ -2760,6 +2762,7 @@ function cloudAct(a,b){
     case 'solo':setSolo();break;
     case 'docente':docGate();break;
     case 'doclogin':docLogin();break;
+    case 'dlother':{const bx=$('#dlEmailBox');if(bx){bx.hidden=false;b.hidden=true;const f=$('#dlEmail');if(f)f.focus()}break}
     case 'doclogout':docLogout();break;
     case 'docinf':docenteInforme();break;
     case 'informe':savePdf(mk(()=>buildInforme()),'informe-'+String(S.company&&S.company.name||'empresa').replace(/\s+/g,'-')+'.pdf');break;
