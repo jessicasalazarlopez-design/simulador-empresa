@@ -172,6 +172,10 @@ table.items{min-width:520px;font-size:.88rem}
 .hrow .hamt{font-weight:600;text-align:right}
 .hrow .hact{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px}
 
+.lay-prev{display:block;max-width:100%;max-height:420px;margin:12px 0 6px;border:1px solid var(--line);border-radius:var(--r)}
+.ruta{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.rt{border:1px solid var(--line);border-radius:var(--r);padding:14px;background:var(--surface-2);display:flex;flex-direction:column;gap:6px;min-width:0}
+.rt h3{margin:0}.rt p{margin:0}.rt .bt{margin-top:auto;align-items:center}.rt .num{font:600 .8rem var(--f-mono);opacity:.7}
 .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
 .tile{display:flex;flex-direction:column;gap:2px;border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;background:var(--surface-2);min-width:0}
 .tile strong{font:600 1.15rem var(--f-mono);overflow-wrap:anywhere}
@@ -1414,6 +1418,7 @@ function gPdf(){const J=window.jspdf&&window.jspdf.jsPDF;if(!J)return null;
    let x=M+1.5;cells.forEach((l,i)=>{const c=cols[i];pfnt(doc,'normal',8.8,PC.ink);doc.text(l,c.a==='r'?x+c.w-3:x,st.y,{align:c.a==='r'?'right':'left'});x+=c.w});
    const ly=st.y+(n-1)*lh+2;doc.setDrawColor(226,231,237);doc.setLineWidth(.2);doc.line(M,ly,W-M,ly);st.y=ly+5});
   if(!rows.length)st.p('Sin registros todavía.',{c:PC.mut,i:1});st.y+=2};
+ st.img=(d,iw,ih)=>{let w=W-2*M,h=w*ih/iw;if(h>95){h=95;w=h*iw/ih}st.need(h+4);try{doc.addImage(d,'JPEG',M,st.y,w,h)}catch(e){}st.y+=h+4};
  st.sign=(name,role)=>{st.need(36);st.y+=16;doc.setDrawColor(21,33,46);doc.setLineWidth(.4);doc.line(M,st.y,M+75,st.y);pfnt(doc,'bold',10,PC.ink);doc.text(pdfSafe(name||'________________'),M,st.y+5);pfnt(doc,'normal',9,PC.mut);doc.text(pdfSafe(role),M,st.y+10);st.y+=16};
  st.finish=(txt)=>{pdfFooter(doc,W,M,txt);return doc.output('blob')};
  return st}
@@ -1904,17 +1909,17 @@ function mBind(e){const t=e.target;if(!t.dataset||!t.dataset.mp||!t.closest('#de
 $('#dept-mkt').addEventListener('input',mBind);$('#dept-mkt').addEventListener('change',mBind);
 
 /* ===== Producción ===== */
-const PRNAV=[['prods','Productos'],['proc','Proceso'],['mat','Materiales'],['costo','Costo de producción'],['inv','Inventario'],['ord','Órdenes de producción'],['cal','Control de calidad'],['prov','Facturas de proveedores']];
+const PRNAV=[['ruta','Mi ruta'],['prods','1. Producto y layout'],['plan','2. Plan y proceso'],['mat','3. Compra de materiales'],['ord','4. Producción'],['cal','5. Control de calidad'],['desp','6. Despacho'],['inf','Informe'],['costo','Costos'],['inv','Inventario'],['prov','Facturas de proveedores']];
 const ORD_ST=['Pendiente','En proceso','Terminada'];
 const DEF_QC=[];
-function defaultPr(){return{prods:[],nextId:1,ordN:0,qcN:0,umbral:5,arts:[],proc:{},bom:{},cost:{},qc:{},min:{},movs:[],ords:[],insp:[]}}
-function ensurePr(){const d=defaultPr(),t=S.pr||{};S.pr=Object.assign(d,t);['proc','bom','cost','qc','min'].forEach(k=>{if(!S.pr[k]||typeof S.pr[k]!=='object')S.pr[k]={}});['movs','ords','insp','arts','prods'].forEach(k=>{if(!Array.isArray(S.pr[k]))S.pr[k]=[]})}
-view.pr='prods';view.prn={name:'',unit:'unidad',price:''};view.prp=null;view.perr2=[];
+function defaultPr(){return{prods:[],nextId:1,ordN:0,qcN:0,umbral:5,arts:[],proc:{},bom:{},cost:{},qc:{},min:{},movs:[],ords:[],insp:[],ocN:0,dpN:0,plan:{},zonas:{},layNota:'',compras:[],desp:[]}}
+function ensurePr(){const d=defaultPr(),t=S.pr||{};S.pr=Object.assign(d,t);['proc','bom','cost','qc','min','plan','zonas'].forEach(k=>{if(!S.pr[k]||typeof S.pr[k]!=='object')S.pr[k]={}});['movs','ords','insp','arts','prods','compras','desp'].forEach(k=>{if(!Array.isArray(S.pr[k]))S.pr[k]=[]})}
+view.pr='ruta';view.prn={name:'',unit:'unidad',price:'',desc:''};view.prp=null;view.perr2=[];
 view.prs={txt:'',resp:'',min:''};view.prr={name:'',kind:'m',unit:'',ini:'',min:''};view.prb={name:'',qty:'',unit:'unidad',cost:'',prov:''};view.pre={mat:'',qty:'',date:dayKey()};
-view.pra={tgt:'',qty:'',mot:''};view.pro={item:'',qty:'',ent:'',nota:''};view.pri={ord:'',insp:'',def:'0',acc:'',checks:{}};
-function pRoot(p){const m={'n.':view.prn,'r.':view.prr,'s.':view.prs,'b.':view.prb,'e.':view.pre,'a.':view.pra,'o.':view.pro,'i.':view.pri,'v.':view};const k=p.slice(0,2);if(m[k])return[m[k],p.slice(2)];return[S.pr,p]}
+view.pra={tgt:'',qty:'',mot:''};view.pro={item:'',qty:'',ent:'',nota:'',resp:''};view.poc={prov:'',date:dayKey(),nota:''};view.pol={mat:'',qty:'',cost:''};view.pocl=[];view.pod={name:'',qty:'',dest:'',lugar:'',rec:'',transp:'',nota:'',date:dayKey()};view.pri={ord:'',insp:'',def:'0',acc:'',checks:{}};
+function pRoot(p){const m={'n.':view.prn,'r.':view.prr,'s.':view.prs,'b.':view.prb,'e.':view.pre,'a.':view.pra,'o.':view.pro,'i.':view.pri,'c.':view.poc,'l.':view.pol,'d.':view.pod,'v.':view};const k=p.slice(0,2);if(m[k])return[m[k],p.slice(2)];return[S.pr,p]}
 function pSet(p,v){const r=pRoot(p),ks=r[1].split('.'),last=ks.pop();ks.reduce((a,b)=>{if(a[b]==null)a[b]={};return a[b]},r[0])[last]=v}
-const pPersist=p=>!/^[nrsbeaoiv]\./.test(p);
+const pPersist=p=>!/^[nrsbeaoivcld]\./.test(p);
 const prItems=()=>S.pr&&Array.isArray(S.pr.prods)?S.pr.prods:[];
 const prCur=()=>{const it=prItems();let c=it.find(x=>String(x.id)===String(view.prp));if(!c&&it.length){c=it[0];view.prp=c.id}return c||null};
 const prBom=id=>S.pr.bom[id]||(S.pr.bom[id]=[]);
@@ -1931,7 +1936,7 @@ const prArts=k=>S.pr.arts.filter(a=>a.kind===k);
 const artIni=(k,nm)=>S.pr.arts.filter(a=>a.kind===k&&a.name.trim().toLowerCase()===nm.trim().toLowerCase()).reduce((t,a)=>t+num(a.ini),0);
 function prProdNames(){const s=[];prItems().filter(i=>i.tipo==='Producto').forEach(i=>s.push(i.name));prArts('p').forEach(a=>{if(!s.some(x=>x.toLowerCase()===a.name.toLowerCase()))s.push(a.name)});return s}
 const unitList=()=>'<datalist id="unitlist">'+['unidad','kg','g','lb','l','ml','m','cm','caja','paquete','docena','rollo','hora','porción'].map(u=>`<option value="${u}">`).join('')+'</datalist>';
-function stockProd(nm){const k=nm.trim().toLowerCase();let ent=0,adj=0;prDone().forEach(o=>{if(o.name.trim().toLowerCase()===k)ent+=o.qty});S.pr.movs.forEach(m=>{if(m.kind==='p'&&m.name.trim().toLowerCase()===k)adj+=m.qty});const sold=soldQty(nm),ini=artIni('p',nm);return{ini,ent,adj,sold,stock:r2(ini+ent+adj-sold)}}
+function stockProd(nm){const k=nm.trim().toLowerCase();let ent=0,adj=0;prDone().forEach(o=>{if(o.name.trim().toLowerCase()===k)ent+=o.qty});S.pr.movs.forEach(m=>{if(m.kind==='p'&&m.name.trim().toLowerCase()===k)adj+=m.qty});const ini=artIni('p',nm),sold=despQty(nm),rej=rejQty(nm);return{ini,ent,adj,sold,rej,fact:soldQty(nm),stock:r2(ini+ent+adj-rej-sold)}}
 function matNames(){const s=new Set();Object.keys(S.pr.bom).forEach(id=>S.pr.bom[id].forEach(x=>{if(x.name.trim())s.add(x.name.trim())}));S.pr.movs.forEach(m=>{if(m.kind==='m')s.add(m.name)});prArts('m').forEach(a=>{if(a.name.trim())s.add(a.name.trim())});return Array.from(s)}
 function stockMat(nm){const k=nm.trim().toLowerCase();let ent=artIni('m',nm),use=0;S.pr.movs.forEach(m=>{if(m.kind==='m'&&m.name.trim().toLowerCase()===k)ent+=m.qty});
  prDone().forEach(o=>(S.pr.bom[o.item]||[]).forEach(l=>{if(l.name.trim().toLowerCase()===k)use+=num(l.qty)*o.qty}));return{ent,use,stock:r2(ent-use)}}
@@ -1939,19 +1944,112 @@ function prLow(){ensurePr();ensureMk();const out=[];prProdNames().forEach(nm=>{c
  matNames().forEach(n=>{const s=stockMat(n).stock,mn=num(S.pr.min['m|'+n]);if(s<0||(mn>0&&s<=mn))out.push({kind:'Material',name:n,stock:s,min:mn})});return out}
 const prSel=()=>{const it=prItems();return it.length?`<div class="grid" style="margin-bottom:14px"><div class="field wide"><label for="p-item">Producto o servicio</label><select id="p-item" data-rp="v.prp" data-rr>${it.map(i=>`<option value="${i.id}"${String(i.id)===String(view.prp)?' selected':''}>${esc(i.name)}</option>`).join('')}</select></div></div>`:''};
 const prNone=()=>'<div class="card"><p>Primero agrega el producto o servicio que produce tu departamento.</p><button type="button" class="btn sec sm" data-pr="nav" data-v="prods">Ir a Productos</button></div>';
-function pProds(){const f=view.prn,its=prItems();
- const rows=its.map(i=>`<tr><td>${esc(i.name)}</td><td>${esc(i.tipo)}</td><td>${esc(i.unit)}</td><td class="r">${i.price?fmt(i.price):'—'}</td><td><button type="button" class="link" data-pr="prod-rm" data-i="${i.id}">Quitar</button></td></tr>`).join('');
- return unitList()+`<div class="card"><h2 style="margin-bottom:6px">Lo que produce mi departamento</h2><p class="hint" style="margin-bottom:12px">Agrega cada producto o servicio que la empresa produce. Después podrás describir su proceso, sus materiales, su costo y sus órdenes. Esta lista es de Producción y no depende de otros departamentos.</p>${prErrHTML()}
+const ZONAS=[['rec','Recepción de materiales'],['bod','Bodega de materiales'],['prod','Área de producción'],['cal','Control de calidad'],['bpt','Bodega de producto terminado'],['des','Despacho']];
+const prPlan=id=>S.pr.plan[id]||(S.pr.plan[id]={meta:'',pers:'',dias:'',ini:'',obs:''});
+const prMin=id=>prSteps(id).reduce((a,s)=>a+num(s.min),0);
+function prCap(it){const p=prPlan(it.id),mn=prMin(it.id),pers=num(p.pers),dias=num(p.dias);if(!(mn>0)||!(pers>0)||!(dias>0))return null;const dia=Math.floor(480/mn),mes=dia*pers*dias*4;return{mn,dia,mes,meta:num(p.meta)}}
+const despQty=nm=>{const k=nm.trim().toLowerCase();return r2(S.pr.desp.filter(d=>d.name.trim().toLowerCase()===k).reduce((a,d)=>a+num(d.qty),0))};
+const rejQty=nm=>{const k=nm.trim().toLowerCase();return r2(S.pr.insp.filter(x=>String(x.name).trim().toLowerCase()===k).reduce((a,x)=>a+num(x.def),0))};
+const matUnit=nm=>{const k=String(nm).trim().toLowerCase();for(const id in S.pr.bom){const l=S.pr.bom[id].find(x=>x.name.trim().toLowerCase()===k);if(l)return l.unit||'unidad'}return 'unidad'};
+function ordFalta(o){const b=S.pr.bom[o.item]||[],out=[];b.forEach(l=>{const need=num(l.qty)*o.qty,have=Math.max(0,stockMat(l.name).stock);if(need>have)out.push(l.name+' ('+r2(need-have)+' '+(l.unit||'')+')')});return out}
+function ordFaltaHTML(o){if(o.est==='Terminada')return '';if(!(S.pr.bom[o.item]||[]).length)return '<span class="sub">Falta anotar los materiales de este producto (paso 3).</span>';const f=ordFalta(o);return f.length?`<span class="sub" style="color:var(--bad)">Faltan materiales: ${esc(f.join(', '))}. Haz una orden de compra en el paso 3.</span>`:'<span class="sub" style="color:var(--ok)">Materiales completos para esta orden.</span>'}
+function prEstado(){const its=prItems(),L=S.prLay,P=S.pr,hasProd=its.length>0,hasLay=!!(L&&L.img);
+ const hasPlan=its.some(i=>num(prPlan(i.id).meta)>0),hasSteps=its.some(i=>prSteps(i.id).length>0),hasBom=its.some(i=>prBom(i.id).length>0),done=P.ords.filter(o=>o.est==='Terminada').length;
+ const st=(ok,part)=>ok?'listo':part?'curso':'falta';
+ return[
+ {k:'prods',n:1,t:'Mi producto y mi layout',e:'Ficha del producto y layout',s:st(hasProd&&hasLay,hasProd||hasLay)},
+ {k:'plan',n:2,t:'Plan y proceso',e:'Plan de producción',s:st(hasPlan&&hasSteps,hasPlan||hasSteps)},
+ {k:'mat',n:3,t:'Compra de materiales',e:'Orden de compra',s:st(hasBom&&P.compras.length>0,hasBom||P.compras.length>0)},
+ {k:'ord',n:4,t:'Producción',e:'Orden de producción',s:st(done>0,P.ords.length>0)},
+ {k:'cal',n:5,t:'Control de calidad',e:'Informe de calidad',s:st(P.insp.length>0,false)},
+ {k:'desp',n:6,t:'Despacho',e:'Nota de despacho',s:st(P.desp.length>0,false)}]}
+function prTot(){const names=prProdNames(),t={ent:0,rej:0,desp:0,stock:0},rows=names.map(n=>{const s=stockProd(n);t.ent+=s.ent;t.rej+=s.rej;t.desp+=s.sold;t.stock+=s.stock;return{n,s}});
+ const P=S.pr,done=P.ords.filter(o=>o.est==='Terminada');let costo=0;done.forEach(o=>{const it=prItems().find(x=>x.id===o.item);if(it)costo+=o.qty*prCostTot(it)});
+ return{rows,t:{ent:r2(t.ent),rej:r2(t.rej),desp:r2(t.desp),stock:r2(t.stock)},ords:P.ords.length,done:done.length,costo:r2(costo),insp:P.insp.length,ok:P.insp.filter(x=>x.ok).length}}
+function pRuta(){const it=prCur(),pn=it?it.name:'tu producto',E=prEstado(),ls=E.filter(x=>x.s==='listo').length;
+ const txt={prods:`Escribe qué produce tu empresa y sube el layout, el dibujo de tu área de trabajo.`,
+  plan:`Define cuánto vas a producir de ${pn} y los pasos para hacerlo. El simulador calcula si tu meta es posible.`,
+  mat:`Anota los materiales que lleva ${pn} y haz la orden de compra al proveedor.`,
+  ord:`Crea una orden de producción de ${pn} y llévala hasta Terminada.`,
+  cal:`Revisa ${pn} con tu lista de revisión y anota los defectos.`,
+  desp:`Entrega ${pn} a un cliente y registra quién lo recibió.`};
+ const pill={listo:'<span class="pill ok">Listo</span>',curso:'<span class="pill info">En curso</span>',falta:'<span class="pill">Por hacer</span>'};
+ const cards=E.map(x=>`<article class="rt"><span class="num">Actividad ${x.n}</span><h3>${esc(x.t)}</h3><p>${esc(txt[x.k])}</p><p class="sub">Entregable: <strong>${esc(x.e)}</strong> (PDF)</p><div class="btnrow bt">${pill[x.s]}<button type="button" class="btn sec sm" data-pr="nav" data-v="${x.k}">Ir a la actividad</button></div></article>`).join('');
+ return `<div class="card"><div class="head-row"><h2>Mi ruta de producción</h2><span class="pill info">${ls} de ${E.length} actividades listas</span></div>
+  <p class="hint" style="margin-bottom:10px">${prItems().length?`Estás produciendo: <strong>${esc(pn)}</strong>. Cada actividad usa tu producto y lo que hiciste antes.`:'Empieza por la actividad 1: escribe el producto que produce tu empresa. Todo lo demás se arma con él.'} Tu departamento trabaja con sus propios datos: no necesitas esperar a otros departamentos.</p>
+  ${prItems().length>1?prSel():''}
+  <div class="ruta">${cards}</div></div>
+ <div class="card" style="margin-top:20px"><h2 style="margin-bottom:6px">Para apoyar tu trabajo</h2><p class="hint" style="margin-bottom:12px">Estas pantallas te ayudan en cualquier momento de la ruta.</p>
+  <div class="btnrow"><button type="button" class="btn sec sm" data-pr="nav" data-v="costo">Costos</button><button type="button" class="btn sec sm" data-pr="nav" data-v="inv">Inventario</button><button type="button" class="btn sec sm" data-pr="nav" data-v="prov">Facturas de proveedores</button><button type="button" class="btn sm" data-pr="nav" data-v="inf">Informe de producción</button></div></div>`}
+function pProds(){const f=view.prn,its=prItems(),L=S.prLay,zs=S.pr.zonas;
+ const rows=its.map(i=>`<tr><td>${esc(i.name)}${i.desc?`<span class="sub">${esc(i.desc)}</span>`:''}</td><td>${esc(i.tipo)}</td><td>${esc(i.unit)}</td><td class="r">${i.price?fmt(i.price):'—'}</td><td><button type="button" class="link" data-pr="prod-rm" data-i="${i.id}">Quitar</button></td></tr>`).join('');
+ return unitList()+`<div class="card"><h2 style="margin-bottom:6px">Actividad 1: mi producto o servicio</h2><p class="hint" style="margin-bottom:12px">Escribe lo que produce tu empresa. Todo lo demás de Producción (plan, materiales, órdenes, calidad y despacho) se arma con tu producto. Esta lista es de Producción y no depende de otros departamentos.</p>${prErrHTML()}
   <div class="grid"><div class="field wide"><label for="p-pn">Nombre del producto o servicio</label><input id="p-pn" maxlength="80" autocomplete="off" data-rp="n.name" value="${esc(f.name)}"></div>
+   <div class="field wide"><label for="p-pds">¿Cómo es? ¿Qué lo hace especial? (opcional)</label><input id="p-pds" maxlength="140" autocomplete="off" data-rp="n.desc" value="${esc(f.desc||'')}"></div>
    <div class="field"><label for="p-pt">Es un…</label><select id="p-pt" data-rp="n.tipo">${gOpts(['Producto','Servicio'],f.tipo||'Producto')}</select></div>
    <div class="field"><label for="p-pu">Unidad</label><input id="p-pu" list="unitlist" maxlength="20" autocomplete="off" data-rp="n.unit" value="${esc(f.unit)}"></div>
    <div class="field"><label for="p-pp">Precio de venta sin IVA (opcional)</label><input id="p-pp" class="mono" type="number" min="0" step="0.01" data-rp="n.price" value="${esc(f.price)}"></div></div>
   <div class="btnrow" style="margin-top:12px"><button type="button" class="btn" data-pr="prod-add">Agregar</button></div></div>
- <div class="card" style="margin-top:20px"><h2 style="margin-bottom:12px">Mis productos y servicios</h2>${rows?`<div class="tscroll"><table class="mv" style="min-width:520px"><thead><tr><th>Nombre</th><th>Tipo</th><th>Unidad</th><th class="r">Precio sin IVA</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`:'<p class="hint">Todavía no hay productos. Agrega el primero arriba.</p>'}</div>`}
-function pProc(){const it=prCur();if(!it)return prNone();const st=prSteps(it.id),f=view.prs,tot=st.reduce((a,s)=>a+num(s.min),0);
+ <div class="card" style="margin-top:20px"><h2 style="margin-bottom:12px">Mis productos y servicios</h2>${rows?`<div class="tscroll"><table class="mv" style="min-width:520px"><thead><tr><th>Nombre</th><th>Tipo</th><th>Unidad</th><th class="r">Precio sin IVA</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`:'<p class="hint">Todavía no hay productos. Agrega el primero arriba.</p>'}</div>
+ <div class="card" style="margin-top:20px"><div class="head-row"><h2>Layout de mi área de producción</h2><button type="button" class="btn sm" data-pr="pdf-prod">Ficha y layout (PDF)</button></div>
+  <p class="hint" style="margin-bottom:12px">El layout es el dibujo o plano de cómo está organizado tu taller o espacio de trabajo: por dónde entran los materiales, dónde se produce, dónde se revisa y por dónde sale el producto. Puede ser un dibujo a mano (tómale una foto) o hecho en la computadora.</p>
+  <div class="field wide"><label for="p-lay">Subir la imagen del layout (JPG o PNG)</label><input id="p-lay" type="file" accept="image/png,image/jpeg,image/webp"></div>
+  ${L&&L.img?`<img class="lay-prev" src="${L.img}" alt="Layout de mi área de producción"><button type="button" class="link" data-pr="lay-rm">Quitar el layout</button>`:'<p class="hint" style="margin-top:8px">Todavía no has subido tu layout.</p>'}
+  <h3 style="margin:16px 0 4px">¿Qué zonas se ven en tu layout?</h3>
+  <div class="grid">${ZONAS.map(z=>`<label class="ck"><input type="checkbox" data-rp="zonas.${z[0]}"${zs[z[0]]?' checked':''}><span>${esc(z[1])}</span></label>`).join('')}</div>
+  <div class="field wide" style="margin-top:10px"><label for="p-layn">Explica tu layout en pocas palabras</label><textarea id="p-layn" maxlength="300" data-rp="layNota">${esc(S.pr.layNota||'')}</textarea></div></div>`}
+function prCapHTML(it){const c=prCap(it);let cap='<p class="hint" style="margin-top:12px">Completa las personas, los días y los pasos del proceso (más abajo) para ver cuánto pueden producir.</p>';
+ if(c){const ok=c.meta>0&&c.meta<=c.mes;cap=`<dl class="kv" style="margin-top:12px"><dt>Tiempo para hacer 1 unidad</dt><dd>${c.mn} minutos</dd><dt>Una persona produce por día</dt><dd>${c.dia} unidades (jornada de 8 horas)</dd><dt>Capacidad por mes</dt><dd><strong>${c.mes} unidades</strong></dd></dl>${c.meta>0?(ok?`<p class="alert ok">Tu meta de ${c.meta} unidades por mes se puede cumplir.</p>`:`<p class="alert bad" role="alert">Tu meta de ${c.meta} unidades supera lo que pueden producir (${c.mes}). Prueba con más personas, más días o un proceso más rápido.</p>`):''}`}
+ return cap}
+function pPlan(){const it=prCur();if(!it)return prNone();const p=prPlan(it.id);
+ return `<div class="card"><div class="head-row"><h2>Actividad 2: plan de producción de ${esc(it.name)}</h2><button type="button" class="btn sm" data-pr="pdf-plan">Plan de producción (PDF)</button></div>
+  <p class="hint" style="margin-bottom:12px">Define cuánto quieres producir y con qué recursos. Después describe el proceso paso a paso: con esos minutos el simulador calcula cuánto pueden producir de verdad.</p>${prSel()}${prErrHTML()}
+  <div class="grid"><div class="field"><label for="p-pm">Meta: unidades por mes</label><input id="p-pm" class="mono" type="number" min="0" step="1" data-rp="plan.${it.id}.meta" value="${esc(p.meta)}"></div>
+   <div class="field"><label for="p-pe">Personas que producen</label><input id="p-pe" class="mono" type="number" min="0" step="1" data-rp="plan.${it.id}.pers" value="${esc(p.pers)}"></div>
+   <div class="field"><label for="p-pd">Días de producción por semana</label><input id="p-pd" class="mono" type="number" min="0" max="7" step="1" data-rp="plan.${it.id}.dias" value="${esc(p.dias)}"></div>
+   <div class="field"><label for="p-pi">Fecha de inicio</label><input id="p-pi" type="date" data-rp="plan.${it.id}.ini" value="${esc(p.ini)}"></div>
+   <div class="field wide"><label for="p-po">Notas del plan (opcional)</label><input id="p-po" maxlength="150" autocomplete="off" data-rp="plan.${it.id}.obs" value="${esc(p.obs)}"></div></div><div id="capBox">${prCapHTML(it)}</div></div>`+pProc(true)}
+function prOC(){const f=view.poc,l=view.pol,lines=view.pocl,names=matNames(),tot=r2(lines.reduce((a,x)=>a+num(x.qty)*num(x.cost),0));
+ const lrows=lines.map((x,i)=>`<tr><td>${esc(x.mat)}</td><td class="r">${x.qty}</td><td class="r">${fmt(x.cost)}</td><td class="r">${fmt(r2(num(x.qty)*num(x.cost)))}</td><td><button type="button" class="link" data-pr="ocl-rm" data-i="${i}">Quitar</button></td></tr>`).join('');
+ const orows=S.pr.compras.slice().reverse().map(o=>{const t=r2(o.lines.reduce((a,x)=>a+num(x.qty)*num(x.cost),0));return `<tr><td class="mono">${esc(o.n)}</td><td>${esc(o.prov)}<span class="sub">${o.lines.length} línea(s) · ${esc(gd(o.date))}</span></td><td class="r">${fmt(t)}</td><td>${o.est==='Recibida'?'<span class="pill ok">Recibida</span>':'<span class="pill info">Emitida</span>'}</td><td style="white-space:nowrap"><button type="button" class="btn sec sm" data-pr="oc-pdf" data-i="${o.id}">PDF</button>${o.est==='Recibida'?'':` <button type="button" class="btn sec sm" data-pr="oc-rec" data-i="${o.id}">Registrar llegada</button>`} <button type="button" class="link" data-pr="oc-rm" data-i="${o.id}">Quitar</button></td></tr>`}).join('');
+ return `<datalist id="matlist">${names.map(n=>`<option value="${esc(n)}">`).join('')}</datalist>
+ <div class="card" style="margin-top:20px"><div class="head-row"><h2>Orden de compra al proveedor</h2><button type="button" class="btn sec sm" data-pr="oc-sug">Calcular lo que me falta</button></div>
+  <p class="hint" style="margin-bottom:12px">Una orden de compra le pide a un proveedor los materiales que necesitas. Escribe las líneas o usa "Calcular lo que me falta", que revisa tus órdenes de producción pendientes. Cuando lleguen los materiales, presiona "Registrar llegada" y entran al inventario.</p>
+  <div class="grid"><div class="field wide"><label for="p-ocp">Proveedor (inventado)</label><input id="p-ocp" maxlength="80" autocomplete="off" data-rp="c.prov" value="${esc(f.prov)}"></div><div class="field"><label for="p-ocf">Fecha</label><input id="p-ocf" type="date" data-rp="c.date" value="${esc(f.date)}"></div></div>
+  <h3 style="margin:14px 0 8px">Líneas de la orden</h3>
+  <div class="grid" style="align-items:end"><div class="field wide"><label for="p-olm">Material</label><input id="p-olm" list="matlist" maxlength="60" autocomplete="off" data-rp="l.mat" value="${esc(l.mat)}"></div><div class="field"><label for="p-olq">Cantidad</label><input id="p-olq" class="mono" type="number" min="0" step="0.01" data-rp="l.qty" value="${esc(l.qty)}"></div><div class="field"><label for="p-olc">Costo por unidad (₡)</label><input id="p-olc" class="mono" type="number" min="0" step="0.01" data-rp="l.cost" value="${esc(l.cost)}"></div><div><button type="button" class="btn sec" data-pr="ocl-add">Agregar línea</button></div></div>
+  ${lrows?`<div class="tscroll" style="margin-top:14px"><table class="mv" style="min-width:520px"><thead><tr><th>Material</th><th class="r">Cantidad</th><th class="r">Costo unit.</th><th class="r">Subtotal</th><th></th></tr></thead><tbody>${lrows}</tbody><tfoot><tr><td colspan="3"><strong>Total de la orden</strong></td><td class="r"><strong>${fmt(tot)}</strong></td><td></td></tr></tfoot></table></div><div class="btnrow" style="margin-top:12px"><button type="button" class="btn" data-pr="oc-add">Crear orden de compra</button></div>`:'<p class="hint" style="margin-top:12px">Todavía no hay líneas en la orden.</p>'}</div>
+ <div class="card" style="margin-top:20px"><h2 style="margin-bottom:12px">Mis órdenes de compra</h2>${orows?`<div class="tscroll"><table class="mv" style="min-width:640px"><thead><tr><th>N.º</th><th>Proveedor</th><th class="r">Total</th><th>Estado</th><th></th></tr></thead><tbody>${orows}</tbody></table></div>`:'<p class="hint">Todavía no hay órdenes de compra.</p>'}</div>`}
+function pDesp(){const f=view.pod,names=prProdNames(),avail=names.filter(n=>stockProd(n).stock>0),stk=f.name?stockProd(f.name).stock:0;
+ const rows=S.pr.desp.slice().reverse().map(d=>`<tr><td class="mono">${esc(d.n)}</td><td>${esc(d.name)}<span class="sub">${esc(d.dest)}${d.lugar?' · '+esc(d.lugar):''}</span></td><td class="r">${d.qty}</td><td>${esc(gd(d.date))}</td><td>${esc(d.rec)}</td><td style="white-space:nowrap"><button type="button" class="btn sec sm" data-pr="dp-pdf" data-i="${d.id}">PDF</button> <button type="button" class="link" data-pr="dp-rm" data-i="${d.id}">Quitar</button></td></tr>`).join('');
+ const form=avail.length?`<div class="grid"><div class="field wide"><label for="p-dn">Producto</label><select id="p-dn" data-rp="d.name" data-rr><option value="">— Elige —</option>${avail.map(n=>`<option value="${esc(n)}"${n===f.name?' selected':''}>${esc(n)} (hay ${stockProd(n).stock} en bodega)</option>`).join('')}</select></div>
+   <div class="field"><label for="p-dq">Cantidad a despachar${stk?' (máx. '+stk+')':''}</label><input id="p-dq" class="mono" type="number" min="0" step="1" data-rp="d.qty" value="${esc(f.qty)}"></div>
+   <div class="field"><label for="p-dd">Fecha</label><input id="p-dd" type="date" data-rp="d.date" value="${esc(f.date)}"></div>
+   <div class="field wide"><label for="p-dc">Cliente o punto de venta que recibe (inventado)</label><input id="p-dc" maxlength="80" autocomplete="off" data-rp="d.dest" value="${esc(f.dest)}"></div>
+   <div class="field wide"><label for="p-dl">Lugar de entrega</label><input id="p-dl" maxlength="100" autocomplete="off" data-rp="d.lugar" value="${esc(f.lugar)}"></div>
+   <div class="field"><label for="p-dr">Nombre de quien recibe</label><input id="p-dr" maxlength="60" autocomplete="off" data-rp="d.rec" value="${esc(f.rec)}"></div>
+   <div class="field"><label for="p-dt">Transporte (opcional)</label><input id="p-dt" maxlength="60" autocomplete="off" data-rp="d.transp" value="${esc(f.transp)}" placeholder="Ej.: moto, carro de la empresa"></div>
+   <div class="field wide"><label for="p-dnn">Nota (opcional)</label><input id="p-dnn" maxlength="100" autocomplete="off" data-rp="d.nota" value="${esc(f.nota)}"></div></div>
+  <div class="btnrow" style="margin-top:12px"><button type="button" class="btn" data-pr="dp-add">Crear nota de despacho</button></div>`:`<div class="alert warn"><strong>Todavía no hay producto terminado en la bodega.</strong> Termina una orden de producción (actividad 4) y revísala (actividad 5).<div class="btnrow" style="margin-top:8px"><button type="button" class="btn sec sm" data-pr="nav" data-v="ord">Ir a Producción</button></div></div>`;
+ return `<div class="card"><h2 style="margin-bottom:6px">Actividad 6: despacho de producto terminado</h2><p class="hint" style="margin-bottom:12px">Despachar es entregar lo que produjiste a un cliente o a un punto de venta. Al crear la nota, esas unidades salen de la bodega. Antes de despachar, revisa la calidad (actividad 5).</p>${prErrHTML()}${form}
+  ${names.length?`<h3 style="margin:16px 0 6px">Existencias en bodega</h3><ul class="stepslist">${names.map(n=>`<li>${esc(n)}: <strong>${stockProd(n).stock}</strong></li>`).join('')}</ul>`:''}</div>
+ <div class="card" style="margin-top:20px"><h2 style="margin-bottom:12px">Notas de despacho</h2>${rows?`<div class="tscroll"><table class="mv" style="min-width:680px"><thead><tr><th>N.º</th><th>Producto y destino</th><th class="r">Cantidad</th><th>Fecha</th><th>Recibió</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`:'<p class="hint">Todavía no hay despachos.</p>'}</div>`}
+function pInf(){const m=prTot(),E=prEstado(),ls=E.filter(x=>x.s==='listo').length,tile=(l,v)=>`<div class="tile"><span class="sub">${l}</span><strong>${v}</strong></div>`;
+ const rows=m.rows.map(r=>`<tr><td>${esc(r.n)}</td><td class="r">${r.s.ent}</td><td class="r">${r.s.rej}</td><td class="r">${r.s.sold}</td><td class="r"><strong>${r.s.stock}</strong></td></tr>`).join('');
+ return `<div class="card"><div class="head-row"><h2>Informe de producción</h2><button type="button" class="btn sm" data-pr="pdf-inf">Informe de producción (PDF)</button></div><p class="hint" style="margin-bottom:12px">Resume lo que hizo tu departamento. Se llena solo con lo que registras en cada actividad.</p>
+  <div class="tiles">${tile('Actividades listas',ls+' de '+E.length)}${tile('Órdenes terminadas',m.done+' de '+m.ords)}${tile('Unidades producidas',m.t.ent)}${tile('Unidades rechazadas',m.t.rej)}${tile('Unidades despachadas',m.t.desp)}${tile('En bodega',m.t.stock)}${tile('Inspecciones aprobadas',m.ok+' de '+m.insp)}${tile('Costo estimado de lo producido',fmt(m.costo))}</div></div>
+ <div class="card" style="margin-top:20px"><h2 style="margin-bottom:12px">Por producto</h2>${rows?`<div class="tscroll"><table class="mv" style="min-width:520px"><thead><tr><th>Producto</th><th class="r">Producido</th><th class="r">Rechazado</th><th class="r">Despachado</th><th class="r">En bodega</th></tr></thead><tbody>${rows}</tbody></table></div>`:'<p class="hint">Todavía no hay productos.</p>'}</div>`}
+function processLay(file){if(!file)return;if(!/^image\//.test(file.type)){toast('Sube una imagen JPG o PNG.');return}if(file.size>10*1024*1024){toast('La imagen es muy grande. Usa una de menos de 10 MB.');return}
+ const fr=new FileReader();fr.onerror=()=>toast('No se pudo leer la imagen.');
+ fr.onload=()=>{const img=new Image();img.onerror=()=>toast('Ese archivo no parece una imagen válida.');
+  img.onload=()=>{const w0=img.naturalWidth||img.width,h0=img.naturalHeight||img.height;if(!w0||!h0){toast('No se pudo procesar la imagen.');return}
+   let best=null;[[1000,.75],[900,.65],[760,.6],[640,.55]].some(a=>{const k=Math.min(1,a[0]/Math.max(w0,h0)),w=Math.max(1,Math.round(w0*k)),h=Math.max(1,Math.round(h0*k)),cv=document.createElement('canvas');cv.width=w;cv.height=h;const cx=cv.getContext('2d');cx.fillStyle='#fff';cx.fillRect(0,0,w,h);cx.drawImage(img,0,0,w,h);try{const d=cv.toDataURL('image/jpeg',a[1]);best={img:d,w,h};return d.length<=300000}catch(e){return false}});
+   if(!best){toast('No se pudo procesar la imagen.');return}
+   S.prLay=best;save();renderPr();toast('Layout cargado.')};img.src=fr.result};fr.readAsDataURL(file)}
+function pProc(skipSel){const it=prCur();if(!it)return prNone();const st=prSteps(it.id),f=view.prs,tot=st.reduce((a,s)=>a+num(s.min),0);
  const rows=st.map((s,i)=>`<tr><td>${i+1}</td><td>${esc(s.txt)}</td><td>${esc(s.resp)}</td><td class="r">${esc(s.min)}</td><td><button type="button" class="link" data-pr="step-rm" data-i="${i}">Quitar</button></td></tr>`).join('');
- return `<div class="card"><div class="head-row"><h2>Proceso de producción</h2><button type="button" class="btn sm" data-pr="pdf-proc">Fichas del proceso (PDF)</button></div>
-  <p class="hint" style="margin-bottom:12px">Describe cada paso para hacer el producto o prestar el servicio, desde que empieza hasta que se entrega.</p>${prSel()}${prErrHTML()}
+ return `<div class="card"><div class="head-row"><h2>Proceso paso a paso</h2><button type="button" class="btn sm" data-pr="pdf-proc">Fichas del proceso (PDF)</button></div>
+  <p class="hint" style="margin-bottom:12px">Describe cada paso para hacer el producto o prestar el servicio, desde que empieza hasta que se entrega.</p>${skipSel?'':prSel()+prErrHTML()}
   <div class="grid"><div class="field wide"><label for="p-st">Paso</label><input id="p-st" maxlength="120" autocomplete="off" data-rp="s.txt" value="${esc(f.txt)}" placeholder="Ej.: lo que se hace en este paso"></div>
    <div class="field"><label for="p-sr">¿Quién lo hace?</label><input id="p-sr" maxlength="40" autocomplete="off" data-rp="s.resp" value="${esc(f.resp)}"></div>
    <div class="field"><label for="p-sm">Minutos</label><input id="p-sm" class="mono" type="number" min="0" step="1" data-rp="s.min" value="${esc(f.min)}"></div></div>
@@ -1968,9 +2066,9 @@ function pMat(){const it=prCur();if(!it)return prNone();const b=prBom(it.id),f=v
    <div class="field wide"><label for="p-mp">Proveedor (opcional)</label><input id="p-mp" maxlength="60" autocomplete="off" data-rp="b.prov" value="${esc(f.prov)}"></div></div>
   <div class="btnrow" style="margin-top:12px"><button type="button" class="btn" data-pr="bom-add">Agregar material</button></div>
   ${rows?`<div class="tscroll" style="margin-top:16px"><table class="mv" style="min-width:760px"><thead><tr><th>Material</th><th>Cantidad</th><th>Unidad</th><th>Costo unitario</th><th class="r">Subtotal</th><th></th></tr></thead><tbody>${rows}</tbody><tfoot><tr><td colspan="4"><strong>Materiales por unidad</strong></td><td class="r"><strong>${fmt(bomCost(it.id))}</strong></td><td></td></tr></tfoot></table></div>`:'<p class="hint" style="margin-top:12px">Todavía no hay materiales para este producto.</p>'}</div>
- <div class="card" style="margin-top:20px"><h2 style="margin-bottom:6px">Entrada de materiales al inventario</h2><p class="hint" style="margin-bottom:12px">Cuando compran materiales, anoten cuánto entró. La factura del proveedor se registra en "Facturas de proveedores" y queda por pagar en Contabilidad.</p>
+ <div class="card" style="margin-top:20px"><h2 style="margin-bottom:6px">Entrada de materiales al inventario</h2><p class="hint" style="margin-bottom:12px">Si no usaron orden de compra, anoten aquí cuánto entró. La factura del proveedor se registra en "Facturas de proveedores" y queda por pagar en Contabilidad.</p>
   ${names.length?`<div class="grid"><div class="field wide"><label for="p-em">Material</label><select id="p-em" data-rp="e.mat"><option value="">— Elige —</option>${gOpts(names,e.mat)}</select></div><div class="field"><label for="p-eq">Cantidad que entró</label><input id="p-eq" class="mono" type="number" min="0" step="0.01" data-rp="e.qty" value="${esc(e.qty)}"></div><div class="field"><label for="p-ed">Fecha</label><input id="p-ed" type="date" data-rp="e.date" value="${esc(e.date)}"></div></div>
-  <div class="btnrow" style="margin-top:12px"><button type="button" class="btn sec" data-pr="ent-add">Registrar entrada</button><button type="button" class="btn sec" data-pr="go-prov">Registrar la factura del proveedor</button></div>`:'<p class="hint">Agrega materiales arriba para poder registrar entradas.</p>'}</div>`}
+  <div class="btnrow" style="margin-top:12px"><button type="button" class="btn sec" data-pr="ent-add">Registrar entrada</button><button type="button" class="btn sec" data-pr="go-prov">Registrar la factura del proveedor</button></div>`:'<p class="hint">Agrega materiales arriba para poder registrar entradas.</p>'}</div>`+prOC()}
 function pCosto(){const its=prItems();if(!its.length)return prNone();
  const rows=its.map(it=>{const c=prC(it.id),mat=bomCost(it.id),tot=prCostTot(it),gan=r2(num(it.price)-tot);
   return `<tr><td>${esc(it.name)}</td><td class="r">${fmt(mat)}</td><td><input class="mono" type="number" min="0" step="0.01" data-rp="cost.${it.id}.mo" data-rr aria-label="Mano de obra de ${esc(it.name)}" value="${esc(c.mo)}"></td><td><input class="mono" type="number" min="0" step="0.01" data-rp="cost.${it.id}.otros" data-rr aria-label="Otros costos de ${esc(it.name)}" value="${esc(c.otros)}"></td><td class="r"><strong>${fmt(tot)}</strong></td><td class="r">${fmt(it.price)}</td><td class="r"><span class="pill ${gan>0?'ok':'bad'}">${fmt(gan)}</span></td><td></td></tr>`}).join('');
@@ -1978,10 +2076,10 @@ function pCosto(){const its=prItems();if(!its.length)return prNone();
   <p class="hint" style="margin-bottom:12px">Costo = materiales + mano de obra + otros costos (alquiler, electricidad…), todo por una unidad. Si pusiste el precio de venta en Productos, aquí ves la ganancia.</p>
   <div class="tscroll"><table class="mv" style="min-width:980px"><thead><tr><th>Producto</th><th class="r">Materiales</th><th>Mano de obra</th><th>Otros costos</th><th class="r">Costo por unidad</th><th class="r">Precio sin IVA</th><th class="r">Ganancia</th><th></th></tr></thead><tbody>${rows}</tbody></table></div></div>`}
 function pInv(){const names=prProdNames(),mats=matNames(),a=view.pra,r=view.prr;
- const pr=names.map(nm=>{const s=stockProd(nm),mn=S.pr.min['p|'+nm]||'',low=s.stock<0||(num(mn)>0&&s.stock<=num(mn));return `<tr><td>${esc(nm)}</td><td class="r">${r2(s.ini)}</td><td class="r">${s.ent}</td><td class="r">${s.adj}</td><td class="r">${s.sold}</td><td class="r"><strong>${s.stock}</strong></td><td><input class="mono" style="width:80px" type="number" min="0" data-rmin="p|${esc(nm)}" data-rr aria-label="Mínimo de ${esc(nm)}" value="${esc(mn)}"></td><td>${low?'<span class="pill bad">Poco o negativo</span>':'<span class="pill ok">Bien</span>'}</td></tr>`}).join('');
+ const pr=names.map(nm=>{const s=stockProd(nm),mn=S.pr.min['p|'+nm]||'',low=s.stock<0||(num(mn)>0&&s.stock<=num(mn));return `<tr><td>${esc(nm)}</td><td class="r">${r2(s.ini)}</td><td class="r">${s.ent}</td><td class="r">${s.adj}</td><td class="r">${s.rej}</td><td class="r">${s.sold}</td><td class="r"><strong>${s.stock}</strong></td><td><input class="mono" style="width:80px" type="number" min="0" data-rmin="p|${esc(nm)}" data-rr aria-label="Mínimo de ${esc(nm)}" value="${esc(mn)}"></td><td>${low?'<span class="pill bad">Poco o negativo</span>':'<span class="pill ok">Bien</span>'}</td></tr>`}).join('');
  const mt=mats.map(n=>{const s=stockMat(n),mn=S.pr.min['m|'+n]||'',low=s.stock<0||(num(mn)>0&&s.stock<=num(mn));return `<tr><td>${esc(n)}</td><td class="r">${r2(s.ent)}</td><td class="r">${r2(s.use)}</td><td class="r"><strong>${s.stock}</strong></td><td><input class="mono" style="width:80px" type="number" min="0" data-rmin="m|${esc(n)}" data-rr aria-label="Mínimo de ${esc(n)}" value="${esc(mn)}"></td><td>${low?'<span class="pill bad">Poco o negativo</span>':'<span class="pill ok">Bien</span>'}</td></tr>`}).join('');
  const arts=S.pr.arts.map(x=>`<tr><td>${esc(x.name)}</td><td>${x.kind==='m'?'Material o insumo':'Producto o mercadería'}</td><td>${esc(x.unit)}</td><td class="r">${esc(x.ini||0)}</td><td><button type="button" class="link" data-pr="art-rm" data-i="${x.id}">Quitar</button></td></tr>`).join('');
- const aj=S.pr.movs.filter(m=>m.mot!=='Entrada de material').slice().reverse().map(m=>`<tr><td>${esc(gd(m.date))}</td><td>${m.kind==='p'?'Producto':'Material'}: ${esc(m.name)}</td><td class="r">${m.qty}</td><td>${esc(m.mot)}</td><td><button type="button" class="link" data-pr="mov-rm" data-i="${m.id}">Quitar</button></td></tr>`).join('');
+ const aj=S.pr.movs.filter(m=>!/^Entrada de material/.test(m.mot)).slice().reverse().map(m=>`<tr><td>${esc(gd(m.date))}</td><td>${m.kind==='p'?'Producto':'Material'}: ${esc(m.name)}</td><td class="r">${m.qty}</td><td>${esc(m.mot)}</td><td><button type="button" class="link" data-pr="mov-rm" data-i="${m.id}">Quitar</button></td></tr>`).join('');
  const opts=names.map(n=>['p|'+n,'Producto: '+n]).concat(mats.map(n=>['m|'+n,'Material: '+n]));
  return unitList()+`<div class="card"><h2 style="margin-bottom:6px">Artículos de inventario</h2><p class="hint" style="margin-bottom:12px">Aquí registran lo que su negocio guarda: materiales, insumos, suministros o mercadería que compran para revender. Los productos del catálogo que son de tipo "Producto" aparecen solos.</p>${prErrHTML()}
   <div class="grid"><div class="field wide"><label for="p-rn">Nombre del artículo</label><input id="p-rn" maxlength="60" autocomplete="off" data-rp="r.name" value="${esc(r.name)}"></div>
@@ -1992,27 +2090,28 @@ function pInv(){const names=prProdNames(),mats=matNames(),a=view.pra,r=view.prr;
   <div class="btnrow" style="margin-top:12px"><button type="button" class="btn" data-pr="art-add">Agregar artículo</button></div>
   ${arts?`<div class="tscroll" style="margin-top:14px"><table class="mv" style="min-width:560px"><thead><tr><th>Artículo</th><th>Tipo</th><th>Unidad</th><th class="r">Existencia inicial</th><th></th></tr></thead><tbody>${arts}</tbody></table></div>`:''}</div>
  <div class="card" style="margin-top:20px"><div class="head-row"><h2>Existencias</h2><button type="button" class="btn sm" data-pr="pdf-inv">Reporte de inventario (PDF)</button></div>
-  <p class="hint" style="margin-bottom:12px">Las existencias se calculan solas. Los productos suben cuando una orden queda <strong>Terminada</strong> y bajan con las facturas emitidas cuyo detalle es igual al nombre del producto. Los materiales suben con las entradas y bajan al terminar órdenes. Los servicios no llevan inventario.</p>
-  <h3 style="margin-bottom:8px">Productos y mercadería</h3>${pr?`<div class="tscroll"><table class="mv" style="min-width:760px"><thead><tr><th>Producto</th><th class="r">Inicial</th><th class="r">Producido</th><th class="r">Ajustes</th><th class="r">Vendido</th><th class="r">Existencia</th><th>Mínimo</th><th>Estado</th></tr></thead><tbody>${pr}</tbody></table></div>`:'<p class="hint">Aún no hay productos. Agrégalos en la pestaña Productos o como artículos de inventario.</p>'}
+  <p class="hint" style="margin-bottom:12px">Las existencias se calculan solas. Los productos suben cuando una orden queda <strong>Terminada</strong> y bajan con los defectos rechazados en calidad y con las notas de despacho. Los materiales suben con las entradas y bajan al terminar órdenes. Los servicios no llevan inventario.</p>
+  <h3 style="margin-bottom:8px">Productos y mercadería</h3>${pr?`<div class="tscroll"><table class="mv" style="min-width:760px"><thead><tr><th>Producto</th><th class="r">Inicial</th><th class="r">Producido</th><th class="r">Ajustes</th><th class="r">Rechazado</th><th class="r">Despachado</th><th class="r">Existencia</th><th>Mínimo</th><th>Estado</th></tr></thead><tbody>${pr}</tbody></table></div>`:'<p class="hint">Aún no hay productos. Agrégalos en la pestaña Productos o como artículos de inventario.</p>'}
   <h3 style="margin:18px 0 8px">Materiales e insumos</h3>${mt?`<div class="tscroll"><table class="mv" style="min-width:620px"><thead><tr><th>Material</th><th class="r">Entradas</th><th class="r">Usado</th><th class="r">Existencia</th><th>Mínimo</th><th>Estado</th></tr></thead><tbody>${mt}</tbody></table></div>`:'<p class="hint">Aún no hay materiales.</p>'}</div>
  <div class="card" style="margin-top:20px"><h2 style="margin-bottom:6px">Entradas, salidas y ajustes</h2><p class="hint" style="margin-bottom:12px">Una cantidad positiva significa que entra al inventario (por ejemplo, una compra). Una negativa significa que sale (una pérdida o un conteo físico).</p>
   ${opts.length?`<div class="grid"><div class="field wide"><label for="p-at">¿Qué artículo?</label><select id="p-at" data-rp="a.tgt"><option value="">— Elige —</option>${gOpts(opts,a.tgt)}</select></div><div class="field"><label for="p-aq">Cantidad (+ o −)</label><input id="p-aq" class="mono" type="number" step="0.01" data-rp="a.qty" value="${esc(a.qty)}"></div><div class="field wide"><label for="p-am">Motivo</label><input id="p-am" maxlength="80" autocomplete="off" data-rp="a.mot" value="${esc(a.mot)}" placeholder="Ej.: compra, pérdida, conteo"></div></div>
   <div class="btnrow" style="margin-top:12px"><button type="button" class="btn sec" data-pr="adj-add">Registrar</button></div>`:'<p class="hint">Primero agrega artículos arriba.</p>'}
   ${aj?`<div class="tscroll" style="margin-top:14px"><table class="mv" style="min-width:560px"><thead><tr><th>Fecha</th><th>Artículo</th><th class="r">Cantidad</th><th>Motivo</th><th></th></tr></thead><tbody>${aj}</tbody></table></div>`:''}</div>`}
 function pOrd(){const its=prItems(),f=view.pro,acc=[];
- const rows=S.pr.ords.slice().reverse().map(o=>{const i=S.pr.ords.indexOf(o);return `<tr><td class="mono">${esc(o.n)}</td><td>${esc(o.name)}${o.nota?`<span class="sub">${esc(o.nota)}</span>`:''}</td><td class="r">${o.qty}</td><td>${esc(gd(o.ent))}</td><td><select data-rp="ords.${i}.est" data-rr aria-label="Estado de ${esc(o.n)}">${gOpts(ORD_ST,o.est)}</select></td><td style="white-space:nowrap"><button type="button" class="btn sec sm" data-pr="ord-pdf" data-i="${o.id}">PDF</button> <button type="button" class="link" data-pr="ord-rm" data-i="${o.id}">Quitar</button></td></tr>`}).join('');
- return `<div class="card"><h2 style="margin-bottom:6px">Nueva orden de producción</h2><p class="hint" style="margin-bottom:12px">Una orden dice qué se va a producir, cuánto y para cuándo. Al marcarla <strong>Terminada</strong>, el producto entra al inventario y se gastan los materiales.</p>${prErrHTML()}
+ const rows=S.pr.ords.slice().reverse().map(o=>{const i=S.pr.ords.indexOf(o);return `<tr><td class="mono">${esc(o.n)}</td><td>${esc(o.name)}${o.nota?`<span class="sub">${esc(o.nota)}</span>`:''}${o.resp?`<span class="sub">Responsable: ${esc(o.resp)}</span>`:''}${ordFaltaHTML(o)}</td><td class="r">${o.qty}</td><td>${esc(gd(o.ent))}</td><td><select data-rp="ords.${i}.est" data-rr aria-label="Estado de ${esc(o.n)}">${gOpts(ORD_ST,o.est)}</select></td><td style="white-space:nowrap"><button type="button" class="btn sec sm" data-pr="ord-pdf" data-i="${o.id}">PDF</button> <button type="button" class="link" data-pr="ord-rm" data-i="${o.id}">Quitar</button></td></tr>`}).join('');
+ return `<div class="card"><h2 style="margin-bottom:6px">Actividad 4: orden de producción</h2><p class="hint" style="margin-bottom:12px">Una orden dice qué se va a producir, cuánto y para cuándo. Al marcarla <strong>Terminada</strong>, el producto entra al inventario y se gastan los materiales.</p>${prErrHTML()}
   ${acc.length?`<div class="alert warn"><strong>Cotizaciones aceptadas sin orden:</strong><ul>${acc.map(c=>`<li>${esc(c.n)} · ${esc(c.cli.name)} <button type="button" class="btn sec sm" data-pr="ord-cot" data-i="${c.id}">Crear órdenes</button></li>`).join('')}</ul></div>`:''}
   ${its.length?`<div class="grid"><div class="field wide"><label for="p-oi">Producto o servicio</label><select id="p-oi" data-rp="o.item"><option value="">— Elige —</option>${its.map(i=>`<option value="${i.id}"${String(i.id)===String(f.item)?' selected':''}>${esc(i.name)}</option>`).join('')}</select></div>
    <div class="field"><label for="p-oq">Cantidad</label><input id="p-oq" class="mono" type="number" min="1" step="1" data-rp="o.qty" value="${esc(f.qty)}"></div>
    <div class="field"><label for="p-oe">Fecha de entrega</label><input id="p-oe" type="date" data-rp="o.ent" value="${esc(f.ent)}"></div>
+   <div class="field wide"><label for="p-or">Responsable de la orden</label><input id="p-or" maxlength="60" autocomplete="off" data-rp="o.resp" value="${esc(f.resp||'')}"></div>
    <div class="field wide"><label for="p-on">Nota (opcional)</label><input id="p-on" maxlength="100" autocomplete="off" data-rp="o.nota" value="${esc(f.nota)}"></div></div>
-  <div class="btnrow" style="margin-top:12px"><button type="button" class="btn" data-pr="ord-add">Crear orden</button></div>`:'<p class="hint">Primero agrega productos en la pestaña Productos.</p>'}</div>
+  <div class="btnrow" style="margin-top:12px"><button type="button" class="btn" data-pr="ord-add">Crear orden</button></div>`:'<p class="hint">Primero agrega tu producto en la actividad 1.</p>'}</div>
  <div class="card" style="margin-top:20px"><h2 style="margin-bottom:12px">Órdenes</h2>${rows?`<div class="tscroll"><table class="mv" style="min-width:680px"><thead><tr><th>N.º</th><th>Producto</th><th class="r">Cantidad</th><th>Entrega</th><th>Estado</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`:'<p class="hint">Todavía no hay órdenes.</p>'}</div>`}
 function pCal(){const it=prCur();if(!it)return prNone();const qc=prQc(it.id),f=view.pri,ready=prDone().filter(o=>!S.pr.insp.some(x=>x.ord===o.id));
  const ord=S.pr.ords.find(o=>String(o.id)===String(f.ord)),qcl=ord?prQc(ord.item):[];
  const rows=S.pr.insp.slice().reverse().map(x=>`<tr><td class="mono">${esc(x.n)}</td><td>${esc(x.ordn)} · ${esc(x.name)}${x.fail.length?`<span class="sub">Falló: ${esc(x.fail.join(', '))}</span>`:''}${x.acc?`<span class="sub">Acción: ${esc(x.acc)}</span>`:''}</td><td class="r">${x.def} de ${x.insp}</td><td>${x.ok?'<span class="pill ok">Aprobada</span>':'<span class="pill bad">Requiere acción</span>'}</td><td><button type="button" class="link" data-pr="insp-rm" data-i="${x.id}">Quitar</button></td></tr>`).join('');
- return `<div class="card"><div class="head-row"><h2>Lista de revisión</h2><button type="button" class="btn sm" data-pr="pdf-cal">Informe de calidad (PDF)</button></div>
+ return `<div class="card"><div class="head-row"><h2>Actividad 5: lista de revisión</h2><button type="button" class="btn sm" data-pr="pdf-cal">Informe de calidad (PDF)</button></div>
   <p class="hint" style="margin-bottom:12px">Define qué se revisa antes de entregar cada producto.</p>${prSel()}
   <ul class="stepslist">${qc.map((q,i)=>`<li style="display:flex;gap:10px;align-items:center;justify-content:space-between"><span>• ${esc(q)}</span><button type="button" class="link" data-pr="qc-rm" data-i="${i}">Quitar</button></li>`).join('')}</ul>
   <div class="grid" style="margin-top:10px;align-items:end"><div class="field wide"><label for="p-qa">Agregar revisión</label><input id="p-qa" maxlength="80" autocomplete="off" placeholder="Ej.: lo que revisan antes de entregar"></div><div><button type="button" class="btn sec" data-pr="qc-add">Agregar</button></div></div></div>
@@ -2025,7 +2124,7 @@ function pCal(){const it=prCur();if(!it)return prNone();const qc=prQc(it.id),f=v
 function renderPr(){ensurePr();ensureMk();const el=$('#dept-prod');if(!el)return;el.className='v-prod';
  const nav=PRNAV.map(n=>`<button type="button" data-pr="nav" data-v="${n[0]}" aria-pressed="${view.pr===n[0]}">${n[1]}</button>`).join('');
  const who=(S.ger&&S.ger.org&&S.ger.org.prod)||'';
- el.innerHTML=`<div class="seg" role="group" aria-label="Secciones de Producción">${nav}</div>${who?`<p class="hint" style="margin:-6px 0 14px">Responsable del departamento: <strong>${esc(who)}</strong></p>`:''}`+({prods:pProds,proc:pProc,mat:pMat,costo:pCosto,inv:pInv,ord:pOrd,cal:pCal,prov:()=>provHTML('prod')}[view.pr]||pProc)()}
+ el.innerHTML=`<div class="seg" role="group" aria-label="Secciones de Producción">${nav}</div>${who?`<p class="hint" style="margin:-6px 0 14px">Responsable del departamento: <strong>${esc(who)}</strong></p>`:''}`+({ruta:pRuta,prods:pProds,plan:pPlan,proc:pPlan,mat:pMat,costo:pCosto,inv:pInv,ord:pOrd,cal:pCal,desp:pDesp,inf:pInf,prov:()=>provHTML('prod')}[view.pr]||pRuta)()}
 /* ---- PDF ---- */
 function prAddProc(st){st.title('Fichas del proceso de producción',S.company.name);
  prItems().forEach(it=>{const s=prSteps(it.id);st.h2(it.name);st.table([{h:'N.º',w:12},{h:'Paso',w:100},{h:'Responsable',w:44},{h:'Minutos',w:24,a:'r'}],s.map((x,i)=>[String(i+1),x.txt,x.resp,String(x.min)]));if(s.length)st.p('Tiempo total: '+s.reduce((a,x)=>a+num(x.min),0)+' minutos.',{c:PC.mut,s:9})})}
@@ -2035,7 +2134,7 @@ function prAddCosto(st){st.title('Hoja de costos de producción',S.company.name+
  st.table([{h:'Producto',w:46},{h:'Materiales',w:24,a:'r'},{h:'M. de obra',w:24,a:'r'},{h:'Otros',w:20,a:'r'},{h:'Costo unit.',w:24,a:'r'},{h:'Precio',w:22,a:'r'},{h:'Ganancia',w:20,a:'r'}],prItems().map(it=>{const c=prC(it.id),t=prCostTot(it);return[it.name,nf(bomCost(it.id)),nf(c.mo||0),nf(c.otros||0),nf(t),nf(it.price),nf(num(it.price)-t)]}));
  st.p('Montos en colones (CRC) por una unidad. Precio sin IVA.',{c:PC.mut,s:8.5,i:1})}
 function prAddInv(st){st.title('Reporte de inventario',S.company.name+' · '+gd(dayKey()));st.h2('Productos y mercadería');
- st.table([{h:'Producto',w:52},{h:'Inicial',w:20,a:'r'},{h:'Producido',w:22,a:'r'},{h:'Ajustes',w:20,a:'r'},{h:'Vendido',w:20,a:'r'},{h:'Existencia',w:24,a:'r'},{h:'Mínimo',w:22,a:'r'}],prProdNames().map(n=>{const s=stockProd(n);return[n,String(r2(s.ini)),String(s.ent),String(s.adj),String(s.sold),String(s.stock),String(S.pr.min['p|'+n]||'-')]}));
+ st.table([{h:'Producto',w:46},{h:'Inicial',w:18,a:'r'},{h:'Producido',w:22,a:'r'},{h:'Ajustes',w:18,a:'r'},{h:'Rechaz.',w:18,a:'r'},{h:'Despach.',w:20,a:'r'},{h:'Existencia',w:22,a:'r'},{h:'Mínimo',w:18,a:'r'}],prProdNames().map(n=>{const s=stockProd(n);return[n,String(r2(s.ini)),String(s.ent),String(s.adj),String(s.rej),String(s.sold),String(s.stock),String(S.pr.min['p|'+n]||'-')]}));
  st.h2('Materiales e insumos');st.table([{h:'Material',w:76},{h:'Entradas',w:26,a:'r'},{h:'Usado',w:26,a:'r'},{h:'Existencia',w:26,a:'r'},{h:'Mínimo',w:26,a:'r'}],matNames().map(n=>{const s=stockMat(n);return[n,String(r2(s.ent)),String(r2(s.use)),String(s.stock),String(S.pr.min['m|'+n]||'-')]}))}
 function prAddOrd(st,o){st.title('Orden de producción N.º '+o.n,S.company.name);st.kv('Producto',o.name);st.kv('Cantidad',String(o.qty));st.kv('Fecha de entrega',gd(o.ent));st.kv('Estado',o.est);if(o.nota)st.kv('Nota',o.nota);st.y+=2;
  const b=S.pr.bom[o.item]||[];st.h2('Materiales necesarios');st.table([{h:'Material',w:90},{h:'Por unidad',w:40,a:'r'},{h:'Total para la orden',w:50,a:'r'}],b.map(l=>[l.name,l.qty+' '+l.unit,r2(num(l.qty)*o.qty)+' '+l.unit]));
@@ -2043,8 +2142,28 @@ function prAddOrd(st,o){st.title('Orden de producción N.º '+o.n,S.company.name
  st.sign((S.ger&&S.ger.org&&S.ger.org.prod)||'','Producción (responsable)')}
 function prAddCal(st){st.title('Informe de control de calidad',S.company.name+' · '+gd(dayKey()));
  st.table([{h:'N.º',w:18},{h:'Orden y producto',w:62},{h:'Defectos',w:26,a:'r'},{h:'Resultado',w:30},{h:'Acción correctiva',w:44}],S.pr.insp.map(x=>[x.n,x.ordn+' · '+x.name+(x.fail.length?' (falló: '+x.fail.join(', ')+')':''),x.def+' de '+x.insp,x.ok?'Aprobada':'Requiere acción',x.acc]))}
+function prAddProd(st){st.title('Ficha del producto y layout',S.company.name);
+ prItems().forEach(it=>{st.h2(it.name);st.kv('Tipo',it.tipo);st.kv('Unidad',it.unit);if(it.price)st.kv('Precio sin IVA',moneyPdf(it.price));if(it.desc)st.kv('Descripción',it.desc)});
+ if(!prItems().length)st.p('Todavía no hay productos.',{c:PC.mut,i:1});
+ st.h2('Layout del área de producción');const L=S.prLay;if(L&&L.img)st.img(L.img,L.w,L.h);else st.p('Todavía no se ha subido el layout.',{c:PC.mut,i:1});
+ if(S.pr.layNota)st.p(S.pr.layNota);
+ const z=ZONAS.filter(x=>S.pr.zonas[x[0]]).map(x=>x[1]);st.kv('Zonas que se ven',z.length?z.join(', '):'-')}
+function prAddPlan(st){st.title('Plan de producción',S.company.name);
+ prItems().forEach(it=>{const p=prPlan(it.id),c=prCap(it),s=prSteps(it.id);st.h2(it.name);st.kv('Meta por mes',String(p.meta||'-')+' unidades');st.kv('Personas',String(p.pers||'-'));st.kv('Días por semana',String(p.dias||'-'));if(p.ini)st.kv('Inicio',gd(p.ini));if(p.obs)st.kv('Notas',p.obs);
+  if(c){st.kv('Minutos por unidad',String(c.mn));st.kv('Por persona al día',c.dia+' unidades');st.kv('Capacidad por mes',c.mes+' unidades');if(c.meta>0)st.kv('Meta',c.meta<=c.mes?'Se puede cumplir':'Supera la capacidad')}
+  st.table([{h:'N.º',w:12},{h:'Paso',w:100},{h:'Responsable',w:44},{h:'Minutos',w:24,a:'r'}],s.map((x,i)=>[String(i+1),x.txt,x.resp,String(x.min)]))})}
+function prAddOC(st,o){st.title('Orden de compra N.º '+o.n,S.company.name);st.kv('Proveedor',o.prov);st.kv('Fecha',gd(o.date));st.kv('Estado',o.est);if(o.nota)st.kv('Nota',o.nota);st.y+=2;
+ st.table([{h:'Material',w:76},{h:'Cantidad',w:24,a:'r'},{h:'Costo unit.',w:30,a:'r'},{h:'Subtotal',w:34,a:'r'}],o.lines.map(l=>[l.mat,String(l.qty),nf(l.cost),nf(num(l.qty)*num(l.cost))]));
+ st.p('Total de la orden: '+moneyPdf(r2(o.lines.reduce((a,x)=>a+num(x.qty)*num(x.cost),0))),{b:1,s:10});
+ st.sign((S.ger&&S.ger.org&&S.ger.org.prod)||'','Producción (responsable)')}
+function prAddDP(st,d){st.title('Nota de despacho N.º '+d.n,S.company.name);st.kv('Producto',d.name);st.kv('Cantidad',String(d.qty));st.kv('Fecha',gd(d.date));st.kv('Cliente o destino',d.dest);st.kv('Lugar de entrega',d.lugar);if(d.transp)st.kv('Transporte',d.transp);if(d.nota)st.kv('Nota',d.nota);
+ st.sign((S.ger&&S.ger.org&&S.ger.org.prod)||'','Entregó (Producción)');st.sign(d.rec,'Recibió')}
+function prAddInf(st){const m=prTot(),E=prEstado();st.title('Informe de producción',S.company.name+' · '+gd(dayKey()));
+ st.h2('Actividades de la ruta');st.table([{h:'N.º',w:12},{h:'Actividad',w:70},{h:'Entregable',w:60},{h:'Estado',w:34}],E.map(x=>[String(x.n),x.t,x.e,{listo:'Listo',curso:'En curso',falta:'Por hacer'}[x.s]]));
+ st.h2('Resultados');st.kv('Órdenes terminadas',m.done+' de '+m.ords);st.kv('Unidades producidas',String(m.t.ent));st.kv('Unidades rechazadas',String(m.t.rej));st.kv('Unidades despachadas',String(m.t.desp));st.kv('En bodega',String(m.t.stock));st.kv('Inspecciones aprobadas',m.ok+' de '+m.insp);st.kv('Costo estimado',moneyPdf(m.costo));
+ st.h2('Por producto');st.table([{h:'Producto',w:70},{h:'Producido',w:28,a:'r'},{h:'Rechazado',w:28,a:'r'},{h:'Despachado',w:28,a:'r'},{h:'En bodega',w:28,a:'r'}],m.rows.map(r=>[r.n,String(r.s.ent),String(r.s.rej),String(r.s.sold),String(r.s.stock)]))}
 function prBuild(kind,arg){const st=gPdf();if(!st)return null;st.head();
- if(kind==='proc')prAddProc(st);else if(kind==='mat')prAddMat(st);else if(kind==='costo')prAddCosto(st);else if(kind==='inv')prAddInv(st);else if(kind==='ord')prAddOrd(st,arg);else if(kind==='cal')prAddCal(st);
+ if(kind==='proc')prAddProc(st);else if(kind==='mat')prAddMat(st);else if(kind==='costo')prAddCosto(st);else if(kind==='inv')prAddInv(st);else if(kind==='ord')prAddOrd(st,arg);else if(kind==='cal')prAddCal(st);else if(kind==='prod')prAddProd(st);else if(kind==='plan')prAddPlan(st);else if(kind==='oc')prAddOC(st,arg);else if(kind==='dp')prAddDP(st,arg);else if(kind==='inf')prAddInf(st);
  return st.finish('Producción · '+S.company.name)}
 /* ---- eventos ---- */
 document.addEventListener('click',e=>{const b=e.target.closest('#dept-prod [data-pr]');if(!b)return;const a=b.dataset.pr,P=S.pr,id=+b.dataset.i,it=prCur();
@@ -2060,7 +2179,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('#dept-prod [data
    P.movs.push({id:P.nextId++,date:f.date||dayKey(),kind:'m',name:f.mat,qty:num(f.qty),mot:'Entrada de material'});save();view.pre={mat:'',qty:'',date:dayKey()};view.perr2=[];renderPr();toast('Entrada registrada.');break}
   case 'go-prov':view.pr='prov';renderPr();break;
   case 'prod-add':{const f=view.prn,er=[];if(!f.name.trim())er.push('Escribe el nombre del producto o servicio.');if(P.prods.some(x=>x.name.trim().toLowerCase()===f.name.trim().toLowerCase()))er.push('Ese producto ya está en la lista.');if(er.length)return fail(er);
-   P.prods.push({id:P.nextId++,name:f.name.trim(),tipo:f.tipo||'Producto',unit:(f.unit||'').trim()||'unidad',price:num(f.price)});save();view.prn={name:'',unit:f.unit||'unidad',price:'',tipo:f.tipo||'Producto'};view.perr2=[];renderPr();toast('Producto agregado.');break}
+   P.prods.push({id:P.nextId++,name:f.name.trim(),tipo:f.tipo||'Producto',unit:(f.unit||'').trim()||'unidad',price:num(f.price),desc:(f.desc||'').trim()});save();view.prn={name:'',unit:f.unit||'unidad',price:'',tipo:f.tipo||'Producto',desc:''};view.perr2=[];renderPr();toast('Producto agregado.');break}
   case 'prod-rm':P.prods=P.prods.filter(x=>x.id!==id);if(String(view.prp)===String(id))view.prp=null;save();renderPr();break;
   case 'art-add':{const f=view.prr,er=[];if(!f.name.trim())er.push('Escribe el nombre del artículo.');if(P.arts.some(x=>x.kind===f.kind&&x.name.trim().toLowerCase()===f.name.trim().toLowerCase()))er.push('Ese artículo ya está en la lista.');if(er.length)return fail(er);
    P.arts.push({id:P.nextId++,name:f.name.trim(),kind:f.kind,unit:f.unit.trim()||'unidad',ini:num(f.ini)});if(num(f.min)>0)P.min[f.kind+'|'+f.name.trim()]=num(f.min);save();view.prr={name:'',kind:f.kind,unit:'',ini:'',min:''};view.perr2=[];renderPr();toast('Artículo agregado.');break}
@@ -2069,7 +2188,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('#dept-prod [data
    const k=f.tgt.slice(0,1)==='p'?'p':'m';P.movs.push({id:P.nextId++,date:dayKey(),kind:k,name:f.tgt.slice(2),qty:num(f.qty),mot:f.mot.trim()});save();view.pra={tgt:'',qty:'',mot:''};view.perr2=[];renderPr();toast('Ajuste registrado.');break}
   case 'mov-rm':P.movs=P.movs.filter(x=>x.id!==id);save();renderPr();break;
   case 'ord-add':{const f=view.pro,er=[],x=prItems().find(z=>String(z.id)===String(f.item));if(!x)er.push('Elige el producto.');if(!(num(f.qty)>0))er.push('La cantidad debe ser mayor que cero.');if(!f.ent)er.push('Escoge la fecha de entrega.');if(er.length)return fail(er);
-   P.ordN++;P.ords.push({id:P.nextId++,n:'OP-'+pad3(P.ordN),item:x.id,name:x.name,qty:Math.round(num(f.qty)),ent:f.ent,nota:f.nota.trim(),est:'Pendiente',fin:''});save();view.pro={item:'',qty:'',ent:'',nota:''};view.perr2=[];renderPr();toast('Orden creada.');break}
+   P.ordN++;P.ords.push({id:P.nextId++,n:'OP-'+pad3(P.ordN),item:x.id,name:x.name,qty:Math.round(num(f.qty)),ent:f.ent,nota:f.nota.trim(),est:'Pendiente',fin:'',resp:(f.resp||'').trim()});save();view.pro={item:'',qty:'',ent:'',nota:'',resp:''};view.perr2=[];renderPr();toast('Orden creada.');break}
   case 'ord-cot':{const c=S.mk.cots.find(z=>z.id===id);if(!c)break;let n=0;c.lines.forEach(l=>{const x=prItems().find(z=>z.name.trim().toLowerCase()===String(l.det).trim().toLowerCase());if(x){P.ordN++;n++;P.ords.push({id:P.nextId++,n:'OP-'+pad3(P.ordN),item:x.id,name:x.name,qty:Math.round(l.qty),ent:'',nota:'Cotización '+c.n+' · '+c.cli.name,est:'Pendiente',fin:''})}});
    c.ord=true;save();renderPr();toast(n?'Órdenes creadas. Pon la fecha de entrega en cada una si hace falta.':'No se encontraron productos del catálogo en la cotización.');break}
   case 'ord-rm':P.ords=P.ords.filter(x=>x.id!==id);save();renderPr();break;
@@ -2080,6 +2199,25 @@ document.addEventListener('click',e=>{const b=e.target.closest('#dept-prod [data
    const qcl=prQc(o.item),failed=qcl.filter((q,i)=>f.checks[i]===false),pc=num(f.def)/num(f.insp)*100;P.qcN++;
    P.insp.push({id:P.nextId++,n:'CC-'+pad3(P.qcN),ord:o.id,ordn:o.n,name:o.name,fail:failed,insp:num(f.insp),def:num(f.def),acc:f.acc.trim(),ok:!failed.length&&pc<=P.umbral});save();view.pri={ord:'',insp:'',def:'0',acc:'',checks:{}};view.perr2=[];renderPr();toast('Inspección guardada.');break}
   case 'insp-rm':P.insp=P.insp.filter(x=>x.id!==id);save();renderPr();break;
+  case 'lay-rm':delete S.prLay;save();renderPr();break;
+  case 'ocl-add':{const f=view.pol,er=[];if(!f.mat.trim())er.push('Escribe el material.');if(!(num(f.qty)>0))er.push('La cantidad debe ser mayor que cero.');if(er.length)return fail(er);
+   view.pocl.push({mat:f.mat.trim(),qty:num(f.qty),cost:num(f.cost)});view.pol={mat:'',qty:'',cost:''};view.perr2=[];renderPr();break}
+  case 'ocl-rm':view.pocl.splice(id,1);renderPr();break;
+  case 'oc-sug':{const need={};P.ords.filter(o=>o.est!=='Terminada').forEach(o=>(P.bom[o.item]||[]).forEach(l=>{const k=l.name.trim();need[k]=need[k]||{q:0,c:num(l.cost)};need[k].q+=num(l.qty)*o.qty}));
+   let n=0;Object.keys(need).forEach(k=>{const miss=r2(need[k].q-Math.max(0,stockMat(k).stock));if(miss>0){view.pocl=view.pocl.filter(x=>x.mat.toLowerCase()!==k.toLowerCase());view.pocl.push({mat:k,qty:miss,cost:need[k].c});n++}});
+   view.perr2=[];renderPr();toast(n?'Agregamos lo que te falta a la orden.':'No falta ningún material para tus órdenes pendientes.');break}
+  case 'oc-add':{const f=view.poc,er=[];if(!f.prov.trim())er.push('Escribe el proveedor.');if(!view.pocl.length)er.push('Agrega al menos una línea.');if(er.length)return fail(er);
+   P.ocN++;P.compras.push({id:P.nextId++,n:'OC-'+pad3(P.ocN),prov:f.prov.trim(),date:f.date||dayKey(),nota:(f.nota||'').trim(),lines:view.pocl.slice(),est:'Emitida'});save();view.poc={prov:'',date:dayKey(),nota:''};view.pocl=[];view.perr2=[];renderPr();toast('Orden de compra creada.');break}
+  case 'oc-rec':{const o=P.compras.find(x=>x.id===id);if(!o||o.est==='Recibida')break;o.est='Recibida';o.rec=dayKey();o.lines.forEach(l=>P.movs.push({id:P.nextId++,date:dayKey(),kind:'m',name:l.mat,qty:num(l.qty),mot:'Entrada de material · '+o.n}));save();renderPr();toast('Los materiales entraron al inventario.');break}
+  case 'oc-rm':{const o=P.compras.find(x=>x.id===id);if(o)P.movs=P.movs.filter(m=>m.mot!=='Entrada de material · '+o.n);P.compras=P.compras.filter(x=>x.id!==id);save();renderPr();break}
+  case 'oc-pdf':{const o=P.compras.find(x=>x.id===id);if(o)savePdf(mk(()=>prBuild('oc',o)),'orden-compra-'+o.n+'.pdf');break}
+  case 'dp-add':{const f=view.pod,er=[];if(!f.name)er.push('Elige el producto.');const stk=f.name?stockProd(f.name).stock:0;if(!(num(f.qty)>0))er.push('La cantidad debe ser mayor que cero.');else if(f.name&&num(f.qty)>stk)er.push('Solo hay '+stk+' en la bodega.');if(!f.dest.trim())er.push('Escribe el cliente o punto de venta.');if(!f.rec.trim())er.push('Escribe quién recibe.');if(er.length)return fail(er);
+   P.dpN++;P.desp.push({id:P.nextId++,n:'DP-'+pad3(P.dpN),name:f.name,qty:num(f.qty),dest:f.dest.trim(),lugar:f.lugar.trim(),rec:f.rec.trim(),transp:f.transp.trim(),nota:f.nota.trim(),date:f.date||dayKey()});save();view.pod={name:'',qty:'',dest:'',lugar:'',rec:'',transp:'',nota:'',date:dayKey()};view.perr2=[];renderPr();toast('Despacho registrado.');break}
+  case 'dp-rm':P.desp=P.desp.filter(x=>x.id!==id);save();renderPr();break;
+  case 'dp-pdf':{const d=P.desp.find(x=>x.id===id);if(d)savePdf(mk(()=>prBuild('dp',d)),'despacho-'+d.n+'.pdf');break}
+  case 'pdf-prod':savePdf(mk(()=>prBuild('prod')),'ficha-y-layout.pdf');break;
+  case 'pdf-plan':savePdf(mk(()=>prBuild('plan')),'plan-de-produccion.pdf');break;
+  case 'pdf-inf':savePdf(mk(()=>prBuild('inf')),'informe-de-produccion.pdf');break;
   case 'pdf-proc':savePdf(mk(()=>prBuild('proc')),'fichas-del-proceso.pdf');break;
   case 'pdf-mat':savePdf(mk(()=>prBuild('mat')),'lista-de-materiales.pdf');break;
   case 'pdf-costo':savePdf(mk(()=>prBuild('costo')),'hoja-de-costos.pdf');break;
@@ -2093,8 +2231,10 @@ function pBind(e){const t=e.target;if(!t.dataset||!t.closest||!t.closest('#dept-
  if(e.type==='change'){const m=/^ords\.(\d+)\.est$/.exec(p);if(m){const o=S.pr.ords[+m[1]];o.fin=o.est==='Terminada'?dayKey():''}
   if(p==='i.ord')view.pri.checks={}}
  if(pPersist(p))save();
- if(e.type==='change'&&t.dataset.rr!==undefined)renderPr()}
+ if(e.type==='change'&&t.dataset.rr!==undefined)renderPr();
+ else if(/^plan\.\d+\.(meta|pers|dias)$/.test(p)){const b=$('#capBox'),it=prCur();if(b&&it)b.innerHTML=prCapHTML(it)}}
 $('#dept-prod').addEventListener('input',pBind);$('#dept-prod').addEventListener('change',pBind);
+document.addEventListener('change',e=>{const t=e.target;if(t&&t.id==='p-lay'){processLay(t.files&&t.files[0]);t.value=''}});
 
 document.addEventListener('change',e=>{const t=e.target;if(!t||t.id!=='cat-pick'||!t.value)return;ensureMk();const it=S.mk.items.find(x=>String(x.id)===t.value);if(!it)return;
  const L=S.draft.lines,blank=L.length===1&&!L[0].det.trim()&&!String(L[0].price).trim();
@@ -2108,7 +2248,7 @@ const DEPTS=[
   t:[],u:'Logo, color, lema y datos de contacto.',ready:true},
  {k:'th',n:'Talento Humano',col:'--ok',d:'Contrata y cuida al equipo: colaboradores, contratos, planilla, cargas sociales, reglamento y cultura.',
   t:[],u:'Todos los datos de la empresa.',ready:true},
- {k:'prod',n:'Producción',col:'--warn',d:'Proceso, materiales, costos, inventario, órdenes de producción y control de calidad.',
+ {k:'prod',n:'Producción',col:'--warn',d:'Ruta de producción de su propio producto: layout, plan, compra de materiales, producción, control de calidad y despacho.',
   t:[],u:'Actividad de la empresa y proveedores.',ready:true},
  {k:'fin',n:'Contabilidad y finanzas',col:'--acct',d:'Lleva el dinero de la empresa: banco, facturación, compras, impuestos y libros.',
   t:['Banco: pagos, transferencias, SINPE Móvil y comprobantes en PDF.','Factura electrónica con los datos y el logo de la empresa.','Contabilidad: compras, declaración de IVA, pago de impuestos y libro diario.'],u:'Todos los datos de la empresa.',ready:true}];
