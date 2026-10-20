@@ -176,6 +176,15 @@ table.items{min-width:520px;font-size:.88rem}
 .ruta{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
 .rt{border:1px solid var(--line);border-radius:var(--r);padding:14px;background:var(--surface-2);display:flex;flex-direction:column;gap:6px;min-width:0}
 .rt h3{margin:0}.rt p{margin:0}.rt .bt{margin-top:auto;align-items:center}.rt .num{font:600 .8rem var(--f-mono);opacity:.7}
+body::before{content:"";display:block;height:7px;background:linear-gradient(90deg,var(--brandc,#0A6A62) 0 78%,var(--brandc2,#F2A900) 78% 100%)}
+.pals{display:flex;flex-wrap:wrap;gap:8px}
+.pal{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 12px 6px 8px;font:600 .85rem var(--f-body);cursor:pointer;min-height:40px}
+.pal.on{border-color:var(--ink);box-shadow:0 0 0 2px var(--ink)}
+.pal .sw{display:flex}.pal .sw i{width:20px;height:20px;border-radius:50%;border:2px solid var(--surface);margin-right:-6px}
+.guide{background:color-mix(in srgb,var(--accent) 9%,var(--surface));border:1px solid color-mix(in srgb,var(--accent) 35%,var(--line));border-left:6px solid var(--accent);border-radius:var(--r);padding:12px 16px;margin:6px 0 18px}
+.guide ol{margin:6px 0 8px;padding-left:22px;display:grid;gap:3px}.guide .eg{margin:0;font-size:.88rem;color:var(--muted)}
+.gdsec{margin-top:22px;padding-top:6px}.gdsec h3{margin:0 0 10px;font-size:1.05rem;display:flex;align-items:center;gap:8px}.gdsec h3::before{content:"";width:8px;height:20px;border-radius:4px;background:var(--accent)}
+.gdin{width:100%;min-width:110px;box-sizing:border-box}.gdt td{vertical-align:top}
 .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
 .tile{display:flex;flex-direction:column;gap:2px;border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;background:var(--surface-2);min-width:0}
 .tile strong{font:600 1.15rem var(--f-mono);overflow-wrap:anywhere}
@@ -309,7 +318,9 @@ body.ro-mode .wrap input,body.ro-mode .wrap select,body.ro-mode .wrap textarea{p
           <div class="field"><label for="co-tel">Teléfono</label><input id="co-tel" autocomplete="off" inputmode="tel"></div>
           <div class="field"><label for="co-mail">Correo</label><input id="co-mail" autocomplete="off" inputmode="email"></div>
           <div class="field wide"><label for="co-dir">Dirección</label><input id="co-dir" autocomplete="off"></div>
-          <div class="field"><label for="co-color">Color de la empresa</label><input id="co-color" type="color" value="#0a6a62"></div>
+          <div class="field wide"><label>Paleta de colores</label><div class="pals" id="palBox"></div><p class="hint">Elige una paleta ya hecha o escoge tus propios colores aquí abajo. Se usan en la hoja membretada, en los PDF y en la franja de arriba.</p></div>
+          <div class="field"><label for="co-color">Color principal</label><input id="co-color" type="color" value="#0a6a62"></div>
+          <div class="field"><label for="co-color2">Color de acento</label><input id="co-color2" type="color" value="#f2a900"></div>
           <div class="field wide"><label for="co-logo">Logo de la empresa (opcional)</label>
             <div class="logorow"><img id="logoPrev" class="logo-prev" alt="Logo cargado" hidden><input id="co-logo" type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"><button type="button" class="link" id="logoClear" hidden>Quitar logo</button></div>
             <p class="hint">Aparece en las facturas y en los PDF. Se reduce de tamaño para que no pese.</p></div>
@@ -321,6 +332,11 @@ body.ro-mode .wrap input,body.ro-mode .wrap select,body.ro-mode .wrap textarea{p
         <p class="hint">Así se verán los documentos de tu empresa.</p>
         <div class="letterhead" id="lhPrev"></div>
         <div class="btnrow" style="margin-top:12px"><button type="button" class="btn sm" data-act="lh-pdf">Descargar hoja membretada (PDF)</button></div>
+      </div>
+      <div class="card">
+        <h2>Informe general de la empresa</h2>
+        <p class="hint">Reúne en un solo PDF lo que ha hecho cada departamento: avance, resultados y documentos. Sirve para entregarlo a tu docente.</p>
+        <div class="btnrow" style="margin-top:12px"><button type="button" class="btn sm" data-act="inf-pdf">Descargar informe general (PDF)</button></div>
       </div>
     </div>
     <h2 class="sec">Los cinco departamentos</h2>
@@ -336,6 +352,7 @@ body.ro-mode .wrap input,body.ro-mode .wrap select,body.ro-mode .wrap textarea{p
     <button class="tab t-bank" role="tab" id="tab-bank" aria-selected="true" aria-controls="v-bank" data-tab="bank">Banco</button>
     <button class="tab t-tax" role="tab" id="tab-tax" aria-selected="false" aria-controls="v-tax" data-tab="tax">Factura electrónica</button>
     <button class="tab t-acct" role="tab" id="tab-acct" aria-selected="false" aria-controls="v-acct" data-tab="acct">Contabilidad</button>
+    <button class="tab t-acct" role="tab" id="tab-gest" aria-selected="false" aria-controls="v-gest" data-tab="gest">Presupuesto y políticas</button>
   </div>
 
   <main>
@@ -380,6 +397,7 @@ body.ro-mode .wrap input,body.ro-mode .wrap select,body.ro-mode .wrap textarea{p
       <div class="card" id="invHistory" style="margin-top:20px"></div>
     </section>
 
+    <section id="v-gest" class="v-acct" role="tabpanel" aria-labelledby="tab-gest" hidden><div id="finGest"></div></section>
     <section id="v-acct" class="v-acct" role="tabpanel" aria-labelledby="tab-acct" hidden>
       <details class="tip">
         <summary>Qué practicar en Contabilidad</summary>
@@ -488,7 +506,7 @@ function defaults(){const now=Date.now();
     contacts:[{name:'Proveedor de práctica 1 (ejemplo)',iban:mkIban('099905551234567890')},{name:'Proveedor de práctica 2 (ejemplo)',iban:mkIban('099908887654321098')}],
     invoices:[],receipts:{},purchases:[],decls:[],checks:{},draft:blankDraft()}}
 function load(){try{const raw=localStorage.getItem(KEY);if(raw){const o=JSON.parse(raw);if(o&&o.v===1&&o.accounts&&o.draft)return o}}catch(e){}return defaults()}
-let S=load();S.ger=S.ger||null;S.th=S.th||null;S.mk=S.mk||null;S.pr=S.pr||null;S.company=Object.assign({act:'',lema:'',color:'#0A6A62'},S.company);S.receipts=S.receipts||{};S.purchases=S.purchases||[];S.decls=S.decls||[];S.checks=S.checks||{};
+let S=load();S.ger=S.ger||null;S.th=S.th||null;S.mk=S.mk||null;S.pr=S.pr||null;S.company=Object.assign({act:'',lema:'',color:'#0A6A62',color2:'#F2A900'},S.company);S.docs=S.docs||{};S.receipts=S.receipts||{};S.purchases=S.purchases||[];S.decls=S.decls||[];S.checks=S.checks||{};
 function save(){if(cloud.ro)return;try{localStorage.setItem(cloud.on?KEY+':'+cloud.code:KEY,JSON.stringify(S))}catch(e){}if(cloud.on)cloudPush()}
 const view={dept:'home',tab:'bank',acc:'cc',prev:null,ac:'resumen',ym:dayKey().slice(0,7),pf:null,perr:[]};view.pf=newPF();
 let sending=false,tt;
@@ -499,7 +517,7 @@ function copyText(text,srcEl){
   try{navigator.clipboard.writeText(text).then(()=>toast('Copiado.'),fb)}catch(e){fb()}}
 
 /* ---------- Empresa ---------- */
-function renderCompany(){const c=S.company;$('#co-act').value=c.act;$('#co-lema').value=c.lema;$('#co-color').value=c.color;$('#co-name').value=c.name;$('#co-ced').value=c.ced;$('#co-tel').value=c.tel;$('#co-mail').value=c.mail;$('#co-dir').value=c.dir;refreshCompanyText();refreshLogo();renderLetterhead()}
+function renderCompany(){const c=S.company;$('#co-act').value=c.act;$('#co-lema').value=c.lema;$('#co-color').value=c.color;$('#co-name').value=c.name;$('#co-ced').value=c.ced;$('#co-tel').value=c.tel;$('#co-mail').value=c.mail;$('#co-dir').value=c.dir;try{renderPaleta();applyBrand()}catch(e){}refreshCompanyText();refreshLogo();renderLetterhead()}
 function refreshCompanyText(){$('#cname').textContent=S.company.name;const h=$('#holder');if(h)h.textContent='Titular: '+S.company.name}
 
 /* ---------- Banco ---------- */
@@ -854,7 +872,7 @@ function notaCredito(id){const o=S.invoices.find(x=>x.id===id);if(!o||o.type==='
   toast(o.paid?'Nota de crédito emitida. Si ya cobraste, devuelve el dinero con una transferencia.':'Nota de crédito emitida. La factura quedó anulada.')}
 
 /* ---------- Eventos ---------- */
-function setTab(t){view.tab=t;['bank','tax','acct'].forEach(k=>{$('#v-'+k).hidden=k!==t;$('#tab-'+k).setAttribute('aria-selected',String(k===t))})}
+function setTab(t){view.tab=t;if(t==='gest')renderFinGest();['bank','tax','acct','gest'].forEach(k=>{$('#v-'+k).hidden=k!==t;$('#tab-'+k).setAttribute('aria-selected',String(k===t))})}
 document.addEventListener('click',e=>{
   const tabBtn=e.target.closest('[data-tab]');if(tabBtn){setTab(tabBtn.dataset.tab);return}
   const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act;
@@ -1213,7 +1231,7 @@ const LEGACY_CART=[
  {id:'c1',inst:'Escuela Pública Ejemplo (institución ficticia)',ced:'3-007-000123',num:'2026PR-000001',det:'Afiches informativos de seguridad escolar',qty:120,unit:'Unid',max:6000,req:'Impresos a color, tamaño carta. Entrega en 15 días hábiles.'},
  {id:'c2',inst:'Municipalidad de Villa Práctica (ficticia)',ced:'3-007-000456',num:'2026PR-000002',det:'Diseño de identidad visual para campaña de reciclaje',qty:1,unit:'Sp',max:180000,req:'Logo, paleta de colores y manual básico. Entrega en 20 días hábiles.'},
  {id:'c3',inst:'Hospital Regional de Práctica (ficticio)',ced:'3-007-000789',num:'2026PR-000003',det:'Rótulos de señalización interna',qty:50,unit:'Unid',max:12000,req:'Rótulos en PVC de 30 x 20 cm. Entrega en 25 días hábiles.'}];
-const GNAV=[['ficha','Ficha y puesta en operación'],['org','Organigrama y plan'],['tab','Centro de operaciones'],['estado','Compras del Estado'],['actas','Actas de decisión'],['ase','Asesoría'],['prov','Facturas de proveedores'],['cierre','Informe de cierre']];
+const GNAV=[['ficha','Ficha y puesta en operación'],['org','Organigrama y plan'],['kpi','Metas y KPI'],['areas','Planes por área'],['tab','Centro de operaciones'],['estado','Compras del Estado'],['actas','Actas de decisión'],['ase','Asesoría'],['prov','Facturas de proveedores'],['cierre','Informe de cierre']];
 const GUIA=[
  ['No sé si conviene ser sociedad o persona física','Abogado o notario','Explicar la forma legal, el capital y las responsabilidades.'],
  ['Dudas con IVA, renta o la factura electrónica','Contador público autorizado o el sitio oficial de Hacienda','Presentar declaraciones bien y evitar multas.'],
@@ -1375,7 +1393,7 @@ function gCierre(){const g=S.ger,e=g.equipo,ch=gChecks();
   <div class="btnrow" style="margin-top:14px"><button type="button" class="btn" data-g="pdf-port">Descargar portafolio (PDF)</button></div></div>`}
 function renderGer(){ensureGer();const el=$('#dept-ger');if(!el)return;el.className='v-ger';
  const nav=GNAV.map(n=>`<button type="button" data-g="nav" data-v="${n[0]}" aria-pressed="${view.gr===n[0]}">${n[1]}</button>`).join('');
- const body=({ficha:gFicha,org:gOrg,tab:gTab,estado:gEstado,actas:gActas,ase:gAse,prov:()=>provHTML('ger'),cierre:gCierre}[view.gr]||gFicha)();
+ const body=({ficha:gFicha,org:gOrg,kpi:gKpi,areas:gAreas,tab:gTab,estado:gEstado,actas:gActas,ase:gAse,prov:()=>provHTML('ger'),cierre:gCierre}[view.gr]||gFicha)();
  el.innerHTML=`<div class="seg" role="group" aria-label="Secciones de Gerencia">${nav}</div>${view.gr==='ficha'||view.gr==='org'||view.gr==='tab'||view.gr==='cierre'?gErrHTML():''}${body}`}
 /* ---- acciones ---- */
 const gShowErr=()=>{renderGer();const x=$('#gErr')||$('#dept-ger .alert');if(x&&x.scrollIntoView)x.scrollIntoView({block:'center'})};
@@ -1408,7 +1426,7 @@ function gPdf(){const J=window.jspdf&&window.jspdf.jsPDF;if(!J)return null;
  st.page=()=>{doc.addPage();st.head()};
  st.need=h=>{if(st.y+h>260)st.page()};
  st.title=(t,sub)=>{st.need(20);pfnt(doc,'bold',16,PC.ink);const l=doc.splitTextToSize(pdfSafe(t),W-2*M);doc.text(l,M,st.y);st.y+=l.length*7;if(sub){pfnt(doc,'normal',9.5,PC.mut);doc.text(pdfSafe(sub),M,st.y);st.y+=6}st.y+=3};
- st.h2=t=>{st.need(16);pfnt(doc,'bold',11.5,PC.ink);doc.text(pdfSafe(t),M,st.y);st.y+=2;doc.setDrawColor(211,218,226);doc.setLineWidth(.3);doc.line(M,st.y,W-M,st.y);st.y+=6};
+ st.h2=t=>{st.need(26);pfnt(doc,'bold',11.5,PC.ink);doc.text(pdfSafe(t),M,st.y);st.y+=2;{const c2=S.company.color2?rgbOf(S.company.color2):[211,218,226];doc.setDrawColor(c2[0],c2[1],c2[2]);doc.setLineWidth(S.company.color2?.7:.3)};doc.line(M,st.y,W-M,st.y);st.y+=6};
  st.p=(t,o)=>{o=o||{};const s=o.s||10;pfnt(doc,o.b?'bold':o.i?'italic':'normal',s,o.c||PC.ink);const l=doc.splitTextToSize(pdfSafe(t),o.w||W-2*M),lh=s*.44+.9;for(const ln of l){st.need(lh+1);doc.text(ln,o.x||M,st.y);st.y+=lh}st.y+=o.gap==null?1.5:o.gap};
  st.kv=(k,v)=>{st.need(7);pfnt(doc,'bold',9.5,PC.mut);doc.text(pdfSafe(k),M,st.y);pfnt(doc,'normal',10,PC.ink);const l=doc.splitTextToSize(pdfSafe(v||'-'),W-2*M-46);doc.text(l,M+46,st.y);st.y+=Math.max(1,l.length)*4.8+1};
  st.table=(cols,rows)=>{const lh=4.2;
@@ -1525,7 +1543,7 @@ function gBind(e){const t=e.target;if(!t.dataset||!t.dataset.gp||!t.closest('#de
 $('#dept-ger').addEventListener('input',gBind);$('#dept-ger').addEventListener('change',gBind);
 
 /* ===== Talento Humano ===== */
-const THNAV=[['staff','Colaboradores y contratos'],['plan','Planilla'],['cargas','Cargas sociales y pólizas'],['reg','Reglamento interno'],['cult','Cultura y clima'],['prov','Facturas de proveedores']];
+const THNAV=[['staff','Colaboradores y contratos'],['plan','Planilla'],['cargas','Cargas sociales y pólizas'],['reg','Reglamento interno'],['manual','Manual de funciones'],['capac','Capacitación y desempeño'],['cult','Cultura y clima'],['prov','Facturas de proveedores']];
 const CONTR=[['indef','Plazo indefinido'],['fijo','Plazo fijo'],['obra','Por obra determinada']];
 const CONTR_N={indef:'Plazo indefinido',fijo:'Plazo fijo',obra:'Por obra determinada'};
 const CLIMA_Q=['Me siento respetado y respetada en la empresa.','Sé qué se espera de mi trabajo.','Hay buena comunicación entre los departamentos.','Tengo lo que necesito para hacer bien mi trabajo.','Recomendaría esta empresa como lugar de trabajo.'];
@@ -1620,7 +1638,7 @@ function tCult(){const C=S.th.cult,k=view.tkf,avg=tClimaAvg();
 function renderTh(){ensureTh();const el=$('#dept-th');if(!el)return;el.className='v-th';
  const nav=THNAV.map(n=>`<button type="button" data-t="nav" data-v="${n[0]}" aria-pressed="${view.tr===n[0]}">${n[1]}</button>`).join('');
  const who=(S.ger&&S.ger.org&&S.ger.org.th)||'';
- el.innerHTML=`<div class="seg" role="group" aria-label="Secciones de Talento Humano">${nav}</div>${who?`<p class="hint" style="margin:-6px 0 14px">Responsable del departamento: <strong>${esc(who)}</strong></p>`:''}`+({staff:tStaff,plan:tPlan,cargas:tCargas,reg:tReg,cult:tCult,prov:()=>provHTML('th')}[view.tr]||tStaff)()}
+ el.innerHTML=`<div class="seg" role="group" aria-label="Secciones de Talento Humano">${nav}</div>${who?`<p class="hint" style="margin:-6px 0 14px">Responsable del departamento: <strong>${esc(who)}</strong></p>`:''}`+({staff:tStaff,plan:tPlan,cargas:tCargas,reg:tReg,manual:()=>gdPage('manual'),capac:()=>gdPage('capac'),cult:tCult,prov:()=>provHTML('th')}[view.tr]||tStaff)()}
 /* ---- PDF ---- */
 function thAddContrato(st,s){const e=S.company;
  st.title('Contrato individual de trabajo',e.name+' · Documento de práctica, sin validez legal');
@@ -1740,7 +1758,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-pv]');if(!
 function pvBind(e){const t=e.target;if(!t.dataset||!t.dataset.pp)return;const p=t.dataset.pp.split('.'),d=p[0];view.pff[d][p[1]]=t.value;const c=$('#pvcalc-'+d);if(c)c.innerHTML=pvCalcHTML(d)}
 document.addEventListener('input',pvBind);document.addEventListener('change',pvBind);
 /* ===== Marketing y ventas ===== */
-const MKNAV=[['marca','Marca y cliente'],['prod','Producto (1.ª P)'],['precio','Precio (2.ª P)'],['plaza','Plaza (3.ª P)'],['promo','Promoción (4.ª P)'],['cat','Catálogo'],['cot','Cotizaciones'],['prov','Facturas de proveedores'],['ventas','Ventas y clientes']];
+const MKNAV=[['marca','Marca y cliente'],['prod','Producto (1.ª P)'],['precio','Precio (2.ª P)'],['plaza','Plaza (3.ª P)'],['promo','Promoción (4.ª P)'],['plan','Plan estratégico'],['publi','Publicidad'],['cat','Catálogo'],['cot','Cotizaciones'],['prov','Facturas de proveedores'],['ventas','Ventas y clientes']];
 const CANALES=['Tienda o puesto físico','Redes sociales','WhatsApp','Sitio web o tienda en línea','Entrega a domicilio','Ferias y actividades del colegio','Distribuidores o revendedores'];
 const OBJS=['Dar a conocer la empresa','Vender más','Lanzar un producto nuevo','Fidelizar clientes'];
 function defaultMk(){return{nextId:10,cotN:0,marca:{cliente:'',propuesta:'',mensaje:''},
@@ -1844,7 +1862,7 @@ function mVentas(){const s=mkSales(),t=totals(),mx=Math.max(1,...s.prod.map(p=>p
 function renderMk(){ensureMk();const el=$('#dept-mkt');if(!el)return;el.className='v-mkt';
  const nav=MKNAV.map(n=>`<button type="button" data-m="nav" data-v="${n[0]}" aria-pressed="${view.mr===n[0]}">${n[1]}</button>`).join('');
  const who=(S.ger&&S.ger.org&&S.ger.org.mkt)||'';
- el.innerHTML=`<div class="seg" role="group" aria-label="Secciones de Marketing y ventas">${nav}</div>${who?`<p class="hint" style="margin:-6px 0 14px">Responsable del departamento: <strong>${esc(who)}</strong></p>`:''}`+({marca:mMarca,prod:mProd,precio:mPrecio,plaza:mPlaza,promo:mPromo,cat:mCat,cot:mCot,prov:()=>provHTML('mkt'),ventas:mVentas}[view.mr]||mMarca)()}
+ el.innerHTML=`<div class="seg" role="group" aria-label="Secciones de Marketing y ventas">${nav}</div>${who?`<p class="hint" style="margin:-6px 0 14px">Responsable del departamento: <strong>${esc(who)}</strong></p>`:''}`+({marca:mMarca,prod:mProd,precio:mPrecio,plaza:mPlaza,promo:mPromo,plan:()=>gdPage('plan_mk'),publi:()=>gdPage('publi'),cat:mCat,cot:mCot,prov:()=>provHTML('mkt'),ventas:mVentas}[view.mr]||mMarca)()}
 /* ---- PDF ---- */
 function mkAddPlan(st){const M=S.mk,c=S.company;st.title('Plan de marketing: las 4 P',c.name);
  st.h2('Marca y cliente');if(c.lema)st.kv('Lema',c.lema);st.kv('Cliente ideal',M.marca.cliente);st.kv('Propuesta de valor',M.marca.propuesta);st.kv('Mensaje',M.marca.mensaje);st.y+=2;
@@ -1909,7 +1927,7 @@ function mBind(e){const t=e.target;if(!t.dataset||!t.dataset.mp||!t.closest('#de
 $('#dept-mkt').addEventListener('input',mBind);$('#dept-mkt').addEventListener('change',mBind);
 
 /* ===== Producción ===== */
-const PRNAV=[['ruta','Mi ruta'],['prods','1. Producto y layout'],['plan','2. Plan y proceso'],['mat','3. Compra de materiales'],['ord','4. Producción'],['cal','5. Control de calidad'],['desp','6. Despacho'],['inf','Informe'],['costo','Costos'],['inv','Inventario'],['prov','Facturas de proveedores']];
+const PRNAV=[['ruta','Mi ruta'],['prods','1. Producto y layout'],['plan','2. Plan y proceso'],['mat','3. Compra de materiales'],['ord','4. Producción'],['cal','5. Control de calidad'],['desp','6. Despacho'],['inf','Informe'],['procs','Procesos'],['estrella','Producto estrella'],['costo','Costos'],['inv','Inventario'],['prov','Facturas de proveedores']];
 const ORD_ST=['Pendiente','En proceso','Terminada'];
 const DEF_QC=[];
 function defaultPr(){return{prods:[],nextId:1,ordN:0,qcN:0,umbral:5,arts:[],proc:{},bom:{},cost:{},qc:{},min:{},movs:[],ords:[],insp:[],ocN:0,dpN:0,plan:{},zonas:{},layNota:'',compras:[],desp:[]}}
@@ -2124,7 +2142,7 @@ function pCal(){const it=prCur();if(!it)return prNone();const qc=prQc(it.id),f=v
 function renderPr(){ensurePr();ensureMk();const el=$('#dept-prod');if(!el)return;el.className='v-prod';
  const nav=PRNAV.map(n=>`<button type="button" data-pr="nav" data-v="${n[0]}" aria-pressed="${view.pr===n[0]}">${n[1]}</button>`).join('');
  const who=(S.ger&&S.ger.org&&S.ger.org.prod)||'';
- el.innerHTML=`<div class="seg" role="group" aria-label="Secciones de Producción">${nav}</div>${who?`<p class="hint" style="margin:-6px 0 14px">Responsable del departamento: <strong>${esc(who)}</strong></p>`:''}`+({ruta:pRuta,prods:pProds,plan:pPlan,proc:pPlan,mat:pMat,costo:pCosto,inv:pInv,ord:pOrd,cal:pCal,desp:pDesp,inf:pInf,prov:()=>provHTML('prod')}[view.pr]||pRuta)()}
+ el.innerHTML=`<div class="seg" role="group" aria-label="Secciones de Producción">${nav}</div>${who?`<p class="hint" style="margin:-6px 0 14px">Responsable del departamento: <strong>${esc(who)}</strong></p>`:''}`+({ruta:pRuta,prods:pProds,plan:pPlan,proc:pPlan,mat:pMat,costo:pCosto,inv:pInv,ord:pOrd,cal:pCal,desp:pDesp,inf:pInf,procs:()=>gdPage('procesos'),estrella:()=>gdPage('estrella'),prov:()=>provHTML('prod')}[view.pr]||pRuta)()}
 /* ---- PDF ---- */
 function prAddProc(st){st.title('Fichas del proceso de producción',S.company.name);
  prItems().forEach(it=>{const s=prSteps(it.id);st.h2(it.name);st.table([{h:'N.º',w:12},{h:'Paso',w:100},{h:'Responsable',w:44},{h:'Minutos',w:24,a:'r'}],s.map((x,i)=>[String(i+1),x.txt,x.resp,String(x.min)]));if(s.length)st.p('Tiempo total: '+s.reduce((a,x)=>a+num(x.min),0)+' minutos.',{c:PC.mut,s:9})})}
@@ -2240,19 +2258,173 @@ document.addEventListener('change',e=>{const t=e.target;if(!t||t.id!=='cat-pick'
  const L=S.draft.lines,blank=L.length===1&&!L[0].det.trim()&&!String(L[0].price).trim();
  const ln={det:it.name,code:it.code||'',qty:1,unit:UNITS.some(u=>u[0]===it.unit)?it.unit:'Unid',price:num(it.price),disc:0,iva:num(it.iva)};
  if(blank)L[0]=ln;else L.push(ln);view.prev=null;save();renderLines();renderMini();renderPreview();t.value=''});
+/* ===== Documentos de gestión guiados, paleta e informe del docente ===== */
+const AREAS=[['ger','Gerencia'],['mkt','Marketing y ventas'],['th','Talento Humano'],['prod','Producción'],['fin','Contabilidad y finanzas']];
+const CANALES_PUB=['Redes sociales','WhatsApp','Radio','Volantes o afiches','Correo electrónico','Feria o evento','Boca a boca','Otro'];
+const gdPct0=(r,c)=>{const m=num(r.meta),a=num(r.act);return m>0?Math.round(a/m*100)+' %':'—'};
+const GDOCS={
+ kpi:{dept:'ger',title:'Metas y KPI de la empresa',
+  steps:['Un KPI es un número que te dice si la empresa va bien (por ejemplo, ventas del mes).','Escribe la meta general y el período.','En la tabla, anota cada indicador con su meta. Cada semana escribe "Lo actual".','El avance se calcula solo. Al final, escribe qué aprendieron.'],
+  ej:'Indicador: ventas del mes · Unidad: ₡ · Meta: 300000 · Lo actual: 120000 · Avance: 40 %',
+  secs:[
+   {t:'Meta general',f:[{k:'periodo',l:'Período',ph:'Ej.: octubre a diciembre'},{k:'meta',l:'¿Qué quiere lograr la empresa en este período?',t:'a',ph:'Ej.: vender 500 unidades y ganar 10 clientes nuevos'}]},
+   {t:'Tabla de KPI',l:{k:'rows',add:'Agregar KPI',cols:[{k:'ind',l:'Indicador',ph:'Ventas del mes'},{k:'area',l:'Área',t:'s',o:AREAS.map(a=>a[1])},{k:'unit',l:'Unidad',ph:'₡, unidades, %'},{k:'meta',l:'Meta',t:'n'},{k:'act',l:'Lo actual',t:'n'},{k:'av',l:'Avance',t:'c',c:gdPct0},{k:'resp',l:'Responsable'}]}},
+   {t:'Reflexión',f:[{k:'ref',l:'¿Qué metas cumplimos y qué haremos distinto?',t:'a'}]}]},
+ manual:{dept:'th',title:'Manual descriptivo de funciones',
+  steps:['Escribe un puesto por fila (gerente, vendedor, operario…).','Puedes presionar "Traer puestos de Colaboradores" para llenar la tabla solo y luego completarla.','Para cada puesto: a quién responde, para qué existe, qué funciones hace y qué requisitos pide.'],
+  ej:'Puesto: Encargado de producción · Responde a: Gerente · Objetivo: producir con calidad y a tiempo · Funciones: preparar materiales, supervisar y entregar',
+  secs:[{t:'Puestos de la empresa',l:{k:'rows',add:'Agregar puesto',imp:'imp-manual',impT:'Traer puestos de Colaboradores',cols:[{k:'puesto',l:'Puesto'},{k:'area',l:'Área',t:'s',o:AREAS.map(a=>a[1])},{k:'jefe',l:'Responde a'},{k:'obj',l:'Objetivo del puesto',t:'a'},{k:'func',l:'Funciones principales',t:'a'},{k:'req',l:'Requisitos',t:'a'}]}},
+   {t:'Notas',f:[{k:'nota',l:'Observaciones (opcional)',t:'a'}]}]},
+ plan_mk:{dept:'mkt',title:'Plan estratégico de mercadeo y ventas',
+  steps:['Primero describe tu mercado y tu competencia.','Haz el FODA: Fortalezas y Debilidades (de la empresa), Oportunidades y Amenazas (de afuera).','Pon objetivos de ventas con número y fecha.','Resume tus estrategias de las 4 P y arma el plan de ventas mes por mes.'],
+  ej:'Objetivo: vender 200 unidades · Meta: 200 · Plazo: diciembre',
+  secs:[
+   {t:'1. Mercado y competencia',f:[{k:'mercado',l:'Mercado meta: ¿quiénes compran? (edad, lugar, necesidades)',t:'a'},{k:'comp',l:'Competencia: ¿quién vende algo parecido y en qué somos mejores?',t:'a'}]},
+   {t:'2. FODA',f:[{k:'f',l:'Fortalezas',t:'a'},{k:'d',l:'Debilidades',t:'a'},{k:'o',l:'Oportunidades',t:'a'},{k:'a',l:'Amenazas',t:'a'}]},
+   {t:'3. Objetivos de ventas',l:{k:'obj',add:'Agregar objetivo',cols:[{k:'o',l:'Objetivo'},{k:'meta',l:'Meta (número)',t:'n'},{k:'plazo',l:'Plazo',t:'d'}]}},
+   {t:'4. Estrategias (las 4 P)',f:[{k:'prod',l:'Producto',t:'a'},{k:'precio',l:'Precio',t:'a'},{k:'plaza',l:'Plaza (dónde y cómo se vende)',t:'a'},{k:'promo',l:'Promoción',t:'a'}]},
+   {t:'5. Plan de ventas',l:{k:'plan',add:'Agregar mes',sum:'meta',cols:[{k:'mes',l:'Mes'},{k:'meta',l:'Meta de ventas (₡)',t:'n'},{k:'est',l:'Qué haremos',t:'a'},{k:'resp',l:'Responsable'}]}},
+   {t:'6. Presupuesto y control',f:[{k:'presup',l:'Presupuesto de mercadeo (₡)',t:'n'},{k:'ctrl',l:'¿Cómo vamos a revisar si el plan funciona?',t:'a'}]}]},
+ publi:{dept:'mkt',title:'Estrategias de publicidad',
+  steps:['Escribe el mensaje principal: lo que quieres que la gente recuerde de tu empresa.','Describe a quién le hablas (público).','Agrega cada campaña con su canal, fechas y costo. El total se suma solo.','Después de la campaña, anota qué resultado tuvo.'],
+  ej:'Campaña: Lanzamiento · Canal: Redes sociales · Mensaje: “Probá lo nuevo” · Costo: 15000 · Resultado: 40 mensajes recibidos',
+  secs:[{t:'Idea central',f:[{k:'msg',l:'Mensaje principal',t:'a'},{k:'pub',l:'Público al que le hablamos',t:'a'}]},
+   {t:'Campañas',l:{k:'camp',add:'Agregar campaña',sum:'costo',cols:[{k:'n',l:'Nombre de la campaña'},{k:'obj',l:'Objetivo'},{k:'canal',l:'Canal',t:'s',o:CANALES_PUB},{k:'msg',l:'Mensaje o idea',t:'a'},{k:'ini',l:'Inicio',t:'d'},{k:'fin',l:'Fin',t:'d'},{k:'costo',l:'Costo (₡)',t:'n'},{k:'res',l:'Resultado'}]}},
+   {t:'Evaluación',f:[{k:'eval',l:'¿Qué campaña funcionó mejor y por qué?',t:'a'}]}]},
+
+ capac:{dept:'th',title:'Plan de capacitación y evaluación del desempeño',
+  steps:['Piensa qué necesita aprender cada persona para hacer mejor su trabajo y anótalo como capacitación.','Define los criterios con que van a evaluar el trabajo del equipo.','Anota cada evaluación con las fortalezas y lo que se puede mejorar.'],
+  ej:'Tema: Atención al cliente · Para: vendedores · Prioridad: Alta · Costo: 0 (la da un compañero)',
+  secs:[{t:'Capacitaciones',l:{k:'cap',add:'Agregar capacitación',sum:'costo',cols:[{k:'tema',l:'Tema'},{k:'quien',l:'¿Para quién?'},{k:'prio',l:'Prioridad',t:'s',o:['Alta','Media','Baja']},{k:'fecha',l:'Fecha',t:'d'},{k:'costo',l:'Costo (₡)',t:'n'}]}},
+   {t:'Criterios de evaluación',f:[{k:'crit',l:'¿Qué se evalúa? (puntualidad, calidad, trabajo en equipo…)',t:'a'},{k:'frec',l:'¿Cada cuánto se evalúa?',ph:'Ej.: cada mes'}]},
+   {t:'Evaluaciones',l:{k:'ev',add:'Agregar evaluación',cols:[{k:'col',l:'Colaborador'},{k:'puesto',l:'Puesto'},{k:'nota',l:'Nota (0 a 100)',t:'n'},{k:'fort',l:'Fortalezas',t:'a'},{k:'mej',l:'A mejorar',t:'a'}]}},
+   {t:'Reconocimientos',f:[{k:'rec',l:'¿Cómo reconocen el buen trabajo?',t:'a'}]}]},
+ presup:{dept:'fin',title:'Presupuesto y flujo de caja',
+  steps:['Escribe con cuánto dinero empieza la empresa.','En la tabla pon, mes por mes, cuánto esperan ganar (ingresos) y cuánto esperan gastar.','El resultado de cada mes se calcula solo. Si sale negativo, piensen cómo corregirlo.','Al final del mes comparen lo presupuestado con lo real.'],
+  ej:'Mes: noviembre · Ingresos: 400000 · Gastos: 250000 · Resultado: 150000',
+  secs:[{t:'Punto de partida',f:[{k:'capital',l:'Dinero con que empieza la empresa (₡)',t:'n'}]},
+   {t:'Presupuesto mensual',l:{k:'meses',add:'Agregar mes',sum:'ing',cols:[{k:'mes',l:'Mes'},{k:'ing',l:'Ingresos esperados (₡)',t:'n'},{k:'egr',l:'Gastos esperados (₡)',t:'n'},{k:'res',l:'Resultado',t:'c',c:r=>fmt(r2(num(r.ing)-num(r.egr)))},{k:'real',l:'Resultado real (₡)',t:'n'}]}},
+   {t:'Revisión',f:[{k:'rev',l:'¿Qué diferencias hubo entre lo presupuestado y lo real? ¿Por qué?',t:'a'}]}]},
+ polfin:{dept:'fin',title:'Políticas de cobro, pago y control del dinero',
+  steps:['Una política es una regla que toda la empresa cumple.','Escribe cómo cobran, cómo pagan y quién autoriza el dinero.','Lista los impuestos que deben pagar y cuándo.'],
+  ej:'Cobro: a crédito hasta 15 días, con factura electrónica · Pago a proveedores: los viernes',
+  secs:[{t:'Cobros',f:[{k:'cobro',l:'¿Cómo y cuándo cobramos a los clientes? (plazos, medios de pago)',t:'a'}]},
+   {t:'Pagos',f:[{k:'pago',l:'¿Cómo y cuándo pagamos a los proveedores?',t:'a'},{k:'aut',l:'¿Quién autoriza los pagos y hasta qué monto?',t:'a'}]},
+   {t:'Control',f:[{k:'ctrl',l:'¿Cada cuánto revisamos bancos, facturas y libro diario?',t:'a'}]},
+   {t:'Impuestos',l:{k:'imp',add:'Agregar impuesto',cols:[{k:'i',l:'Impuesto'},{k:'cuando',l:'¿Cuándo se paga?'},{k:'resp',l:'Responsable'}]}}]},
+ procesos:{dept:'prod',title:'Mapa de procesos de la empresa',
+  steps:['Un proceso es una serie de pasos que convierte algo que entra en algo que sale.','Escribe los procesos de tu empresa: los que dirigen (estratégicos), los que hacen el producto (operativos) y los que ayudan (de apoyo).','Para cada uno anota quién lo hace, qué entra, qué sale y cómo se mide.'],
+  ej:'Proceso: Producción · Tipo: Operativo · Entra: materiales · Sale: producto terminado · Indicador: unidades por día',
+  secs:[{t:'Procesos',l:{k:'rows',add:'Agregar proceso',cols:[{k:'p',l:'Proceso'},{k:'tipo',l:'Tipo',t:'s',o:['Estratégico','Operativo','De apoyo']},{k:'resp',l:'Responsable'},{k:'ent',l:'¿Qué entra?'},{k:'sal',l:'¿Qué sale?'},{k:'ind',l:'Indicador'}]}},
+   {t:'Mejoras',f:[{k:'mej',l:'¿Qué proceso es el más lento o el que más falla? ¿Cómo lo mejoramos?',t:'a'}]}]},
+ estrella:{dept:'prod',title:'Procedimiento del producto estrella',
+  steps:['Elige tu producto estrella: el que más venden o el que mejor los representa.','Escribe para qué sirve el procedimiento y a quién aplica.','Anota los materiales y los pasos exactos. Puedes presionar "Traer pasos de Plan y proceso".','Dices cómo saben que quedó bien y qué formularios se llenan.'],
+  ej:'Paso 1: Lavar y pesar los materiales · Responsable: operario · Tiempo: 15 min · Control: peso correcto',
+  secs:[{t:'Datos del procedimiento',f:[{k:'prod',l:'Producto estrella',t:'p'},{k:'cod',l:'Código',ph:'PRO-001'},{k:'ver',l:'Versión',ph:'1'},{k:'resp',l:'Responsable'},{k:'fecha',l:'Fecha',t:'d'}]},
+   {t:'Objetivo y alcance',f:[{k:'obj',l:'Objetivo: ¿para qué sirve este procedimiento?',t:'a'},{k:'alc',l:'Alcance: ¿a quién y cuándo se aplica?',t:'a'}]},
+   {t:'Materiales y equipo',l:{k:'mat',add:'Agregar material o equipo',cols:[{k:'i',l:'Material o equipo'},{k:'c',l:'Cantidad'},{k:'n',l:'Nota'}]}},
+   {t:'Pasos del procedimiento',l:{k:'pasos',add:'Agregar paso',imp:'imp-pasos',impT:'Traer pasos de Plan y proceso',num:true,cols:[{k:'p',l:'Qué se hace',t:'a'},{k:'r',l:'Quién'},{k:'t',l:'Minutos',t:'n'},{k:'c',l:'Qué se revisa'}]}},
+   {t:'Calidad, seguridad y registros',f:[{k:'seg',l:'Normas de higiene y seguridad',t:'a'},{k:'cal',l:'¿Cómo sabemos que quedó bien?',t:'a'},{k:'reg',l:'Formularios que se llenan',ph:'Orden de producción, informe de calidad…'}]}]}};
+AREAS.forEach(a=>{GDOCS['plan_'+a[0]]={dept:'ger',title:'Plan del área: '+a[1],
+ steps:['Escribe para qué existe el área y qué quiere lograr.','Pon metas con su indicador y su plazo.','Lista las actividades con responsable y fecha.','Anota el presupuesto y los riesgos que ves.'],
+ ej:'Meta: reducir defectos a menos de 5 % · Indicador: % de defectos · Plazo: noviembre',
+ secs:[{t:'Punto de partida',f:[{k:'obj',l:'Objetivo del área',t:'a'},{k:'sit',l:'Situación actual: ¿cómo estamos hoy?',t:'a'}]},
+  {t:'Metas',l:{k:'metas',add:'Agregar meta',cols:[{k:'m',l:'Meta'},{k:'i',l:'Indicador'},{k:'p',l:'Plazo',t:'d'}]}},
+  {t:'Actividades',l:{k:'acts',add:'Agregar actividad',cols:[{k:'a',l:'Actividad',t:'a'},{k:'r',l:'Responsable'},{k:'f',l:'Fecha',t:'d'},{k:'rec',l:'Recursos'}]}},
+  {t:'Presupuesto y riesgos',f:[{k:'pres',l:'Presupuesto estimado (₡)',t:'n'},{k:'rie',l:'Riesgos y cómo los evitamos',t:'a'}]}]}});
+const gdR=k=>(S.docs&&S.docs[k])||{};
+const gdW=k=>{if(!S.docs||typeof S.docs!=='object')S.docs={};return S.docs[k]||(S.docs[k]={})};
+const gdRows=(k,l)=>{const r=gdR(k)[l];return Array.isArray(r)?r:[]};
+function gdPct(k){const d=GDOCS[k];let t=0,n=0;d.secs.forEach(s=>{if(s.f)s.f.forEach(f=>{t++;if(String(gdR(k)[f.k]||'').trim())n++});if(s.l){t++;if(gdRows(k,s.l.k).some(r=>String(r[s.l.cols[0].k]||'').trim()))n++}});return t?Math.round(n/t*100):0}
+function gdField(k,f){const v=gdR(k)[f.k]||'',id='gd-'+k+'-'+f.k,at=`id="${id}" data-gd="${k}|${f.k}"`;
+ let inp;if(f.t==='a')inp=`<textarea ${at} maxlength="700" placeholder="${esc(f.ph||'')}">${esc(v)}</textarea>`;
+ else if(f.t==='p')inp=`<select ${at}><option value="">— Elige —</option>${gOpts(prItems().map(i=>i.name),v)}</select>`;
+ else inp=`<input ${at} type="${f.t==='d'?'date':f.t==='n'?'number':'text'}"${f.t==='n'?' class="mono" min="0" step="any"':' maxlength="120"'} placeholder="${esc(f.ph||'')}" value="${esc(v)}" autocomplete="off">`;
+ return `<div class="field ${f.t==='a'?'wide':''}"><label for="${id}">${esc(f.l)}</label>${inp}</div>`}
+function gdCell(k,l,r,i,c){const at=`data-gd="${k}|${l.k}|${i}|${c.k}" aria-label="${esc(c.l)}"`,v=r[c.k]==null?'':r[c.k];
+ if(c.t==='c')return `<td class="r" data-gdcalc="${k}|${l.k}|${i}|${c.k}">${esc(c.c(r,c))}</td>`;
+ if(c.t==='a')return `<td><textarea class="gdin" rows="2" maxlength="400" ${at}>${esc(v)}</textarea></td>`;
+ if(c.t==='s')return `<td><select class="gdin" ${at}><option value="">—</option>${gOpts(c.o,v)}</select></td>`;
+ return `<td><input class="gdin${c.t==='n'?' mono':''}" ${at} type="${c.t==='d'?'date':c.t==='n'?'number':'text'}"${c.t==='n'?' min="0" step="any"':' maxlength="120"'} placeholder="${esc(c.ph||'')}" value="${esc(v)}" autocomplete="off"></td>`}
+function gdSum(k,l){return fmt(r2(gdRows(k,l.k).reduce((a,r)=>a+num(r[l.sum]),0)))}
+function gdList(k,l){const rows=gdRows(k,l.k);
+ const body=rows.map((r,i)=>`<tr>${l.num?`<td class="mono">${i+1}</td>`:''}${l.cols.map(c=>gdCell(k,l,r,i,c)).join('')}<td><button type="button" class="link" data-gdc="rm" data-k="${k}" data-l="${l.k}" data-i="${i}">Quitar</button></td></tr>`).join('');
+ const foot=l.sum&&rows.length?`<tfoot><tr><td colspan="${l.cols.findIndex(c=>c.k===l.sum)+(l.num?1:0)}"><strong>Total</strong></td><td class="r"><strong data-gdsum="${k}|${l.k}">${gdSum(k,l)}</strong></td><td colspan="${l.cols.length-l.cols.findIndex(c=>c.k===l.sum)}"></td></tr></tfoot>`:'';
+ return `<div class="btnrow" style="margin-bottom:10px"><button type="button" class="btn sm" data-gdc="add" data-k="${k}" data-l="${l.k}">${esc(l.add)}</button>${l.imp?`<button type="button" class="btn sec sm" data-gdc="${l.imp}" data-k="${k}" data-l="${l.k}">${esc(l.impT)}</button>`:''}</div>`
+ +(rows.length?`<div class="tscroll"><table class="mv gdt" style="min-width:${Math.max(560,l.cols.length*150)}px"><thead><tr>${l.num?'<th>N.º</th>':''}${l.cols.map(c=>`<th>${esc(c.l)}</th>`).join('')}<th></th></tr></thead><tbody>${body}</tbody>${foot}</table></div>`:'<p class="hint">Todavía no hay filas. Presiona el botón de arriba para agregar la primera.</p>')}
+function gdPage(k,before,after){const d=GDOCS[k],p=gdPct(k);
+ return `<div class="card gd"><div class="head-row"><h2>${esc(d.title)}</h2><div class="btnrow"><span class="pill ${p>=80?'ok':p>0?'info':''}" data-gdpct="${k}">${p} % completo</span><button type="button" class="btn sm" data-gdc="pdf" data-k="${k}">Descargar PDF</button></div></div>
+ <div class="guide"><strong>Qué hacer</strong><ol>${d.steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol><p class="eg"><strong>Ejemplo:</strong> ${esc(d.ej)}</p></div>${before||''}
+ ${d.secs.map(s=>`<section class="gdsec"><h3>${esc(s.t)}</h3>${s.f?`<div class="grid">${s.f.map(f=>gdField(k,f)).join('')}</div>`:''}${s.l?gdList(k,s.l):''}</section>`).join('')}${after||''}</div>`}
+function gdUpdate(k){document.querySelectorAll('[data-gdcalc^="'+k+'|"]').forEach(td=>{const q=td.dataset.gdcalc.split('|'),l=GDOCS[k].secs.map(s=>s.l).find(x=>x&&x.k===q[1]),r=gdRows(k,q[1])[+q[2]],c=l&&l.cols.find(x=>x.k===q[3]);if(r&&c)td.textContent=c.c(r,c)});
+ document.querySelectorAll('[data-gdsum^="'+k+'|"]').forEach(b=>{const q=b.dataset.gdsum.split('|'),l=GDOCS[k].secs.map(s=>s.l).find(x=>x&&x.k===q[1]);if(l)b.textContent=gdSum(k,l)});
+ const pp=document.querySelector('[data-gdpct="'+k+'"]');if(pp){const p=gdPct(k);pp.textContent=p+' % completo';pp.className='pill '+(p>=80?'ok':p>0?'info':'')}}
+function gdBind(e){const t=e.target;if(!t.dataset||!t.dataset.gd)return;if(cloud.ro)return;const q=t.dataset.gd.split('|'),k=q[0];if(!GDOCS[k])return;const d=gdW(k);
+ if(q.length===2)d[q[1]]=t.value;else{const rows=d[q[1]];if(!Array.isArray(rows)||!rows[+q[2]])return;rows[+q[2]][q[3]]=t.value}
+ save();gdUpdate(k)}
+document.addEventListener('input',gdBind);document.addEventListener('change',gdBind);
+const gdRender=k=>{const d=GDOCS[k].dept;if(d==='fin')renderFinGest();else if(d==='ger')renderGer();else if(d==='th')renderTh();else if(d==='mkt')renderMk();else renderPr()};
+function gdBuild(k){const st=gPdf();if(!st)return null;const d=GDOCS[k];st.head();st.title(d.title,S.company.name+' · '+gd(dayKey()));
+ d.secs.forEach(s=>{st.h2(s.t);
+  if(s.f)s.f.forEach(f=>{st.p(f.l,{b:1,s:9,c:PC.mut,gap:.4});st.p(String(gdR(k)[f.k]||'')||'-',{gap:3})});
+  if(s.l){const l=s.l,rows=gdRows(k,l.k),wt=c=>c.t==='a'?2.2:c.t==='n'||c.t==='c'||c.t==='d'?.9:1.3,cols=l.cols.slice(),tot=cols.reduce((a,c)=>a+wt(c),0)+(l.num?.5:0),sc=180/tot;
+   const defs=(l.num?[{h:'N.º',w:.5*sc}]:[]).concat(cols.map(c=>({h:c.l,w:wt(c)*sc,a:c.t==='n'||c.t==='c'?'r':undefined})));
+   const data=rows.map((r,i)=>(l.num?[String(i+1)]:[]).concat(cols.map(c=>c.t==='c'?c.c(r,c):c.t==='d'?gd(r[c.k]):String(r[c.k]==null?'':r[c.k]))));
+   st.table(defs,data);if(l.sum&&rows.length)st.p('Total: '+gdSum(k,l),{b:1,s:10})}});
+ st.sign(gdR(k).resp||(S.ger&&S.ger.org&&S.ger.org[d.dept])||'','Responsable');return st.finish(d.title+' · '+S.company.name)}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-gdc]');if(!b)return;const k=b.dataset.k,a=b.dataset.gdc;if(a==='sel'){view.gdarea=b.dataset.v;renderGer();return}
+ if(!GDOCS[k])return;if(a==='pdf'){savePdf(mk(()=>gdBuild(k)),k+'.pdf');return}
+ if(cloud.ro){toast('Vista de docente: solo lectura.');return}
+ const d=gdW(k),l=b.dataset.l;
+ if(a==='add'){if(!Array.isArray(d[l]))d[l]=[];d[l].push({});save();gdRender(k);return}
+ if(a==='rm'){if(Array.isArray(d[l]))d[l].splice(+b.dataset.i,1);save();gdRender(k);return}
+ if(a==='imp-manual'){if(!Array.isArray(d[l]))d[l]=[];const have=d[l].map(r=>String(r.puesto||'').trim().toLowerCase());let n=0;((S.th&&S.th.staff)||[]).forEach(s=>{if(s.puesto&&!have.includes(s.puesto.trim().toLowerCase())){d[l].push({puesto:s.puesto,area:DNAME[s.dept]||'',func:s.funciones||''});have.push(s.puesto.trim().toLowerCase());n++}});save();gdRender(k);toast(n?'Traímos '+n+' puesto(s).':'No hay puestos nuevos en Colaboradores.');return}
+ if(a==='imp-pasos'){const it=prItems().find(x=>x.name===d.prod)||prItems()[0];if(!it){toast('Primero agrega tu producto en Producción, actividad 1.');return}
+  if(!d.prod)d.prod=it.name;if(!Array.isArray(d[l]))d[l]=[];const st=prSteps(it.id);st.forEach(s=>d[l].push({p:s.txt,r:s.resp,t:s.min}));save();gdRender(k);toast(st.length?'Traímos '+st.length+' paso(s).':'Ese producto todavía no tiene pasos en Plan y proceso.');return}});
+/* métricas automáticas */
+function gdMetricas(){const m=gMetrics(),t=m.t,pt=prTot(),tile=(l,v)=>`<div class="tile"><span class="sub">${l}</span><strong>${v}</strong></div>`;
+ return `<div class="card" style="margin-bottom:20px"><h2 style="margin-bottom:6px">Métricas del simulador (se llenan solas)</h2><p class="hint" style="margin-bottom:12px">Estos números salen de lo que ya hicieron en los departamentos. Úsenlos para llenar la columna "Lo actual" de sus KPI.</p><div class="tiles">${tile('Ventas facturadas',fmt(t.ventas))}${tile('Compras y gastos',fmt(t.compras))}${tile('Utilidad estimada',fmt(t.util))}${tile('Dinero en bancos',fmt(t.bancos))}${tile('Trámites hechos',m.tram.d+' de '+m.tram.t)}${tile('Tareas del plan listas',m.plan.d+' de '+m.plan.t)}${tile('Unidades producidas',pt.t.ent)}${tile('Unidades despachadas',pt.t.desp)}${tile('Colaboradores',((S.th&&S.th.staff)||[]).length)}</div></div>`}
+function renderFinGest(){const el=$('#finGest');if(el)el.innerHTML=gdPage('presup')+'<div style="height:20px"></div>'+gdPage('polfin')}
+function gKpi(){return gdPage('kpi',gdMetricas())}
+function gAreas(){const a=view.gdarea||'ger';return `<div class="card" style="margin-bottom:20px"><h2 style="margin-bottom:6px">Planes por área funcional</h2><p class="hint" style="margin-bottom:10px">Cada área de la empresa tiene su propio plan. Elige el área y complétalo.</p><div class="seg" role="group" aria-label="Área">${AREAS.map(x=>`<button type="button" data-gdc="sel" data-v="${x[0]}" aria-pressed="${a===x[0]}">${esc(x[1])} · ${gdPct('plan_'+x[0])} %</button>`).join('')}</div></div>`+gdPage('plan_'+a)}
+/* paleta */
+const PALETAS=[['Océano','#1C4E9F','#F2A900'],['Bosque','#0A6A62','#E07A2F'],['Atardecer','#B4432B','#F2B84B'],['Uva','#5B3A8E','#3BB3A6'],['Frutal','#C2185B','#6DAA2C'],['Grafito','#2B3A4A','#E4572E'],['Mar y coral','#0F7C99','#F0645A'],['Tierra','#7A4E00','#2E8B57']];
+function applyBrand(){const c=S.company||{},r=document.documentElement;if(c.color)r.style.setProperty('--brandc',c.color);if(c.color2)r.style.setProperty('--brandc2',c.color2)}
+function renderPaleta(){const b=$('#palBox');if(!b)return;const c=S.company;b.innerHTML=PALETAS.map((p,i)=>`<button type="button" class="pal${c.color&&c.color.toLowerCase()===p[1].toLowerCase()&&(c.color2||'').toLowerCase()===p[2].toLowerCase()?' on':''}" data-pal="${i}" aria-label="Paleta ${esc(p[0])}"><span class="sw"><i style="background:${p[1]}"></i><i style="background:${p[2]}"></i></span><span>${esc(p[0])}</span></button>`).join('');const c2=$('#co-color2');if(c2)c2.value=c.color2||'#F2A900'}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-pal]');if(!b||cloud.ro)return;const p=PALETAS[+b.dataset.pal];if(!p)return;S.company.color=p[1];S.company.color2=p[2];$('#co-color').value=p[1];save();applyBrand();renderPaleta();refreshCompanyText();renderPreview();renderLetterhead()});
+document.addEventListener('input',e=>{if(e.target.id==='co-color2'&&!cloud.ro){S.company.color2=e.target.value;save();applyBrand();renderPaleta();renderPreview();renderLetterhead()}if(e.target.id==='co-color'&&!cloud.ro){applyBrand();renderPaleta()}});
+/* informe general (docente) */
+function buildInforme(){const st=gPdf();if(!st)return null;const c=S.company,g=S.ger||{},m=gMetrics(),pt=prTot(),E=prEstado(),eq=g.equipo||{};st.head();
+ st.title('Informe general de la empresa de práctica',c.name+' · '+gd(dayKey()));
+ st.h2('Datos del equipo');st.kv('Empresa',c.name);st.kv('Cédula jurídica',c.ced);st.kv('Actividad',c.act);if(c.lema)st.kv('Lema',c.lema);st.kv('Equipo',eq.nombre);st.kv('Sección',eq.seccion);st.kv('Integrantes',eq.integrantes);
+ const pc=d=>gdPct(d)+' %',per=k=>((S.th&&S.th.staff)||[]).length;
+ const kp=gdRows('kpi','rows'),kav=kp.filter(r=>num(r.meta)>0).map(r=>Math.min(100,num(r.act)/num(r.meta)*100)),kavg=kav.length?Math.round(kav.reduce((a,x)=>a+x,0)/kav.length)+' %':'—';
+ const mkS=S.mk||{};
+ st.h2('Resumen por departamento');
+ st.table([{h:'Departamento',w:36},{h:'Responsable',w:34},{h:'Evidencias y avance',w:110}],[
+  ['Gerencia',(g.org||{}).ger||'',`Trámites ${m.tram.d}/${m.tram.t} · Documentos ${m.docs.d}/${m.docs.t} · Plan de trabajo ${m.plan.d}/${m.plan.t} · Actas ${(g.actas||[]).length} · KPI ${kp.length} (avance ${kavg}) · Planes por área: ${AREAS.map(a=>a[1].split(' ')[0]+' '+pc('plan_'+a[0])).join(', ')}`],
+  ['Marketing y ventas',(g.org||{}).mkt||'',`Catálogo ${(mkS.items||[]).length} · Cotizaciones ${(mkS.cots||[]).length} · Plan estratégico ${pc('plan_mk')} · Publicidad ${pc('publi')} (${gdRows('publi','camp').length} campañas)`],
+  ['Talento Humano',(g.org||{}).th||'',`Colaboradores ${per()} · Manual de funciones ${pc('manual')} (${gdRows('manual','rows').length} puestos) · Capacitación y desempeño ${pc('capac')}`],
+  ['Producción',(g.org||{}).prod||'',`Ruta ${E.filter(x=>x.s==='listo').length}/6 · Órdenes terminadas ${pt.done}/${pt.ords} · Producido ${pt.t.ent} · Rechazado ${pt.t.rej} · Despachado ${pt.t.desp} · Procesos ${pc('procesos')} · Producto estrella ${pc('estrella')}`],
+  ['Contabilidad y finanzas',(g.org||{}).fin||'',`Facturas ${S.invoices.length} · Ventas ${moneyPdf(m.t.ventas)} · Compras ${moneyPdf(m.t.compras)} · Utilidad ${moneyPdf(m.t.util)} · Bancos ${moneyPdf(m.t.bancos)} · Presupuesto y flujo ${pc('presup')} · Políticas ${pc('polfin')}`]]);
+ st.h2('Producción: ruta del producto');st.table([{h:'N.º',w:12},{h:'Actividad',w:70},{h:'Entregable',w:60},{h:'Estado',w:38}],E.map(x=>[String(x.n),x.t,x.e,{listo:'Listo',curso:'En curso',falta:'Por hacer'}[x.s]]));
+ st.h2('Documentos de gestión');st.table([{h:'Documento',w:110},{h:'Departamento',w:40},{h:'Completo',w:30,a:'r'}],Object.keys(GDOCS).map(k=>[GDOCS[k].title,DNAME[GDOCS[k].dept],pc(k)]));
+ st.h2('Valoración del docente');st.table([{h:'Criterio',w:96},{h:'Puntos',w:28,a:'r'},{h:'Observaciones',w:56}],['Datos y hoja membretada','Gerencia','Marketing y ventas','Talento Humano','Producción','Contabilidad y finanzas','Trabajo en equipo'].map(x=>[x,'',''])); 
+ st.sign('','Docente');return st.finish('Informe general · '+c.name)}
+document.addEventListener('click',e=>{if(e.target.closest('[data-act="inf-pdf"]'))savePdf(mk(()=>buildInforme()),'informe-general-empresa.pdf')});
 /* ===== Portada y departamentos ===== */
 const DEPTS=[
- {k:'ger',n:'Gerencia',col:'--bank',d:'Dirige la empresa: trámites de puesta en operación, organigrama, compras del Estado, decisiones y portafolio.',
+ {k:'ger',n:'Gerencia',col:'--bank',d:'Dirige la empresa: trámites, organigrama, metas y KPI, planes por área, compras del Estado, decisiones y portafolio.',
   t:[],u:'Todos los datos de la empresa.',ready:true},
- {k:'mkt',n:'Marketing y ventas',col:'--tax',d:'Las 4 P del marketing, catálogo, cotizaciones, facturas de proveedores y ventas.',
+ {k:'mkt',n:'Marketing y ventas',col:'--tax',d:'Las 4 P, plan estratégico de mercadeo y ventas, publicidad, catálogo, cotizaciones y ventas.',
   t:[],u:'Logo, color, lema y datos de contacto.',ready:true},
- {k:'th',n:'Talento Humano',col:'--ok',d:'Contrata y cuida al equipo: colaboradores, contratos, planilla, cargas sociales, reglamento y cultura.',
+ {k:'th',n:'Talento Humano',col:'--ok',d:'Contrata y cuida al equipo: colaboradores, contratos, planilla, cargas sociales, reglamento, manual de funciones y cultura.',
   t:[],u:'Todos los datos de la empresa.',ready:true},
- {k:'prod',n:'Producción',col:'--warn',d:'Ruta de producción de su propio producto: layout, plan, compra de materiales, producción, control de calidad y despacho.',
+ {k:'prod',n:'Producción',col:'--warn',d:'Ruta de producción de su propio producto: layout, plan, procesos, procedimiento del producto estrella, materiales, calidad y despacho.',
   t:[],u:'Actividad de la empresa y proveedores.',ready:true},
  {k:'fin',n:'Contabilidad y finanzas',col:'--acct',d:'Lleva el dinero de la empresa: banco, facturación, compras, impuestos y libros.',
   t:['Banco: pagos, transferencias, SINPE Móvil y comprobantes en PDF.','Factura electrónica con los datos y el logo de la empresa.','Contabilidad: compras, declaración de IVA, pago de impuestos y libro diario.'],u:'Todos los datos de la empresa.',ready:true}];
-const HOW=['Escribe los datos de tu empresa aquí en la portada.','Mira cómo queda tu hoja membretada y descárgala en PDF.','Entra a cada departamento y haz sus tareas.','Los cinco departamentos ya están listos. Empieza por la portada y sigue el orden que quieras.'];
+const HOW=['Escribe los datos de tu empresa aquí en la portada y elige tu paleta de colores.','Mira cómo queda tu hoja membretada y descárgala en PDF.','Entra a cada departamento y haz sus tareas.','Al final, descarga el informe general de tu empresa en PDF.'];
 const rgbOf=h=>{const m=/^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(h||'');return m?[parseInt(m[1],16),parseInt(m[2],16),parseInt(m[3],16)]:[10,106,98]};
 const DEF_NAME='Mi Empresa de Práctica S.A.',DEF_CED='3-101-000000';
 function dataMissing(){const c=S.company,m=[];if(!c.name.trim()||c.name===DEF_NAME)m.push('el nombre');if(!c.ced.trim()||c.ced===DEF_CED)m.push('la cédula jurídica');if(!c.act.trim())m.push('la actividad');if(!c.logo)m.push('el logo');return m}
@@ -2280,7 +2452,7 @@ document.addEventListener('click',e=>{
   const dp=e.target.closest('[data-dept]');if(dp){setDept(dp.dataset.dept);return}
   const lh=e.target.closest('[data-act="lh-pdf"]');if(lh)savePdf(mk(()=>buildLetterheadPdf()),'hoja-membretada.pdf')});
 
-function renderAll(){renderDepts();renderGer();renderTh();renderMk();renderPr();renderCompany();renderAccts();renderMoves();renderPay();renderTaxForm();renderPreview();renderHist();renderAcct()}
+function renderAll(){renderDepts();renderGer();renderTh();renderMk();renderPr();renderFinGest();renderCompany();renderAccts();renderMoves();renderPay();renderTaxForm();renderPreview();renderHist();renderAcct()}
 /* ---------- Nube: empresa compartida por código (Firebase) ---------- */
 const FB_CONFIG={apiKey:"AIzaSyDcWs4CUq-rSv1FKSX82s3OHR-OC17KdzM",authDomain:"simulador-empresa-1ceed.firebaseapp.com",projectId:"simulador-empresa-1ceed",storageBucket:"simulador-empresa-1ceed.firebasestorage.app",messagingSenderId:"930736900267",appId:"1:930736900267:web:379d0acb563c72f349cfee"};
 const FB_BASE='https://www.gstatic.com/firebasejs/13.0.0/';
@@ -2294,7 +2466,7 @@ const withTimeout=(p,ms,msg)=>Promise.race([p,new Promise((_,rej)=>setTimeout(()
 const syncKeys=()=>Object.keys(S).filter(k=>k!=='draft'&&k!=='v');
 const enc=k=>JSON.stringify(S[k]===undefined?null:S[k]);
 const isDirty=()=>syncKeys().some(k=>enc(k)!==cloud.last[k]);
-function normalizeS(){S.ger=S.ger||null;S.th=S.th||null;S.mk=S.mk||null;S.pr=S.pr||null;S.company=Object.assign({act:'',lema:'',color:'#0A6A62'},S.company);S.receipts=S.receipts||{};S.purchases=S.purchases||[];S.decls=S.decls||[];S.checks=S.checks||{};S.draft=S.draft||blankDraft();S.sinpe=S.sinpe||{day:'',total:0}}
+function normalizeS(){S.ger=S.ger||null;S.th=S.th||null;S.mk=S.mk||null;S.pr=S.pr||null;S.company=Object.assign({act:'',lema:'',color:'#0A6A62',color2:'#F2A900'},S.company);S.docs=S.docs||{};S.receipts=S.receipts||{};S.purchases=S.purchases||[];S.decls=S.decls||[];S.checks=S.checks||{};S.draft=S.draft||blankDraft();S.sinpe=S.sinpe||{day:'',total:0}}
 function newCode(){const a=new Uint8Array(8);crypto.getRandomValues(a);let s='';for(let i=0;i<8;i++){s+=ALPHA[a[i]%32];if(i===3)s+='-'}return s}
 function normCode(v){const s=String(v||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(s.length!==8)return null;for(const ch of s)if(ALPHA.indexOf(ch)<0)return null;return s.slice(0,4)+'-'+s.slice(4)}
 function errText(e){const c=(e&&e.code)||'',m=String((e&&e.message)||'');
@@ -2321,7 +2493,7 @@ function updateBar(){
   const btn=(a,t)=>`<button type="button" class="link" data-cl="${a}">${t}</button>`;
   if(!cloud.on){el.innerHTML=`<span class="who"><span class="dot"></span>Trabajando solo en esta computadora</span><span class="grow"></span>${btn('open','Entrar o crear empresa del equipo')}${btn('save','Guardar avance en archivo')}${btn('load','Cargar avance')}`;return}
   const st=STATUS_TXT[cloud.status]||STATUS_TXT.ok,ro=cloud.ro;
-  el.innerHTML=`<span class="who"><span class="dot ${st[0]}"></span>${ro?'Vista de docente (solo lectura):':'Empresa en la nube:'} <strong>${esc(S.company&&S.company.name||'')}</strong> <span class="code">${esc(cloud.code)}</span> <span class="sub" style="font-weight:400">${esc(st[1])}${cloud.err&&cloud.status==='err'?' ('+esc(cloud.err)+')':''}</span></span><span class="grow"></span>${ro?btn('docente','Panel docente'):btn('copy','Copiar código')}${btn('save','Guardar avance en archivo')}${ro?'':btn('load','Cargar avance')}${btn('leave',ro?'Salir de la vista docente':'Salir de esta empresa')}`}
+  el.innerHTML=`<span class="who"><span class="dot ${st[0]}"></span>${ro?'Vista de docente (solo lectura):':'Empresa en la nube:'} <strong>${esc(S.company&&S.company.name||'')}</strong> <span class="code">${esc(cloud.code)}</span> <span class="sub" style="font-weight:400">${esc(st[1])}${cloud.err&&cloud.status==='err'?' ('+esc(cloud.err)+')':''}</span></span><span class="grow"></span>${ro?btn('docente','Panel docente')+btn('informe','Informe del equipo (PDF)'):btn('copy','Copiar código')}${btn('save','Guardar avance en archivo')}${ro?'':btn('load','Cargar avance')}${btn('leave',ro?'Salir de la vista docente':'Salir de esta empresa')}`}
 
 /* ventanas */
 function showModal(html){const m=$('#cloudModal');m.innerHTML=`<div class="cmbox">${html}</div>`;m.hidden=false;const f=m.querySelector('input[type=text],button');if(f)setTimeout(()=>f.focus(),30)}
@@ -2507,6 +2679,7 @@ function cloudAct(a,b){
     case 'join':{const c=normCode(($('#cmCode')||{}).value);if(!c){modalErr('Escribe el código completo: 8 letras o números, como K7QM-X2RD.');break}joinCompany(c,{});break}
     case 'solo':setSolo();break;
     case 'docente':openDocente();break;
+    case 'informe':savePdf(mk(()=>buildInforme()),'informe-'+String(S.company&&S.company.name||'empresa').replace(/\s+/g,'-')+'.pdf');break;
     case 'docadd':{const c=normCode(($('#cmCode')||{}).value);if(!c){modalErr('Escribe el código completo del equipo.');break}
       const lab=String(($('#cmLabel')||{}).value||'').trim().slice(0,40),l=docList().filter(x=>x.code!==c);l.push({code:c,label:lab});docSave(l);openDocente();break}
     case 'docver':joinCompany(b.dataset.code,{ro:true});break;
