@@ -1085,7 +1085,7 @@ function pdfHeader(doc,M,W,y,e){
   if(c.logo){try{const ar=(c.logoW||1)/(c.logoH||1);let w=30,h=30/ar;if(h>24){h=24;w=24*ar}doc.addImage(c.logo,'PNG',M,y-6,w,h);x=M+w+6;h0=h}catch(err){}}
   pfnt(doc,'bold',13,PC.ink);const nl=doc.splitTextToSize(pdfSafe(e.name),W-M-x);doc.text(nl,x,y);
   pfnt(doc,'normal',9,PC.mut);let yy=y+(nl.length-1)*5.5+5.4;
-  ['Cédula jurídica: '+e.ced,'Tel. '+e.tel+' · '+e.mail,e.dir].forEach(t=>{doc.text(doc.splitTextToSize(pdfSafe(t),W-M-x),x,yy);yy+=4.4});
+  (e.hdr||['Cédula jurídica: '+e.ced,'Tel. '+e.tel+' · '+e.mail,e.dir]).forEach(t=>{doc.text(doc.splitTextToSize(pdfSafe(t),W-M-x),x,yy);yy+=4.4});
   return Math.max(yy,y-6+h0)+3}
 function pdfFooter(doc,W,M,text){const n=doc.getNumberOfPages();
   for(let i=1;i<=n;i++){doc.setPage(i);doc.setDrawColor(211,218,226);doc.setLineWidth(.3);doc.line(M,268,W-M,268);
@@ -2399,7 +2399,8 @@ function renderPaleta(){const b=$('#palBox');if(!b)return;const c=S.company;b.in
 document.addEventListener('click',e=>{const b=e.target.closest('[data-pal]');if(!b||cloud.ro)return;const p=PALETAS[+b.dataset.pal];if(!p)return;S.company.color=p[1];S.company.color2=p[2];$('#co-color').value=p[1];save();applyBrand();renderPaleta();refreshCompanyText();renderPreview();renderLetterhead()});
 document.addEventListener('input',e=>{if(e.target.id==='co-color2'&&!cloud.ro){S.company.color2=e.target.value;save();applyBrand();renderPaleta();renderPreview();renderLetterhead()}if(e.target.id==='co-color'&&!cloud.ro){applyBrand();renderPaleta()}});
 /* informe general (docente) */
-function buildInforme(){const st=gPdf();if(!st)return null;const c=S.company,g=S.ger||{},m=gMetrics(),pt=prTot(),E=prEstado(),eq=g.equipo||{};st.head();
+function buildInforme(){const st=gPdf();if(!st)return null;st.head();informeBody(st);return st.finish('Informe general · '+S.company.name)}
+function informeBody(st){ensureGer();ensureTh();ensureMk();ensurePr();const c=S.company,g=S.ger||{},m=gMetrics(),pt=prTot(),E=prEstado(),eq=g.equipo||{};
  st.title('Informe general de la empresa de práctica',c.name+' · '+gd(dayKey()));
  st.h2('Datos del equipo');st.kv('Empresa',c.name);st.kv('Cédula jurídica',c.ced);st.kv('Actividad',c.act);if(c.lema)st.kv('Lema',c.lema);st.kv('Equipo',eq.nombre);st.kv('Sección',eq.seccion);st.kv('Integrantes',eq.integrantes);
  const pc=d=>gdPct(d)+' %',per=k=>((S.th&&S.th.staff)||[]).length;
@@ -2415,7 +2416,34 @@ function buildInforme(){const st=gPdf();if(!st)return null;const c=S.company,g=S
  st.h2('Producción: ruta del producto');st.table([{h:'N.º',w:12},{h:'Actividad',w:70},{h:'Entregable',w:60},{h:'Estado',w:38}],E.map(x=>[String(x.n),x.t,x.e,{listo:'Listo',curso:'En curso',falta:'Por hacer'}[x.s]]));
  st.h2('Documentos de gestión');st.table([{h:'Documento',w:110},{h:'Departamento',w:40},{h:'Completo',w:30,a:'r'}],Object.keys(GDOCS).map(k=>[GDOCS[k].title,DNAME[GDOCS[k].dept],pc(k)]));
  st.h2('Valoración del docente');st.table([{h:'Criterio',w:96},{h:'Puntos',w:28,a:'r'},{h:'Observaciones',w:56}],['Datos y hoja membretada','Gerencia','Marketing y ventas','Talento Humano','Producción','Contabilidad y finanzas','Trabajo en equipo'].map(x=>[x,'',''])); 
- st.sign('','Docente');return st.finish('Informe general · '+c.name)}
+ st.sign('','Docente')}
+
+/* informe general del docente: todos los equipos */
+function teamStats(){ensureGer();ensureTh();ensureMk();ensurePr();const m=gMetrics(),E=prEstado(),ks=Object.keys(GDOCS),avg=Math.round(ks.reduce((a,k)=>a+gdPct(k),0)/ks.length);
+ return{docs:avg,ruta:E.filter(x=>x.s==='listo').length,tram:m.tram.d+'/'+m.tram.t,nf:S.invoices.length,ventas:m.t.ventas,bancos:m.t.bancos}}
+async function docenteInforme(){
+ const list=docList();if(!list.length){toast('Primero agrega los códigos de los equipos.');return}
+ toast('Preparando el informe de '+list.length+' equipo(s)…');
+ try{await fbInit()}catch(e){toast(errText(e));return}
+ const fs=cloud.mods.fs,teams=[],miss=[];
+ await Promise.all(list.map(async it=>{try{const sn=await withTimeout(fs.getDoc(fs.doc(cloud.db,'empresas',it.code)),15000);
+  if(!sn.exists()){miss.push(it.label||it.code);return}const d=sn.data(),n=defaults();Object.keys(d).forEach(f=>{if(f.slice(0,2)!=='k_')return;try{n[f.slice(2)]=JSON.parse(d[f])}catch(e){}});teams.push({it,st:n})}catch(e){miss.push(it.label||it.code)}}));
+ if(!teams.length){toast('No se pudo leer ningún equipo ahora. Intenta de nuevo.');return}
+ teams.sort((a,b)=>String(a.it.label||a.st.company&&a.st.company.name).localeCompare(String(b.it.label||b.st.company&&b.st.company.name),'es'));
+ const keep=S,hold=cloud.ro;let blob=null;
+ try{
+  const stub=defaults();stub.company=Object.assign({},stub.company,{name:'Colegio Técnico Profesional de San Sebastián',ced:'',act:'Emprendimiento e Innovación',hdr:['Emprendimiento e Innovación','Informe para el docente'],color:'#1C7C3C',color2:'#F2A900',logo:undefined});
+  S=stub;const st=gPdf();if(!st)throw new Error('pdf');st.head();
+  st.title('Informe general del docente',gd(dayKey())+' · '+teams.length+' equipo(s)');
+  const rows=teams.map(t=>{S=Object.assign(defaults(),t.st);normalizeS();const x=teamStats();return[String(t.it.label||'—'),String(S.company.name),x.ruta+'/6',x.docs+' %',x.tram,String(x.nf),moneyPdf(x.ventas)]});
+  S=stub;st.h2('Resumen de los equipos');
+  st.table([{h:'Equipo',w:28},{h:'Empresa',w:44},{h:'Ruta prod.',w:20},{h:'Docs',w:16},{h:'Trámites',w:20},{h:'Facturas',w:18},{h:'Ventas',w:34,a:'r'}],rows);
+  st.p('Ruta prod.: actividades de la ruta de Producción listas. Docs: promedio de avance de los documentos de gestión. Trámites: puesta en operación.',{c:PC.mut,s:8.5,i:1});
+  if(miss.length)st.p('No se pudieron leer: '+miss.join(', ')+'.',{c:PC.mut,s:9});
+  teams.forEach(t=>{S=Object.assign(defaults(),t.st);normalizeS();st.page();st.p('Equipo: '+(t.it.label||'—')+' · código '+t.it.code,{b:1,s:9,c:PC.mut});informeBody(st)});
+  S=stub;blob=st.finish('Informe general del docente · '+gd(dayKey()))
+ }catch(e){blob=null}finally{S=keep;cloud.ro=hold}
+ savePdf(blob,'informe-general-docente.pdf')}
 document.addEventListener('click',e=>{if(e.target.closest('[data-act="inf-pdf"]'))savePdf(mk(()=>buildInforme()),'informe-general-empresa.pdf')});
 /* ===== Portada y departamentos ===== */
 const DEPTS=[
@@ -2638,7 +2666,7 @@ function openDocente(){
   <div class="cmopt"><div class="row"><input type="text" id="cmCode" maxlength="9" placeholder="XXXX-XXXX" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Código del equipo"><input type="text" id="cmLabel" maxlength="40" placeholder="Nombre del equipo (opcional)" aria-label="Nombre del equipo" style="text-transform:none;letter-spacing:0;font:600 1rem var(--f-body)"><button type="button" class="btn" data-cl="docadd">Agregar</button></div></div>
   <div class="cmlist" id="cmList">${list.length?'<p class="hint">Cargando equipos…</p>':'<p class="hint">Aún no has agregado equipos.</p>'}</div>
   <p class="cmerr" id="cmErr" role="alert"></p>
-  <div class="row"><button type="button" class="btn sec" data-cl="back">Volver</button></div>`);
+  <div class="row"><button type="button" class="btn" data-cl="docinf">Informe general de todos los equipos (PDF)</button><button type="button" class="btn sec" data-cl="back">Volver</button></div>`);
   if(list.length)fillDocList(list)}
 async function fillDocList(list){
   const box=$('#cmList');if(!box)return;
@@ -2684,6 +2712,7 @@ function cloudAct(a,b){
     case 'join':{const c=normCode(($('#cmCode')||{}).value);if(!c){modalErr('Escribe el código completo: 8 letras o números, como K7QM-X2RD.');break}joinCompany(c,{});break}
     case 'solo':setSolo();break;
     case 'docente':openDocente();break;
+    case 'docinf':docenteInforme();break;
     case 'informe':savePdf(mk(()=>buildInforme()),'informe-'+String(S.company&&S.company.name||'empresa').replace(/\s+/g,'-')+'.pdf');break;
     case 'docadd':{const c=normCode(($('#cmCode')||{}).value);if(!c){modalErr('Escribe el código completo del equipo.');break}
       const lab=String(($('#cmLabel')||{}).value||'').trim().slice(0,40),l=docList().filter(x=>x.code!==c);l.push({code:c,label:lab});docSave(l);openDocente();break}
