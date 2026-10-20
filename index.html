@@ -185,7 +185,7 @@ body::before{content:"";display:block;height:7px;background:linear-gradient(90de
 .guide{background:color-mix(in srgb,var(--accent) 9%,var(--surface));border:1px solid color-mix(in srgb,var(--accent) 35%,var(--line));border-left:6px solid var(--accent);border-radius:var(--r);padding:12px 16px;margin:6px 0 18px}
 .guide ol{margin:6px 0 8px;padding-left:22px;display:grid;gap:3px}.guide .eg{margin:0;font-size:.88rem;color:var(--muted)}
 .gdsec{margin-top:22px;padding-top:6px}.gdsec h3{margin:0 0 10px;font-size:1.05rem;display:flex;align-items:center;gap:8px}.gdsec h3::before{content:"";width:8px;height:20px;border-radius:4px;background:var(--accent)}
-.gdin{width:100%;min-width:110px;box-sizing:border-box}.gdt td{vertical-align:top}
+.resp-f{max-width:420px;margin:4px 0 12px}.gdin{width:100%;min-width:110px;box-sizing:border-box}.gdt td{vertical-align:top}
 .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
 .tile{display:flex;flex-direction:column;gap:2px;border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;background:var(--surface-2);min-width:0}
 .tile strong{font:600 1.15rem var(--f-mono);overflow-wrap:anywhere}
@@ -357,7 +357,7 @@ body.ro-mode .wrap input,body.ro-mode .wrap select,body.ro-mode .wrap textarea{p
     <button class="tab t-bank" role="tab" id="tab-bank" aria-selected="true" aria-controls="v-bank" data-tab="bank">Banco</button>
     <button class="tab t-tax" role="tab" id="tab-tax" aria-selected="false" aria-controls="v-tax" data-tab="tax">Factura electrónica</button>
     <button class="tab t-acct" role="tab" id="tab-acct" aria-selected="false" aria-controls="v-acct" data-tab="acct">Contabilidad</button>
-    <button class="tab t-acct" role="tab" id="tab-gest" aria-selected="false" aria-controls="v-gest" data-tab="gest">Presupuesto y políticas</button>
+    <button class="tab t-acct" role="tab" id="tab-gest" aria-selected="false" aria-controls="v-gest" data-tab="gest">Presupuesto, políticas y negociación</button>
   </div>
 
   <main>
@@ -1236,7 +1236,7 @@ const LEGACY_CART=[
  {id:'c1',inst:'Escuela Pública Ejemplo (institución ficticia)',ced:'3-007-000123',num:'2026PR-000001',det:'Afiches informativos de seguridad escolar',qty:120,unit:'Unid',max:6000,req:'Impresos a color, tamaño carta. Entrega en 15 días hábiles.'},
  {id:'c2',inst:'Municipalidad de Villa Práctica (ficticia)',ced:'3-007-000456',num:'2026PR-000002',det:'Diseño de identidad visual para campaña de reciclaje',qty:1,unit:'Sp',max:180000,req:'Logo, paleta de colores y manual básico. Entrega en 20 días hábiles.'},
  {id:'c3',inst:'Hospital Regional de Práctica (ficticio)',ced:'3-007-000789',num:'2026PR-000003',det:'Rótulos de señalización interna',qty:50,unit:'Unid',max:12000,req:'Rótulos en PVC de 30 x 20 cm. Entrega en 25 días hábiles.'}];
-const GNAV=[['ficha','Ficha y puesta en operación'],['org','Organigrama y plan'],['kpi','Metas y KPI'],['areas','Planes por área'],['tab','Centro de operaciones'],['estado','Compras del Estado'],['actas','Actas de decisión'],['ase','Asesoría'],['prov','Facturas de proveedores'],['cierre','Informe de cierre']];
+const GNAV=[['ficha','Ficha y puesta en operación'],['org','Organigrama y plan'],['kpi','Metas y KPI'],['areas','Planes por área'],['neg','Negociación y contrato'],['tab','Centro de operaciones'],['estado','Compras del Estado'],['actas','Actas de decisión'],['ase','Asesoría'],['prov','Facturas de proveedores'],['cierre','Informe de cierre']];
 const GUIA=[
  ['No sé si conviene ser sociedad o persona física','Abogado o notario','Explicar la forma legal, el capital y las responsabilidades.'],
  ['Dudas con IVA, renta o la factura electrónica','Contador público autorizado o el sitio oficial de Hacienda','Presentar declaraciones bien y evitar multas.'],
@@ -1398,7 +1398,7 @@ function gCierre(){const g=S.ger,e=g.equipo,ch=gChecks();
   <div class="btnrow" style="margin-top:14px"><button type="button" class="btn" data-g="pdf-port">Descargar portafolio (PDF)</button></div></div>`}
 function renderGer(){ensureGer();const el=$('#dept-ger');if(!el)return;el.className='v-ger';
  const nav=GNAV.map(n=>`<button type="button" data-g="nav" data-v="${n[0]}" aria-pressed="${view.gr===n[0]}">${n[1]}</button>`).join('');
- const body=({ficha:gFicha,org:gOrg,kpi:gKpi,areas:gAreas,tab:gTab,estado:gEstado,actas:gActas,ase:gAse,prov:()=>provHTML('ger'),cierre:gCierre}[view.gr]||gFicha)();
+ const body=({ficha:gFicha,org:gOrg,kpi:gKpi,areas:gAreas,neg:()=>gdPage('neg_ger'),tab:gTab,estado:gEstado,actas:gActas,ase:gAse,prov:()=>provHTML('ger'),cierre:gCierre}[view.gr]||gFicha)();
  el.innerHTML=`<div class="seg" role="group" aria-label="Secciones de Gerencia">${nav}</div>${view.gr==='ficha'||view.gr==='org'||view.gr==='tab'||view.gr==='cierre'?gErrHTML():''}${body}`}
 /* ---- acciones ---- */
 const gShowErr=()=>{renderGer();const x=$('#gErr')||$('#dept-ger .alert');if(x&&x.scrollIntoView)x.scrollIntoView({block:'center'})};
@@ -1548,7 +1548,7 @@ function gBind(e){const t=e.target;if(!t.dataset||!t.dataset.gp||!t.closest('#de
 $('#dept-ger').addEventListener('input',gBind);$('#dept-ger').addEventListener('change',gBind);
 
 /* ===== Talento Humano ===== */
-const THNAV=[['staff','Colaboradores y contratos'],['plan','Planilla'],['cargas','Cargas sociales y pólizas'],['reg','Reglamento interno'],['manual','Manual de funciones'],['capac','Capacitación y desempeño'],['cult','Cultura y clima'],['prov','Facturas de proveedores']];
+const THNAV=[['staff','Colaboradores y contratos'],['plan','Planilla'],['cargas','Cargas sociales y pólizas'],['reg','Reglamento interno'],['manual','Manual de funciones'],['capac','Capacitación y desempeño'],['neg','Negociación y contrato'],['cult','Cultura y clima'],['prov','Facturas de proveedores']];
 const CONTR=[['indef','Plazo indefinido'],['fijo','Plazo fijo'],['obra','Por obra determinada']];
 const CONTR_N={indef:'Plazo indefinido',fijo:'Plazo fijo',obra:'Por obra determinada'};
 const CLIMA_Q=['Me siento respetado y respetada en la empresa.','Sé qué se espera de mi trabajo.','Hay buena comunicación entre los departamentos.','Tengo lo que necesito para hacer bien mi trabajo.','Recomendaría esta empresa como lugar de trabajo.'];
@@ -1643,7 +1643,7 @@ function tCult(){const C=S.th.cult,k=view.tkf,avg=tClimaAvg();
 function renderTh(){ensureTh();const el=$('#dept-th');if(!el)return;el.className='v-th';
  const nav=THNAV.map(n=>`<button type="button" data-t="nav" data-v="${n[0]}" aria-pressed="${view.tr===n[0]}">${n[1]}</button>`).join('');
  const who=(S.ger&&S.ger.org&&S.ger.org.th)||'';
- el.innerHTML=`<div class="seg" role="group" aria-label="Secciones de Talento Humano">${nav}</div>${who?`<p class="hint" style="margin:-6px 0 14px">Responsable del departamento: <strong>${esc(who)}</strong></p>`:''}`+({staff:tStaff,plan:tPlan,cargas:tCargas,reg:tReg,manual:()=>gdPage('manual'),capac:()=>gdPage('capac'),cult:tCult,prov:()=>provHTML('th')}[view.tr]||tStaff)()}
+ el.innerHTML=`<div class="seg" role="group" aria-label="Secciones de Talento Humano">${nav}</div>${who?`<p class="hint" style="margin:-6px 0 14px">Responsable del departamento: <strong>${esc(who)}</strong></p>`:''}`+({staff:tStaff,plan:tPlan,cargas:tCargas,reg:tReg,manual:()=>gdPage('manual'),capac:()=>gdPage('capac'),neg:()=>gdPage('neg_th'),cult:tCult,prov:()=>provHTML('th')}[view.tr]||tStaff)()}
 /* ---- PDF ---- */
 function thAddContrato(st,s){const e=S.company;
  st.title('Contrato individual de trabajo',e.name+' · Documento de práctica, sin validez legal');
@@ -1763,7 +1763,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-pv]');if(!
 function pvBind(e){const t=e.target;if(!t.dataset||!t.dataset.pp)return;const p=t.dataset.pp.split('.'),d=p[0];view.pff[d][p[1]]=t.value;const c=$('#pvcalc-'+d);if(c)c.innerHTML=pvCalcHTML(d)}
 document.addEventListener('input',pvBind);document.addEventListener('change',pvBind);
 /* ===== Marketing y ventas ===== */
-const MKNAV=[['marca','Marca y cliente'],['prod','Producto (1.ª P)'],['precio','Precio (2.ª P)'],['plaza','Plaza (3.ª P)'],['promo','Promoción (4.ª P)'],['plan','Plan estratégico'],['publi','Publicidad'],['cat','Catálogo'],['cot','Cotizaciones'],['prov','Facturas de proveedores'],['ventas','Ventas y clientes']];
+const MKNAV=[['marca','Marca y cliente'],['prod','Producto (1.ª P)'],['precio','Precio (2.ª P)'],['plaza','Plaza (3.ª P)'],['promo','Promoción (4.ª P)'],['plan','Plan estratégico'],['publi','Publicidad'],['neg','Negociación y contrato'],['cat','Catálogo'],['cot','Cotizaciones'],['prov','Facturas de proveedores'],['ventas','Ventas y clientes']];
 const CANALES=['Tienda o puesto físico','Redes sociales','WhatsApp','Sitio web o tienda en línea','Entrega a domicilio','Ferias y actividades del colegio','Distribuidores o revendedores'];
 const OBJS=['Dar a conocer la empresa','Vender más','Lanzar un producto nuevo','Fidelizar clientes'];
 function defaultMk(){return{nextId:10,cotN:0,marca:{cliente:'',propuesta:'',mensaje:''},
@@ -1867,7 +1867,7 @@ function mVentas(){const s=mkSales(),t=totals(),mx=Math.max(1,...s.prod.map(p=>p
 function renderMk(){ensureMk();const el=$('#dept-mkt');if(!el)return;el.className='v-mkt';
  const nav=MKNAV.map(n=>`<button type="button" data-m="nav" data-v="${n[0]}" aria-pressed="${view.mr===n[0]}">${n[1]}</button>`).join('');
  const who=(S.ger&&S.ger.org&&S.ger.org.mkt)||'';
- el.innerHTML=`<div class="seg" role="group" aria-label="Secciones de Marketing y ventas">${nav}</div>${who?`<p class="hint" style="margin:-6px 0 14px">Responsable del departamento: <strong>${esc(who)}</strong></p>`:''}`+({marca:mMarca,prod:mProd,precio:mPrecio,plaza:mPlaza,promo:mPromo,plan:()=>gdPage('plan_mk'),publi:()=>gdPage('publi'),cat:mCat,cot:mCot,prov:()=>provHTML('mkt'),ventas:mVentas}[view.mr]||mMarca)()}
+ el.innerHTML=`<div class="seg" role="group" aria-label="Secciones de Marketing y ventas">${nav}</div>${who?`<p class="hint" style="margin:-6px 0 14px">Responsable del departamento: <strong>${esc(who)}</strong></p>`:''}`+({marca:mMarca,prod:mProd,precio:mPrecio,plaza:mPlaza,promo:mPromo,plan:()=>gdPage('plan_mk'),publi:()=>gdPage('publi'),neg:()=>gdPage('neg_mkt'),cat:mCat,cot:mCot,prov:()=>provHTML('mkt'),ventas:mVentas}[view.mr]||mMarca)()}
 /* ---- PDF ---- */
 function mkAddPlan(st){const M=S.mk,c=S.company;st.title('Plan de marketing: las 4 P',c.name);
  st.h2('Marca y cliente');if(c.lema)st.kv('Lema',c.lema);st.kv('Cliente ideal',M.marca.cliente);st.kv('Propuesta de valor',M.marca.propuesta);st.kv('Mensaje',M.marca.mensaje);st.y+=2;
@@ -1932,7 +1932,7 @@ function mBind(e){const t=e.target;if(!t.dataset||!t.dataset.mp||!t.closest('#de
 $('#dept-mkt').addEventListener('input',mBind);$('#dept-mkt').addEventListener('change',mBind);
 
 /* ===== Producción ===== */
-const PRNAV=[['ruta','Mi ruta'],['prods','1. Producto y layout'],['plan','2. Plan y proceso'],['mat','3. Compra de materiales'],['ord','4. Producción'],['cal','5. Control de calidad'],['desp','6. Despacho'],['inf','Informe'],['procs','Procesos'],['estrella','Producto estrella'],['costo','Costos'],['inv','Inventario'],['prov','Facturas de proveedores']];
+const PRNAV=[['ruta','Mi ruta'],['prods','1. Producto y layout'],['plan','2. Plan y proceso'],['mat','3. Compra de materiales'],['ord','4. Producción'],['cal','5. Control de calidad'],['desp','6. Despacho'],['inf','Informe'],['procs','Procesos'],['estrella','Producto estrella'],['neg','Negociación y contrato'],['costo','Costos'],['inv','Inventario'],['prov','Facturas de proveedores']];
 const ORD_ST=['Pendiente','En proceso','Terminada'];
 const DEF_QC=[];
 function defaultPr(){return{prods:[],nextId:1,ordN:0,qcN:0,umbral:5,arts:[],proc:{},bom:{},cost:{},qc:{},min:{},movs:[],ords:[],insp:[],ocN:0,dpN:0,plan:{},zonas:{},layNota:'',compras:[],desp:[]}}
@@ -1997,7 +1997,7 @@ function pRuta(){const it=prCur(),pn=it?it.name:'tu producto',E=prEstado(),ls=E.
   cal:`Revisa ${pn} con tu lista de revisión y anota los defectos.`,
   desp:`Entrega ${pn} a un cliente y registra quién lo recibió.`};
  const pill={listo:'<span class="pill ok">Listo</span>',curso:'<span class="pill info">En curso</span>',falta:'<span class="pill">Por hacer</span>'};
- const cards=E.map(x=>`<article class="rt"><span class="num">Actividad ${x.n}</span><h3>${esc(x.t)}</h3><p>${esc(txt[x.k])}</p><p class="sub">Entregable: <strong>${esc(x.e)}</strong> (PDF)</p><div class="btnrow bt">${pill[x.s]}<button type="button" class="btn sec sm" data-pr="nav" data-v="${x.k}">Ir a la actividad</button></div></article>`).join('');
+ const cards=E.map(x=>`<article class="rt"><span class="num">Actividad ${x.n}</span><h3>${esc(x.t)}</h3><p>${esc(txt[x.k])}</p><p class="sub">Entregable: <strong>${esc(x.e)}</strong> (PDF)</p><div class="field"><label for="p-rr-${x.k}">Responsable</label><input id="p-rr-${x.k}" maxlength="80" autocomplete="off" data-rp="rutaResp.${x.k}" placeholder="Nombre" value="${esc((S.pr.rutaResp||{})[x.k]||'')}"></div><div class="btnrow bt">${pill[x.s]}<button type="button" class="btn sec sm" data-pr="nav" data-v="${x.k}">Ir a la actividad</button></div></article>`).join('');
  return `<div class="card"><div class="head-row"><h2>Mi ruta de producción</h2><span class="pill info">${ls} de ${E.length} actividades listas</span></div>
   <p class="hint" style="margin-bottom:10px">${prItems().length?`Estás produciendo: <strong>${esc(pn)}</strong>. Cada actividad usa tu producto y lo que hiciste antes.`:'Empieza por la actividad 1: escribe el producto que produce tu empresa. Todo lo demás se arma con él.'} Tu departamento trabaja con sus propios datos: no necesitas esperar a otros departamentos.</p>
   ${prItems().length>1?prSel():''}
@@ -2147,7 +2147,7 @@ function pCal(){const it=prCur();if(!it)return prNone();const qc=prQc(it.id),f=v
 function renderPr(){ensurePr();ensureMk();const el=$('#dept-prod');if(!el)return;el.className='v-prod';
  const nav=PRNAV.map(n=>`<button type="button" data-pr="nav" data-v="${n[0]}" aria-pressed="${view.pr===n[0]}">${n[1]}</button>`).join('');
  const who=(S.ger&&S.ger.org&&S.ger.org.prod)||'';
- el.innerHTML=`<div class="seg" role="group" aria-label="Secciones de Producción">${nav}</div>${who?`<p class="hint" style="margin:-6px 0 14px">Responsable del departamento: <strong>${esc(who)}</strong></p>`:''}`+({ruta:pRuta,prods:pProds,plan:pPlan,proc:pPlan,mat:pMat,costo:pCosto,inv:pInv,ord:pOrd,cal:pCal,desp:pDesp,inf:pInf,procs:()=>gdPage('procesos'),estrella:()=>gdPage('estrella'),prov:()=>provHTML('prod')}[view.pr]||pRuta)()}
+ el.innerHTML=`<div class="seg" role="group" aria-label="Secciones de Producción">${nav}</div>${who?`<p class="hint" style="margin:-6px 0 14px">Responsable del departamento: <strong>${esc(who)}</strong></p>`:''}`+({ruta:pRuta,prods:pProds,plan:pPlan,proc:pPlan,mat:pMat,costo:pCosto,inv:pInv,ord:pOrd,cal:pCal,desp:pDesp,inf:pInf,procs:()=>gdPage('procesos'),estrella:()=>gdPage('estrella'),neg:()=>gdPage('neg_prod'),prov:()=>provHTML('prod')}[view.pr]||pRuta)()}
 /* ---- PDF ---- */
 function prAddProc(st){st.title('Fichas del proceso de producción',S.company.name);
  prItems().forEach(it=>{const s=prSteps(it.id);st.h2(it.name);st.table([{h:'N.º',w:12},{h:'Paso',w:100},{h:'Responsable',w:44},{h:'Minutos',w:24,a:'r'}],s.map((x,i)=>[String(i+1),x.txt,x.resp,String(x.min)]));if(s.length)st.p('Tiempo total: '+s.reduce((a,x)=>a+num(x.min),0)+' minutos.',{c:PC.mut,s:9})})}
@@ -2182,7 +2182,7 @@ function prAddOC(st,o){st.title('Orden de compra N.º '+o.n,S.company.name);st.k
 function prAddDP(st,d){st.title('Nota de despacho N.º '+d.n,S.company.name);st.kv('Producto',d.name);st.kv('Cantidad',String(d.qty));st.kv('Fecha',gd(d.date));st.kv('Cliente o destino',d.dest);st.kv('Lugar de entrega',d.lugar);if(d.transp)st.kv('Transporte',d.transp);if(d.nota)st.kv('Nota',d.nota);
  st.sign((S.ger&&S.ger.org&&S.ger.org.prod)||'','Entregó (Producción)');st.sign(d.rec,'Recibió')}
 function prAddInf(st){const m=prTot(),E=prEstado();st.title('Informe de producción',S.company.name+' · '+gd(dayKey()));
- st.h2('Actividades de la ruta');st.table([{h:'N.º',w:12},{h:'Actividad',w:70},{h:'Entregable',w:60},{h:'Estado',w:34}],E.map(x=>[String(x.n),x.t,x.e,{listo:'Listo',curso:'En curso',falta:'Por hacer'}[x.s]]));
+ st.h2('Actividades de la ruta');st.table([{h:'N.º',w:12},{h:'Actividad',w:56},{h:'Entregable',w:52},{h:'Estado',w:20},{h:'Responsable',w:40}],E.map(x=>[String(x.n),x.t,x.e,{listo:'Listo',curso:'En curso',falta:'Por hacer'}[x.s],(S.pr.rutaResp||{})[x.k]||'']));
  st.h2('Resultados');st.kv('Órdenes terminadas',m.done+' de '+m.ords);st.kv('Unidades producidas',String(m.t.ent));st.kv('Unidades rechazadas',String(m.t.rej));st.kv('Unidades despachadas',String(m.t.desp));st.kv('En bodega',String(m.t.stock));st.kv('Inspecciones aprobadas',m.ok+' de '+m.insp);st.kv('Costo estimado',moneyPdf(m.costo));
  st.h2('Por producto');st.table([{h:'Producto',w:70},{h:'Producido',w:28,a:'r'},{h:'Rechazado',w:28,a:'r'},{h:'Despachado',w:28,a:'r'},{h:'En bodega',w:28,a:'r'}],m.rows.map(r=>[r.n,String(r.s.ent),String(r.s.rej),String(r.s.sold),String(r.s.stock)]))}
 function prBuild(kind,arg){const st=gPdf();if(!st)return null;st.head();
@@ -2330,6 +2330,21 @@ const GDOCS={
    {t:'Materiales y equipo',l:{k:'mat',add:'Agregar material o equipo',cols:[{k:'i',l:'Material o equipo'},{k:'c',l:'Cantidad'},{k:'n',l:'Nota'}]}},
    {t:'Pasos del procedimiento',l:{k:'pasos',add:'Agregar paso',imp:'imp-pasos',impT:'Traer pasos de Plan y proceso',num:true,cols:[{k:'p',l:'Qué se hace',t:'a'},{k:'r',l:'Quién'},{k:'t',l:'Minutos',t:'n'},{k:'c',l:'Qué se revisa'}]}},
    {t:'Calidad, seguridad y registros',f:[{k:'seg',l:'Normas de higiene y seguridad',t:'a'},{k:'cal',l:'¿Cómo sabemos que quedó bien?',t:'a'},{k:'reg',l:'Formularios que se llenan',ph:'Orden de producción, informe de calidad…'}]}]}};
+
+const NEGS={ger:['Gerencia','Una alianza o un servicio externo para toda la empresa (por ejemplo, el alquiler del local o un contador externo).','Empresa: Contadores Rojas · Qué se negocia: llevar la contabilidad por ₡40 000 al mes'],
+ mkt:['Marketing y ventas','La venta de su producto a un cliente, o un servicio de publicidad.','Empresa: Cafetería La Esquina · Qué se negocia: comprar 50 unidades al mes durante 3 meses'],
+ th:['Talento Humano','Un servicio para el personal, como una capacitación o un servicio de reclutamiento.','Empresa: Academia Futuro · Qué se negocia: curso de atención al cliente para 5 personas'],
+ prod:['Producción','El suministro de materiales con un proveedor.','Empresa: Distribuidora El Trigal · Qué se negocia: 200 kg de harina al mes con entrega cada 15 días'],
+ fin:['Contabilidad y finanzas','Un servicio financiero: un crédito, un contador externo o los plazos de pago.','Empresa: Cooperativa Local · Qué se negocia: crédito de ₡300 000 a 6 meses']};
+Object.keys(NEGS).forEach(d=>{const n=NEGS[d];GDOCS['neg_'+d]={dept:d,title:'Negociación y contrato · '+n[0],sign:[['f1','Firma por nuestra empresa'],['f2','Firma por la otra empresa']],
+ steps:['Escojan una empresa con quien negociar: otro equipo, un negocio real de la comunidad o su docente.','Qué negocia este departamento: '+n[1],'Antes de reunirse, llenen la preparación. En la reunión, anoten cada acuerdo con su responsable y su fecha.','Anoten las firmas, hagan la reflexión y descarguen el PDF.'],
+ ej:n[2],
+ secs:[{t:'1. Con quién negociamos',f:[{k:'emp',l:'Empresa con quien negociamos'},{k:'cont',l:'Persona de contacto'},{k:'tipo',l:'Tipo de relación',t:'s',o:['Proveedor','Cliente','Aliado','Servicio externo']},{k:'fecha',l:'Fecha de la reunión',t:'d'},{k:'medio',l:'Lugar o medio',ph:'Presencial, videollamada…'},{k:'obj0',l:'¿Qué se negocia?',t:'a'},{k:'part',l:'Quiénes participan por nuestra empresa',t:'a'}]},
+  {t:'2. Preparación',f:[{k:'obj',l:'Nuestro objetivo',t:'a'},{k:'ideal',l:'Lo mejor que podemos lograr',t:'a'},{k:'min',l:'Lo mínimo que aceptamos',t:'a'},{k:'arg',l:'Argumentos y datos que usaremos',t:'a'},{k:'ced',l:'Qué podemos ceder',t:'a'}]},
+  {t:'3. Acuerdos del contrato',l:{k:'acu',add:'Agregar acuerdo',sum:'monto',cols:[{k:'tema',l:'Tema',t:'s',o:['Precio','Cantidad','Plazo de entrega','Forma de pago','Garantía','Multa o penalidad','Duración','Otro']},{k:'acuerdo',l:'Acuerdo',t:'a'},{k:'monto',l:'Monto (₡)',t:'n'},{k:'resp',l:'Responsable'},{k:'lim',l:'Fecha límite',t:'d'}]}},
+  {t:'4. Condiciones finales',f:[{k:'vig',l:'Vigencia del contrato',ph:'Ej.: 3 meses'},{k:'term',l:'¿Cómo se puede cambiar o terminar el contrato?',t:'a'},{k:'inc',l:'¿Qué pasa si alguien no cumple?',t:'a'}]},
+  {t:'5. Firmas',f:[{k:'f1',l:'Firma por nuestra empresa (nombre y cargo)'},{k:'f2',l:'Firma por la otra empresa (nombre y cargo)'},{k:'ff',l:'Fecha de la firma',t:'d'}]},
+  {t:'6. Reflexión',f:[{k:'ref',l:'¿Qué salió bien y qué mejoraríamos en la próxima negociación?',t:'a'}]}]}});
 AREAS.forEach(a=>{GDOCS['plan_'+a[0]]={dept:'ger',title:'Plan del área: '+a[1],
  steps:['Escribe para qué existe el área y qué quiere lograr.','Pon metas con su indicador y su plazo.','Lista las actividades con responsable y fecha.','Anota el presupuesto y los riesgos que ves.'],
  ej:'Meta: reducir defectos a menos de 5 % · Indicador: % de defectos · Plazo: noviembre',
@@ -2359,6 +2374,7 @@ function gdList(k,l){const rows=gdRows(k,l.k);
  +(rows.length?`<div class="tscroll"><table class="mv gdt" style="min-width:${Math.max(560,l.cols.length*150)}px"><thead><tr>${l.num?'<th>N.º</th>':''}${l.cols.map(c=>`<th>${esc(c.l)}</th>`).join('')}<th></th></tr></thead><tbody>${body}</tbody>${foot}</table></div>`:'<p class="hint">Todavía no hay filas. Presiona el botón de arriba para agregar la primera.</p>')}
 function gdPage(k,before,after){const d=GDOCS[k],p=gdPct(k);
  return `<div class="card gd"><div class="head-row"><h2>${esc(d.title)}</h2><div class="btnrow"><span class="pill ${p>=80?'ok':p>0?'info':''}" data-gdpct="${k}">${p} % completo</span><button type="button" class="btn sm" data-gdc="pdf" data-k="${k}">Descargar PDF</button></div></div>
+ <div class="field resp-f"><label for="gd-${k}-resp">Responsable de esta actividad</label><input id="gd-${k}-resp" data-gd="${k}|resp" maxlength="80" autocomplete="off" placeholder="Nombre de la persona responsable" value="${esc(gdR(k).resp||'')}"></div>
  <div class="guide"><strong>Qué hacer</strong><ol>${d.steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol><p class="eg"><strong>Ejemplo:</strong> ${esc(d.ej)}</p></div>${before||''}
  ${d.secs.map(s=>`<section class="gdsec"><h3>${esc(s.t)}</h3>${s.f?`<div class="grid">${s.f.map(f=>gdField(k,f)).join('')}</div>`:''}${s.l?gdList(k,s.l):''}</section>`).join('')}${after||''}</div>`}
 function gdUpdate(k){document.querySelectorAll('[data-gdcalc^="'+k+'|"]').forEach(td=>{const q=td.dataset.gdcalc.split('|'),l=GDOCS[k].secs.map(s=>s.l).find(x=>x&&x.k===q[1]),r=gdRows(k,q[1])[+q[2]],c=l&&l.cols.find(x=>x.k===q[3]);if(r&&c)td.textContent=c.c(r,c)});
@@ -2370,13 +2386,14 @@ function gdBind(e){const t=e.target;if(!t.dataset||!t.dataset.gd)return;if(cloud
 document.addEventListener('input',gdBind);document.addEventListener('change',gdBind);
 const gdRender=k=>{const d=GDOCS[k].dept;if(d==='fin')renderFinGest();else if(d==='ger')renderGer();else if(d==='th')renderTh();else if(d==='mkt')renderMk();else renderPr()};
 function gdBuild(k){const st=gPdf();if(!st)return null;const d=GDOCS[k];st.head();st.title(d.title,S.company.name+' · '+gd(dayKey()));
+ if(gdR(k).resp)st.kv('Responsable',gdR(k).resp);st.y+=1;
  d.secs.forEach(s=>{st.h2(s.t);
   if(s.f)s.f.forEach(f=>{st.p(f.l,{b:1,s:9,c:PC.mut,gap:.4});st.p(String(gdR(k)[f.k]||'')||'-',{gap:3})});
   if(s.l){const l=s.l,rows=gdRows(k,l.k),wt=c=>c.t==='a'?2.2:c.t==='n'||c.t==='c'||c.t==='d'?.9:1.3,cols=l.cols.slice(),tot=cols.reduce((a,c)=>a+wt(c),0)+(l.num?.5:0),sc=180/tot;
    const defs=(l.num?[{h:'N.º',w:.5*sc}]:[]).concat(cols.map(c=>({h:c.l,w:wt(c)*sc,a:c.t==='n'||c.t==='c'?'r':undefined})));
    const data=rows.map((r,i)=>(l.num?[String(i+1)]:[]).concat(cols.map(c=>c.t==='c'?c.c(r,c):c.t==='d'?gd(r[c.k]):String(r[c.k]==null?'':r[c.k]))));
    st.table(defs,data);if(l.sum&&rows.length)st.p('Total: '+gdSum(k,l),{b:1,s:10})}});
- st.sign(gdR(k).resp||(S.ger&&S.ger.org&&S.ger.org[d.dept])||'','Responsable');return st.finish(d.title+' · '+S.company.name)}
+ if(d.sign)d.sign.forEach(x=>st.sign(gdR(k)[x[0]]||'',x[1]));else st.sign(gdR(k).resp||(S.ger&&S.ger.org&&S.ger.org[d.dept])||'','Responsable');return st.finish(d.title+' · '+S.company.name)}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-gdc]');if(!b)return;const k=b.dataset.k,a=b.dataset.gdc;if(a==='sel'){view.gdarea=b.dataset.v;renderGer();return}
  if(!GDOCS[k])return;if(a==='pdf'){savePdf(mk(()=>gdBuild(k)),k+'.pdf');return}
  if(cloud.ro){toast('Vista de docente: solo lectura.');return}
@@ -2389,7 +2406,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-gdc]');if(
 /* métricas automáticas */
 function gdMetricas(){const m=gMetrics(),t=m.t,pt=prTot(),tile=(l,v)=>`<div class="tile"><span class="sub">${l}</span><strong>${v}</strong></div>`;
  return `<div class="card" style="margin-bottom:20px"><h2 style="margin-bottom:6px">Métricas del simulador (se llenan solas)</h2><p class="hint" style="margin-bottom:12px">Estos números salen de lo que ya hicieron en los departamentos. Úsenlos para llenar la columna "Lo actual" de sus KPI.</p><div class="tiles">${tile('Ventas facturadas',fmt(t.ventas))}${tile('Compras y gastos',fmt(t.compras))}${tile('Utilidad estimada',fmt(t.util))}${tile('Dinero en bancos',fmt(t.bancos))}${tile('Trámites hechos',m.tram.d+' de '+m.tram.t)}${tile('Tareas del plan listas',m.plan.d+' de '+m.plan.t)}${tile('Unidades producidas',pt.t.ent)}${tile('Unidades despachadas',pt.t.desp)}${tile('Colaboradores',((S.th&&S.th.staff)||[]).length)}</div></div>`}
-function renderFinGest(){const el=$('#finGest');if(el)el.innerHTML=gdPage('presup')+'<div style="height:20px"></div>'+gdPage('polfin')}
+function renderFinGest(){const el=$('#finGest');if(el)el.innerHTML=gdPage('presup')+'<div style="height:20px"></div>'+gdPage('polfin')+'<div style="height:20px"></div>'+gdPage('neg_fin')}
 function gKpi(){return gdPage('kpi',gdMetricas())}
 function gAreas(){const a=view.gdarea||'ger';return `<div class="card" style="margin-bottom:20px"><h2 style="margin-bottom:6px">Planes por área funcional</h2><p class="hint" style="margin-bottom:10px">Cada área de la empresa tiene su propio plan. Elige el área y complétalo.</p><div class="seg" role="group" aria-label="Área">${AREAS.map(x=>`<button type="button" data-gdc="sel" data-v="${x[0]}" aria-pressed="${a===x[0]}">${esc(x[1])} · ${gdPct('plan_'+x[0])} %</button>`).join('')}</div></div>`+gdPage('plan_'+a)}
 /* paleta */
@@ -2413,7 +2430,7 @@ function informeBody(st){ensureGer();ensureTh();ensureMk();ensurePr();const c=S.
   ['Talento Humano',(g.org||{}).th||'',`Colaboradores ${per()} · Manual de funciones ${pc('manual')} (${gdRows('manual','rows').length} puestos) · Capacitación y desempeño ${pc('capac')}`],
   ['Producción',(g.org||{}).prod||'',`Ruta ${E.filter(x=>x.s==='listo').length}/6 · Órdenes terminadas ${pt.done}/${pt.ords} · Producido ${pt.t.ent} · Rechazado ${pt.t.rej} · Despachado ${pt.t.desp} · Procesos ${pc('procesos')} · Producto estrella ${pc('estrella')}`],
   ['Contabilidad y finanzas',(g.org||{}).fin||'',`Facturas ${S.invoices.length} · Ventas ${moneyPdf(m.t.ventas)} · Compras ${moneyPdf(m.t.compras)} · Utilidad ${moneyPdf(m.t.util)} · Bancos ${moneyPdf(m.t.bancos)} · Presupuesto y flujo ${pc('presup')} · Políticas ${pc('polfin')}`]]);
- st.h2('Producción: ruta del producto');st.table([{h:'N.º',w:12},{h:'Actividad',w:70},{h:'Entregable',w:60},{h:'Estado',w:38}],E.map(x=>[String(x.n),x.t,x.e,{listo:'Listo',curso:'En curso',falta:'Por hacer'}[x.s]]));
+ st.h2('Producción: ruta del producto');st.table([{h:'N.º',w:12},{h:'Actividad',w:58},{h:'Entregable',w:50},{h:'Estado',w:24},{h:'Responsable',w:36}],E.map(x=>[String(x.n),x.t,x.e,{listo:'Listo',curso:'En curso',falta:'Por hacer'}[x.s],(S.pr.rutaResp||{})[x.k]||'']));
  st.h2('Documentos de gestión');st.table([{h:'Documento',w:110},{h:'Departamento',w:40},{h:'Completo',w:30,a:'r'}],Object.keys(GDOCS).map(k=>[GDOCS[k].title,DNAME[GDOCS[k].dept],pc(k)]));
  st.h2('Valoración del docente');st.table([{h:'Criterio',w:96},{h:'Puntos',w:28,a:'r'},{h:'Observaciones',w:56}],['Datos y hoja membretada','Gerencia','Marketing y ventas','Talento Humano','Producción','Contabilidad y finanzas','Trabajo en equipo'].map(x=>[x,'',''])); 
  st.sign('','Docente')}
