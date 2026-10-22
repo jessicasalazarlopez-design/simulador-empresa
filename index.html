@@ -304,6 +304,7 @@ section[data-locked]{display:none!important}
     <button class="tab t-th" role="tab" id="dt-th" aria-selected="false" data-dept="th">Talento Humano</button>
     <button class="tab t-prod" role="tab" id="dt-prod" aria-selected="false" data-dept="prod">Producción</button>
     <button class="tab t-fin" role="tab" id="dt-fin" aria-selected="false" data-dept="fin">Contabilidad y finanzas</button>
+    <button class="tab t-fin" role="tab" id="dt-res" aria-selected="false" data-dept="res">Resumen</button>
     <span class="grow"></span>
     <div class="reset" id="resetBox" hidden>
       <button class="link" data-act="reset-ask" id="resetAsk">Reiniciar práctica</button>
@@ -365,13 +366,18 @@ section[data-locked]{display:none!important}
   <section id="dept-th" hidden></section>
   <section id="dept-prod" hidden></section>
 
+  <section id="dept-res" hidden><div id="resBody"></div></section>
+
   <section id="dept-fin" hidden>
   <div class="tabs" role="tablist" aria-label="Simuladores de Contabilidad y finanzas">
     <button class="tab t-acct" role="tab" id="tab-acts" aria-selected="true" aria-controls="v-acts" data-tab="acts">Mis 12 actividades</button>
     <button class="tab t-bank" role="tab" id="tab-bank" aria-selected="false" aria-controls="v-bank" data-tab="bank">Banco</button>
     <button class="tab t-tax" role="tab" id="tab-tax" aria-selected="false" aria-controls="v-tax" data-tab="tax">Factura electrónica</button>
     <button class="tab t-acct" role="tab" id="tab-acct" aria-selected="false" aria-controls="v-acct" data-tab="acct">Contabilidad</button>
-    <button class="tab t-acct" role="tab" id="tab-gest" aria-selected="false" aria-controls="v-gest" data-tab="gest">Presupuesto, políticas, plan y negociación</button>
+    <button class="tab t-acct" role="tab" id="tab-presup" aria-selected="false" aria-controls="v-presup" data-tab="presup">Presupuesto y flujo de caja</button>
+    <button class="tab t-acct" role="tab" id="tab-pol" aria-selected="false" aria-controls="v-pol" data-tab="pol">Políticas</button>
+    <button class="tab t-acct" role="tab" id="tab-plan" aria-selected="false" aria-controls="v-plan" data-tab="plan">Plan del área</button>
+    <button class="tab t-acct" role="tab" id="tab-neg" aria-selected="false" aria-controls="v-neg" data-tab="neg">Negociación y contrato</button>
   </div>
 
   <main>
@@ -417,7 +423,10 @@ section[data-locked]{display:none!important}
       <div class="card" id="invHistory" style="margin-top:20px"></div>
     </section>
 
-    <section id="v-gest" class="v-acct" role="tabpanel" aria-labelledby="tab-gest" hidden><div id="finGest"></div></section>
+    <section id="v-presup" class="v-acct" role="tabpanel" aria-labelledby="tab-presup" hidden><div id="fgPresup"></div></section>
+    <section id="v-pol" class="v-acct" role="tabpanel" aria-labelledby="tab-pol" hidden><div id="fgPol"></div></section>
+    <section id="v-plan" class="v-acct" role="tabpanel" aria-labelledby="tab-plan" hidden><div id="fgPlan"></div></section>
+    <section id="v-neg" class="v-acct" role="tabpanel" aria-labelledby="tab-neg" hidden><div id="fgNeg"></div></section>
     <section id="v-acct" class="v-acct" role="tabpanel" aria-labelledby="tab-acct" hidden>
       <details class="tip">
         <summary>Qué practicar en Contabilidad</summary>
@@ -528,7 +537,7 @@ function defaults(){const now=Date.now();
 function load(){try{const raw=localStorage.getItem(KEY);if(raw){const o=JSON.parse(raw);if(o&&o.v===1&&o.accounts&&o.draft)return o}}catch(e){}return defaults()}
 let S=load();S.ger=S.ger||null;S.th=S.th||null;S.mk=S.mk||null;S.pr=S.pr||null;S.company=Object.assign({act:'',lema:'',color:'#0A6A62',color2:'#F2A900'},S.company);S.docs=S.docs||{};S.receipts=S.receipts||{};S.purchases=S.purchases||[];S.decls=S.decls||[];S.checks=S.checks||{};
 function save(){if(cloud.ro)return;try{localStorage.setItem(cloud.on?KEY+':'+cloud.code:KEY,JSON.stringify(S))}catch(e){}if(cloud.on)cloudPush()}
-const view={dept:'home',tab:'acts',acc:'cc',prev:null,ac:'resumen',ym:dayKey().slice(0,7),pf:null,perr:[]};view.pf=newPF();
+const view={dept:'home',tab:'acts',acc:'cc',prev:null,ac:'compras',ym:dayKey().slice(0,7),pf:null,perr:[]};view.pf=newPF();
 let sending=false,tt;
 
 function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),3000)}
@@ -892,7 +901,8 @@ function notaCredito(id){const o=S.invoices.find(x=>x.id===id);if(!o||o.type==='
   toast(o.paid?'Nota de crédito emitida. Si ya cobraste, devuelve el dinero con una transferencia.':'Nota de crédito emitida. La factura quedó anulada.')}
 
 /* ---------- Eventos ---------- */
-function setTab(t){view.tab=t;if(t==='gest')renderFinGest();if(t==='acts')renderFinActs();['acts','bank','tax','acct','gest'].forEach(k=>{$('#v-'+k).hidden=k!==t;$('#tab-'+k).setAttribute('aria-selected',String(k===t))})}
+function setTab(t){view.tab=t;if(['presup','pol','plan','neg'].indexOf(t)>=0)renderFinGest();if(t==='acts')renderFinActs();['acts','bank','tax','acct','presup','pol','plan','neg'].forEach(k=>{$('#v-'+k).hidden=k!==t;$('#tab-'+k).setAttribute('aria-selected',String(k===t))})}
+document.addEventListener('change',e=>{const t=e.target;if(t&&t.id==='ac-prov'){const c=S.contacts[+t.value];readPF();if(t.value!==''&&c)Object.assign(view.pf,{name:c.name,ced:c.ced||'',iban:fmtIban(c.iban)});else Object.assign(view.pf,{name:'',ced:'',iban:''});renderAcct()}});
 document.addEventListener('click',e=>{
   const tabBtn=e.target.closest('[data-tab]');if(tabBtn){setTab(tabBtn.dataset.tab);return}
   const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act;
@@ -1020,11 +1030,15 @@ const goPay=()=>{setTab('bank');const pc=$('#payCard');if(pc&&pc.scrollIntoView)
 function acResumen(){const t=totals();
   const tile=(l,v)=>`<div class="tile"><span class="sub">${l}</span><strong>${fmt(v)}</strong></div>`;
   return `<div class="card"><h2 style="margin-bottom:12px">Resumen de la empresa</h2><div class="tiles">${tile('Dinero en bancos',t.bancos)}${tile('Ventas netas (sin IVA)',t.ventas)}${tile('IVA cobrado',t.iva)}${tile('Por cobrar a clientes',t.xcobrar)}${tile('Compras y gastos (sin IVA)',t.compras)}${tile('IVA soportado',t.ivaS)}${tile('Por pagar a proveedores',t.xpagar)}${tile('Utilidad estimada',t.util)}</div>
-    <p class="hint" style="margin-top:10px">La utilidad estimada es ventas netas menos compras y gastos, antes de impuesto sobre la renta y cargas sociales.</p>${pendNote()}</div>
-   <div class="card" style="margin-top:20px"><div class="head-row"><h2>Puesta en marcha de la empresa</h2><span class="pill info" id="ckCount">${ckCount()}</span></div>
+    <p class="hint" style="margin-top:10px">La utilidad estimada es ventas netas menos compras y gastos, antes de impuesto sobre la renta y cargas sociales.</p>${pendNote()}</div>`}
+function renderRes(){const el=$('#resBody');if(el)el.innerHTML=acResumen()+'<div style="height:20px"></div>'+acMarcha()}
+function acMarcha(){
+  return `<div class="card"><div class="head-row"><h2>Puesta en marcha de la empresa</h2><span class="pill info" id="ckCount">${ckCount()}</span></div>
     <p class="hint" style="margin-bottom:12px">Los pasos "automáticos" se completan solos cuando haces la práctica. Los demás los marcas tú cuando los investiguen. Los trámites reales cambian: confirmen siempre los requisitos vigentes.</p>
     <ul class="stepslist">${STEPS.map(x=>{const done=x.auto?x.auto():!!S.checks[x.k];return `<li><label class="ck"><input type="checkbox"${done?' checked':''}${x.auto?' disabled':` data-ck="${x.k}"`}><span>${esc(x.t)}${x.auto?' <span class="sub">(automático)</span>':''}</span></label></li>`}).join('')}</ul></div>`}
 
+function provTable(){if(!S.contacts.length)return '<p class="muted">Todavía no hay proveedores guardados.</p>';
+  return `<div class="tscroll"><table class="mv"><thead><tr><th>Proveedor</th><th>Cédula</th><th>IBAN</th><th></th></tr></thead><tbody>${S.contacts.map((c,i)=>`<tr><td>${esc(c.name)}</td><td class="mono">${esc(c.ced||'—')}</td><td class="mono">${esc(fmtIban(c.iban))}</td><td style="white-space:nowrap"><button class="btn sec sm" type="button" data-act="prov-use" data-i="${i}">Nueva compra</button> <button class="link" type="button" data-act="prov-rm" data-i="${i}">Quitar</button></td></tr>`).join('')}</tbody></table></div>`}
 function acCompras(){const f=view.pf;
   const err=view.perr&&view.perr.length?`<div class="alert bad" role="alert"><strong>Revisa estos datos:</strong><ul>${view.perr.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:'';
   const rows=S.purchases.slice().reverse().map(p=>`<tr><td class="mono" style="white-space:nowrap">${esc(String(p.date).split('-').reverse().join('/'))}</td><td>${esc(p.name)}<span class="sub mono" style="display:block">Fact. ${esc(p.invNo)} · ${esc(p.cat)}${p.dept&&DNAME[p.dept]?' · '+esc(DNAME[p.dept]):''}</span></td><td class="r">${fmt(p.base)}</td><td class="r">${fmt(p.ivaAmt)}</td><td class="r">${fmt(p.total)}</td><td>${p.paid?'<span class="pill ok">Pagada</span>':'<span class="pill warn">Por pagar</span>'}</td><td style="white-space:nowrap">${p.paid?'':`<button class="btn sec sm" data-act="pur-pay" data-id="${p.id}">Pagar</button> <button class="link" data-act="pur-rm" data-id="${p.id}">Quitar</button>`}</td></tr>`).join('');
@@ -1033,6 +1047,7 @@ function acCompras(){const f=view.pf;
     <form id="purForm" novalidate><div class="grid">
      <div class="field"><label for="ac-date">Fecha de la factura</label><input id="ac-date" type="date" value="${esc(f.date)}"></div>
      <div class="field"><label for="ac-inv">N.º de factura del proveedor</label><input id="ac-inv" class="mono" maxlength="30" autocomplete="off" value="${esc(f.invNo)}"></div>
+     <div class="field wide"><label for="ac-prov">Elegir un proveedor guardado</label><select id="ac-prov"><option value="">— Proveedor nuevo (escribe los datos abajo) —</option>${S.contacts.map((c,i)=>`<option value="${i}">${esc(c.name)}</option>`).join('')}</select></div>
      <div class="field wide"><label for="ac-name">Proveedor</label><input id="ac-name" autocomplete="off" value="${esc(f.name)}" placeholder="Nombre del proveedor"></div>
      <div class="field"><label for="ac-ced">Cédula del proveedor (opcional)</label><input id="ac-ced" class="mono" inputmode="numeric" maxlength="14" autocomplete="off" value="${esc(f.ced)}"></div>
      <div class="field wide"><label for="ac-iban">IBAN del proveedor (para poder pagarle)</label><input id="ac-iban" class="mono" autocomplete="off" placeholder="CR00 0000 0000 0000 0000 00" value="${esc(f.iban)}"><p class="hint" style="margin-top:6px">Si el proveedor es inventado, presiona el botón y el simulador crea un IBAN de práctica válido.</p><button type="button" class="btn sec sm" data-act="pur-iban-gen" style="margin-top:6px">Generar un IBAN de práctica</button></div>
@@ -1041,6 +1056,7 @@ function acCompras(){const f=view.pf;
      <div class="field"><label for="ac-base">Monto sin IVA (₡)</label><input id="ac-base" class="mono" type="number" step="0.01" min="0" inputmode="decimal" value="${esc(f.base)}"></div>
      <div class="field"><label for="ac-iva">Tarifa de IVA</label><select id="ac-iva">${IVAS.map(v=>`<option value="${v[0]}"${Number(f.iva)===v[0]?' selected':''}>${v[1]}</option>`).join('')}</select></div></div>
      <div class="mini-total" id="pcalc" style="margin-top:14px">${pcalcHTML()}</div><button class="btn" type="submit">Registrar compra</button></form></div>
+    <div class="card"><div class="head-row" style="margin-bottom:6px"><h2>Mis proveedores</h2></div>${provTable()}<p class="hint" style="margin-top:10px">Cada proveedor se guarda solo la primera vez que registras una compra. Después lo eliges de la lista y los datos se llenan solos.</p></div>
     <div class="card"><div class="head-row" style="margin-bottom:6px"><h2>Libro de compras</h2><button class="btn sec sm" type="button" data-act="compras-pdf">Descargar PDF</button></div>${rows?`<div class="tscroll"><table class="mv"><thead><tr><th>Fecha</th><th>Proveedor</th><th class="r">Base</th><th class="r">IVA</th><th class="r">Total</th><th>Estado</th><th></th></tr></thead><tbody>${rows}</tbody></table></div><p class="hint" style="margin-top:10px">Con "Pagar" se abre el banco con los datos de la compra ya llenos. El IBAN del proveedor se guarda al registrar la compra.</p>`:'<p class="muted">Aún no has registrado compras.</p>'}</div></div>`}
 function addPurchase(){readPF();const f=view.pf,e=[];
   if(!f.name.trim())e.push('Escribe el nombre del proveedor.');
@@ -1052,8 +1068,9 @@ function addPurchase(){readPF();const f=view.pf,e=[];
   if(S.purchases.some(p=>p.invNo.toLowerCase()===f.invNo.trim().toLowerCase()&&p.name.trim().toLowerCase()===f.name.trim().toLowerCase()))e.push('Ya registraste esa factura de ese proveedor.');
   view.perr=e;if(e.length){renderAcct();return}
   {let ib=f.iban&&f.iban.trim()?normIban(f.iban):'';const nm=f.name.trim();
-   if(!S.contacts.some(c=>c.name.toLowerCase()===nm.toLowerCase())){if(!ib){let r='';for(let i=0;i<14;i++)r+=Math.floor(Math.random()*10);ib=mkIban('0999'+r)}
-     if(!S.contacts.some(c=>c.iban===ib))S.contacts.push({name:nm,iban:ib})}}
+   const ex=S.contacts.find(c=>c.name.toLowerCase()===nm.toLowerCase());if(ex&&!ex.ced&&f.ced.trim())ex.ced=f.ced.trim();
+   if(!ex){if(!ib){let r='';for(let i=0;i<14;i++)r+=Math.floor(Math.random()*10);ib=mkIban('0999'+r)}
+     if(!S.contacts.some(c=>c.iban===ib))S.contacts.push({name:nm,ced:f.ced.trim(),iban:ib})}}
   const k=purCalc(f);S.purchases.push({id:S.nextId++,ts:Date.parse(f.date+'T12:00:00-06:00'),date:f.date,name:f.name.trim(),ced:f.ced.trim(),invNo:f.invNo.trim(),cat:f.cat,desc:f.desc.trim(),base:k.base,iva:Number(f.iva),ivaAmt:k.iva,total:k.total,paid:false});
   view.pf=newPF();view.perr=[];save();renderAcct();toast('Compra registrada.')}
 function payPurchase(id){const p=S.purchases.find(x=>x.id===id);if(!p||p.paid)return;
@@ -1103,10 +1120,10 @@ function acDiario(){const E=journal();let n=0;
     <p class="hint" style="margin-bottom:12px">Bancos en contabilidad: ${fmt(bk)}. Saldo real en las cuentas del banco: ${fmt(real)}.</p>
     <div class="tscroll"><table class="mv" style="min-width:560px"><thead><tr><th>Cuenta</th><th class="r">Debe</th><th class="r">Haber</th><th class="r">Saldo deudor</th><th class="r">Saldo acreedor</th></tr></thead><tbody>${bal}</tbody><tfoot><tr><td><strong>Totales</strong></td><td class="r"><strong>${fmt(TD)}</strong></td><td class="r"><strong>${fmt(TH)}</strong></td><td></td><td></td></tr></tfoot></table></div></div>`}
 
-const ACNAV=[['resumen','Resumen'],['compras','Compras y gastos'],['iva','IVA e impuestos'],['diario','Libro diario']];
+const ACNAV=[['compras','Compras y gastos'],['iva','IVA e impuestos'],['diario','Libro diario']];
 function renderAcct(){const nav=$('#acctNav'),body=$('#acctBody');if(!nav||!body)return;
   nav.innerHTML=ACNAV.map(n=>`<button type="button" data-act="ac-nav" data-v="${n[0]}" aria-pressed="${view.ac===n[0]}">${n[1]}</button>`).join('');
-  body.innerHTML=({resumen:acResumen,compras:acCompras,iva:acIva,diario:acDiario}[view.ac]||acResumen)()}
+  body.innerHTML=({compras:acCompras,iva:acIva,diario:acDiario}[view.ac]||acCompras)()}
 
 /*PDFSTART*/
 const PC={ink:[21,33,46],mut:[86,102,119],acc:[10,106,98]};
@@ -1232,9 +1249,11 @@ function buildPurchasesPdf(){
 /* ---------- Eventos de contabilidad, factura y logo ---------- */
 document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act;
   switch(a){
-    case 'ac-nav':view.ac=b.dataset.v;renderAcct();break;
+    case 'ac-nav':view.ac=b.dataset.v;renderAcct();if(view.dept!=='fin'){setDept('fin');setTab('acct')}break;
     case 'pur-rm':{const i=S.purchases.findIndex(x=>x.id===+b.dataset.id);if(i>=0&&!S.purchases[i].paid){S.purchases.splice(i,1);save();renderAcct()}break}
     case 'pur-iban-gen':{readPF();let r='';for(let i=0;i<14;i++)r+=Math.floor(Math.random()*10);view.pf.iban=fmtIban(mkIban('0999'+r));renderAcct();toast('IBAN de práctica generado.');break}
+    case 'prov-use':{const c=S.contacts[+b.dataset.i];if(c){readPF();Object.assign(view.pf,{name:c.name,ced:c.ced||'',iban:fmtIban(c.iban)});renderAcct();const el=$('#ac-inv');if(el)el.focus()}break}
+    case 'prov-rm':{const i=+b.dataset.i,c=S.contacts[i];if(c&&confirm('¿Quitar a '+c.name+' de tus proveedores?')){S.contacts.splice(i,1);save();renderAcct()}break}
     case 'pur-pay':payPurchase(+b.dataset.id);break;
     case 'decl-present':presentDecl();break;
     case 'decl-pay':payDecl(+b.dataset.id);break;
@@ -2528,7 +2547,7 @@ const presupResumen=()=>`<section class="gdsec" id="presupRes">${presupResumenIn
 function presupPdf(st){const t=presupTot(),m=gMetrics().t,r=(n,p,q)=>[n,nf(p),nf(q),nf(r2(q-p))];st.h2('Resumen contable');st.kv('Utilidad bruta',nf(t.ub));st.kv('Utilidad del período',nf(t.ut));st.kv('Dinero al final del flujo de caja',nf(t.caja));st.y+=1;
  st.table([{h:'Concepto',w:64},{h:'Presupuesto',w:38,a:'r'},{h:'Real (simulador)',w:40,a:'r'},{h:'Diferencia',w:38,a:'r'}],[r('Ventas',t.v,m.ventas),r('Compras y gastos',r2(t.c+t.g),m.compras),r('Utilidad',t.ut,m.util),r('Dinero en bancos al final',t.caja,m.bancos)])}
 function presupMig(){const d=S.docs&&S.docs.presup;if(!d||!Array.isArray(d.meses))return;let ch=false;d.meses.forEach(r=>{if(r&&r.ventas==null&&(r.ing!=null||r.egr!=null)){r.ventas=r.ing==null?'':r.ing;r.otros=r.egr==null?'':r.egr;ch=true}});if(ch&&!cloud.ro)save()}
-function renderFinGest(){presupMig();const el=$('#finGest');if(el)el.innerHTML=gdPage('presup',null,presupResumen())+'<div style="height:20px"></div>'+gdPage('polfin')+'<div style="height:20px"></div>'+gdPage('plan_fin')+'<div style="height:20px"></div>'+gdPage('neg_fin')}
+function renderFinGest(){presupMig();const put=(id,h)=>{const el=$('#'+id);if(el)el.innerHTML=h};put('fgPresup',gdPage('presup',null,presupResumen()));put('fgPol',gdPage('polfin'));put('fgPlan',gdPage('plan_fin'));put('fgNeg',gdPage('neg_fin'))}
 function renderFinActs(){const el=$('#finActs');if(el)el.innerHTML=actPage('fin')}
 function gKpi(){return gdPage('kpi',gdMetricas())}
 function gAreas(){const a=view.gdarea||'ger';return `<div class="card" style="margin-bottom:20px"><h2 style="margin-bottom:6px">Planes por área funcional</h2><p class="hint" style="margin-bottom:10px">Cada área de la empresa tiene su propio plan. Elige el área y complétalo.</p><div class="seg" role="group" aria-label="Área">${AREAS.map(x=>`<button type="button" data-gdc="sel" data-v="${x[0]}" aria-pressed="${a===x[0]}">${esc(x[1])} · ${gdPct('plan_'+x[0])} %</button>`).join('')}</div></div>`+gdPage('plan_'+a)}
@@ -2619,12 +2638,12 @@ function buildLetterheadPdf(){
     doc.setDrawColor(col[0],col[1],col[2]);doc.setLineWidth(.8);doc.line(M,262,W-M,262);
   pfnt(doc,'normal',8.5,PC.mut);doc.text(pdfSafe(c.lema||(c.name+' - '+c.dir)),W/2,268,{align:'center'});
   return doc.output('blob')}
-function setDept(k){view.dept=k;if(k==='ger')renderGer();if(k==='th')renderTh();if(k==='mkt')renderMk();if(k==='prod')renderPr();['home','ger','mkt','th','prod','fin'].forEach(x=>{const s=$('#dept-'+x);if(s)s.hidden=x!==k;const b=$('#dt-'+x);if(b)b.setAttribute('aria-selected',String(x===k))});applyGates();window.scrollTo({top:0})}
+function setDept(k){view.dept=k;if(k==='ger')renderGer();if(k==='th')renderTh();if(k==='mkt')renderMk();if(k==='prod')renderPr();if(k==='res')renderRes();['home','ger','mkt','th','prod','fin','res'].forEach(x=>{const s=$('#dept-'+x);if(s)s.hidden=x!==k;const b=$('#dt-'+x);if(b)b.setAttribute('aria-selected',String(x===k))});applyGates();window.scrollTo({top:0})}
 document.addEventListener('click',e=>{
   const dp=e.target.closest('[data-dept]');if(dp){setDept(dp.dataset.dept);return}
   const lh=e.target.closest('[data-act="lh-pdf"]');if(lh)savePdf(mk(()=>buildLetterheadPdf()),'hoja-membretada.pdf')});
 
-function renderAll(){renderDepts();renderGer();renderTh();renderMk();renderPr();renderFinGest();renderCompany();renderAccts();renderMoves();renderPay();renderTaxForm();renderPreview();renderHist();renderAcct();renderFinActs();applyGates()}
+function renderAll(){renderDepts();renderGer();renderTh();renderMk();renderPr();renderFinGest();renderCompany();renderAccts();renderMoves();renderPay();renderTaxForm();renderPreview();renderHist();renderAcct();renderRes();renderFinActs();applyGates()}
 /* ---------- Nube: empresa compartida por código (Firebase) ---------- */
 const FB_CONFIG={apiKey:"AIzaSyDcWs4CUq-rSv1FKSX82s3OHR-OC17KdzM",authDomain:"simulador-empresa-1ceed.firebaseapp.com",projectId:"simulador-empresa-1ceed",storageBucket:"simulador-empresa-1ceed.firebasestorage.app",messagingSenderId:"930736900267",appId:"1:930736900267:web:379d0acb563c72f349cfee"};
 const FB_BASE='https://www.gstatic.com/firebasejs/13.0.0/';
@@ -3026,10 +3045,10 @@ const ACT12={
   ['Libro diario','PDF del libro diario','acct:diario'],
   ['Declaración de IVA','PDF de la declaración','acct:iva'],
   ['Pago de impuestos y cargas','PDF del comprobante del pago','acct:iva'],
-  ['Presupuesto mensual y flujo de caja','PDF del presupuesto','gest'],
-  ['Políticas de cobro, pago y control del dinero','PDF de las políticas','gest'],
-  ['Plan del área de Contabilidad y finanzas','PDF del plan del área','gest'],
-  ['Negociación con una empresa y contrato','PDF de la negociación y el contrato','gest']]};
+  ['Presupuesto mensual y flujo de caja','PDF del presupuesto','presup'],
+  ['Políticas de cobro, pago y control del dinero','PDF de las políticas','pol'],
+  ['Plan del área de Contabilidad y finanzas','PDF del plan del área','plan'],
+  ['Negociación con una empresa y contrato','PDF de la negociación y el contrato','neg']]};
 const actStore=d=>{if(!S.acts||typeof S.acts!=='object')S.acts={};if(!Array.isArray(S.acts[d]))S.acts[d]=[];return S.acts[d]};
 const actCount=d=>{const a=(S.acts&&Array.isArray(S.acts[d]))?S.acts[d]:[];return ACT12[d].filter((x,i)=>a[i]&&a[i].d).length};
 const actTotal=()=>Object.keys(ACT12).reduce((n,d)=>n+actCount(d),0);
