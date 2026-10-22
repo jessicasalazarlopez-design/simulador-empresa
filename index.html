@@ -2633,10 +2633,10 @@ function buildLetterheadPdf(){
   const J=window.jspdf&&window.jspdf.jsPDF;if(!J)return null;
   const doc=new J({unit:'mm',format:'letter'}),W=216,M=20,c=S.company,col=rgbOf(c.color);let y=22;
   y=pdfHeader(doc,M,W,y,c);
-  if(c.act){pfnt(doc,'italic',9,PC.mut);doc.text(pdfSafe(c.act),M,y);y+=5}
+  if(c.act){pfnt(doc,'italic',9,PC.mut);const al=doc.splitTextToSize(pdfSafe(c.act),W-2*M);doc.text(al,M,y);y+=al.length*4.4+1}
   doc.setDrawColor(col[0],col[1],col[2]);doc.setLineWidth(1.2);doc.line(M,y,W-M,y);
     doc.setDrawColor(col[0],col[1],col[2]);doc.setLineWidth(.8);doc.line(M,262,W-M,262);
-  pfnt(doc,'normal',8.5,PC.mut);doc.text(pdfSafe(c.lema||(c.name+' - '+c.dir)),W/2,268,{align:'center'});
+  pfnt(doc,'normal',8.5,PC.mut);doc.text(doc.splitTextToSize(pdfSafe(c.lema||(c.name+' - '+c.dir)),W-2*M).slice(0,2),W/2,268,{align:'center'});
   return doc.output('blob')}
 function setDept(k){view.dept=k;if(k==='ger')renderGer();if(k==='th')renderTh();if(k==='mkt')renderMk();if(k==='prod')renderPr();if(k==='res')renderRes();['home','ger','mkt','th','prod','fin','res'].forEach(x=>{const s=$('#dept-'+x);if(s)s.hidden=x!==k;const b=$('#dt-'+x);if(b)b.setAttribute('aria-selected',String(x===k))});applyGates();window.scrollTo({top:0})}
 document.addEventListener('click',e=>{
