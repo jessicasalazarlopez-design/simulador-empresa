@@ -270,6 +270,14 @@ body.ro-mode .wrap input,body.ro-mode .wrap select,body.ro-mode .wrap textarea{p
 .cmlist{display:flex;flex-direction:column;gap:8px}
 .cmitem{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;background:var(--surface)}
 .cmitem .nm{display:flex;flex-direction:column;min-width:0}
+.tab.locked::after{content:"";display:inline-block;width:.75em;height:.75em;margin-left:.4em;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 10V7a5 5 0 0 1 10 0v3h1a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1h1zm2 0h6V7a3 3 0 0 0-6 0v3z'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 10V7a5 5 0 0 1 10 0v3h1a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1h1zm2 0h6V7a3 3 0 0 0-6 0v3z'/%3E%3C/svg%3E") center/contain no-repeat}
+section[data-locked]{display:none!important}
+.dgate{max-width:520px;margin:24px auto;display:flex;flex-direction:column;gap:12px}
+.dgate input[type=password]{min-height:44px;font:600 1.1rem var(--f-body);padding:0 12px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);color:var(--ink)}
+.cmopt .dpw{display:flex;flex-direction:column;gap:10px}
+.cmopt .dpw .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.cmopt .dpw input[type=text]{flex:1 1 160px;min-height:40px;font:600 1rem var(--f-body);letter-spacing:0;text-transform:none;padding:0 12px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);color:var(--ink)}
+.cmopt .dpw .st{font-size:.85rem;color:var(--muted);font-weight:600;min-width:7ch}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 @media (max-width:520px){.card{padding:16px}.doc{padding:16px}.kv{grid-template-columns:1fr;gap:2px}.kv dd{margin-bottom:8px}}
 </style>
@@ -305,6 +313,8 @@ body.ro-mode .wrap input,body.ro-mode .wrap select,body.ro-mode .wrap textarea{p
       </span>
     </div>
   </div>
+
+  <div id="deptGate" hidden></div>
 
   <section id="dept-home" class="v-home">
     <div class="card">
@@ -354,14 +364,16 @@ body.ro-mode .wrap input,body.ro-mode .wrap select,body.ro-mode .wrap textarea{p
 
   <section id="dept-fin" hidden>
   <div class="tabs" role="tablist" aria-label="Simuladores de Contabilidad y finanzas">
-    <button class="tab t-bank" role="tab" id="tab-bank" aria-selected="true" aria-controls="v-bank" data-tab="bank">Banco</button>
+    <button class="tab t-acct" role="tab" id="tab-acts" aria-selected="true" aria-controls="v-acts" data-tab="acts">Mis 12 actividades</button>
+    <button class="tab t-bank" role="tab" id="tab-bank" aria-selected="false" aria-controls="v-bank" data-tab="bank">Banco</button>
     <button class="tab t-tax" role="tab" id="tab-tax" aria-selected="false" aria-controls="v-tax" data-tab="tax">Factura electrónica</button>
     <button class="tab t-acct" role="tab" id="tab-acct" aria-selected="false" aria-controls="v-acct" data-tab="acct">Contabilidad</button>
-    <button class="tab t-acct" role="tab" id="tab-gest" aria-selected="false" aria-controls="v-gest" data-tab="gest">Presupuesto, políticas y negociación</button>
+    <button class="tab t-acct" role="tab" id="tab-gest" aria-selected="false" aria-controls="v-gest" data-tab="gest">Presupuesto, políticas, plan y negociación</button>
   </div>
 
   <main>
-    <section id="v-bank" class="v-bank" role="tabpanel" aria-labelledby="tab-bank">
+    <section id="v-acts" class="v-acct" role="tabpanel" aria-labelledby="tab-acts"><div id="finActs"></div></section>
+    <section id="v-bank" class="v-bank" role="tabpanel" aria-labelledby="tab-bank" hidden>
       <details class="tip">
         <summary>Qué practicar en el banco</summary>
         <ul>
@@ -496,7 +508,7 @@ const dayKey=(ts)=>{const p=crParts(new Date(ts||Date.now()));return `${p.year}-
 /* ---------- Estado ---------- */
 const KEY='simulador-banco-factura-v1';
 /* Estado de la nube (el módulo completo está al final del script) */
-const cloud={on:false,ro:false,code:'',mods:null,db:null,auth:null,ref:null,unsub:null,last:{},timer:0,status:'solo',err:'',busy:false,pendingRender:false,blurHook:false,renderTimer:0};
+const cloud={on:false,ro:false,code:'',mods:null,db:null,auth:null,ref:null,unsub:null,last:{},timer:0,status:'solo',err:'',busy:false,pendingRender:false,blurHook:false,renderTimer:0,dp:null,dpUnsub:null,dpErr:''};
 function blankDraft(){return{type:'01',rec:{name:'',idType:'02',id:'',mail:''},cond:'01',plazo:'',pago:'04',obs:'',lines:[{det:'',code:'',qty:1,unit:'Unid',price:'',disc:0,iva:13}]}}
 function sampleDraft(){return{type:'01',rec:{name:'Cliente de Práctica S.A. (ejemplo)',idType:'02',id:'3-101-654321',mail:'compras@cliente.example'},cond:'01',plazo:'',pago:'04',obs:'',lines:[
   {det:'Impresión de afiches (ejemplo)',code:'1234567890123',qty:10,unit:'Unid',price:3500,disc:0,iva:13},
@@ -504,7 +516,7 @@ function sampleDraft(){return{type:'01',rec:{name:'Cliente de Práctica S.A. (ej
 function defaults(){const now=Date.now();
   const cc={id:'cc',name:'Cuenta corriente',iban:mkIban('099900000123456789'),bal:2500000};
   const ah={id:'ah',name:'Cuenta de ahorros',iban:mkIban('099900000765432100'),bal:500000};
-  return{v:1,nextId:100,refN:1,seq:{'01':1,'03':1,'04':1},sinpe:{day:'',total:0},
+  return{v:1,acts:{},nextId:100,refN:1,seq:{'01':1,'03':1,'04':1},sinpe:{day:'',total:0},
     company:{name:'Mi Empresa de Práctica S.A.',ced:'3-101-000000',tel:'2222-0000',mail:'ventas@miempresa.example',dir:'San Sebastián, San José'},
     accounts:[cc,ah],
     moves:[{id:1,acc:'cc',ts:now,desc:'Saldo inicial de práctica',debit:0,credit:2500000,bal:2500000,ref:'INICIO'},{id:2,acc:'ah',ts:now,desc:'Saldo inicial de práctica',debit:0,credit:500000,bal:500000,ref:'INICIO'}],
@@ -513,7 +525,7 @@ function defaults(){const now=Date.now();
 function load(){try{const raw=localStorage.getItem(KEY);if(raw){const o=JSON.parse(raw);if(o&&o.v===1&&o.accounts&&o.draft)return o}}catch(e){}return defaults()}
 let S=load();S.ger=S.ger||null;S.th=S.th||null;S.mk=S.mk||null;S.pr=S.pr||null;S.company=Object.assign({act:'',lema:'',color:'#0A6A62',color2:'#F2A900'},S.company);S.docs=S.docs||{};S.receipts=S.receipts||{};S.purchases=S.purchases||[];S.decls=S.decls||[];S.checks=S.checks||{};
 function save(){if(cloud.ro)return;try{localStorage.setItem(cloud.on?KEY+':'+cloud.code:KEY,JSON.stringify(S))}catch(e){}if(cloud.on)cloudPush()}
-const view={dept:'home',tab:'bank',acc:'cc',prev:null,ac:'resumen',ym:dayKey().slice(0,7),pf:null,perr:[]};view.pf=newPF();
+const view={dept:'home',tab:'acts',acc:'cc',prev:null,ac:'resumen',ym:dayKey().slice(0,7),pf:null,perr:[]};view.pf=newPF();
 let sending=false,tt;
 
 function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),3000)}
@@ -877,7 +889,7 @@ function notaCredito(id){const o=S.invoices.find(x=>x.id===id);if(!o||o.type==='
   toast(o.paid?'Nota de crédito emitida. Si ya cobraste, devuelve el dinero con una transferencia.':'Nota de crédito emitida. La factura quedó anulada.')}
 
 /* ---------- Eventos ---------- */
-function setTab(t){view.tab=t;if(t==='gest')renderFinGest();['bank','tax','acct','gest'].forEach(k=>{$('#v-'+k).hidden=k!==t;$('#tab-'+k).setAttribute('aria-selected',String(k===t))})}
+function setTab(t){view.tab=t;if(t==='gest')renderFinGest();if(t==='acts')renderFinActs();['acts','bank','tax','acct','gest'].forEach(k=>{$('#v-'+k).hidden=k!==t;$('#tab-'+k).setAttribute('aria-selected',String(k===t))})}
 document.addEventListener('click',e=>{
   const tabBtn=e.target.closest('[data-tab]');if(tabBtn){setTab(tabBtn.dataset.tab);return}
   const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act;
@@ -1236,7 +1248,7 @@ const LEGACY_CART=[
  {id:'c1',inst:'Escuela Pública Ejemplo (institución ficticia)',ced:'3-007-000123',num:'2026PR-000001',det:'Afiches informativos de seguridad escolar',qty:120,unit:'Unid',max:6000,req:'Impresos a color, tamaño carta. Entrega en 15 días hábiles.'},
  {id:'c2',inst:'Municipalidad de Villa Práctica (ficticia)',ced:'3-007-000456',num:'2026PR-000002',det:'Diseño de identidad visual para campaña de reciclaje',qty:1,unit:'Sp',max:180000,req:'Logo, paleta de colores y manual básico. Entrega en 20 días hábiles.'},
  {id:'c3',inst:'Hospital Regional de Práctica (ficticio)',ced:'3-007-000789',num:'2026PR-000003',det:'Rótulos de señalización interna',qty:50,unit:'Unid',max:12000,req:'Rótulos en PVC de 30 x 20 cm. Entrega en 25 días hábiles.'}];
-const GNAV=[['ficha','Ficha y puesta en operación'],['org','Organigrama y plan'],['kpi','Metas y KPI'],['areas','Planes por área'],['neg','Negociación y contrato'],['tab','Centro de operaciones'],['estado','Compras del Estado'],['actas','Actas de decisión'],['ase','Asesoría'],['prov','Facturas de proveedores'],['cierre','Informe de cierre']];
+const GNAV=[['act','Mis 12 actividades'],['ficha','Ficha y puesta en operación'],['org','Organigrama y plan'],['kpi','Metas y KPI'],['areas','Plan del área'],['tab','Centro de operaciones'],['estado','Compras del Estado'],['actas','Actas de decisión'],['ase','Asesoría'],['riesgos','Matriz de riesgos'],['obl','Calendario de obligaciones'],['neg','Negociación y contrato'],['prov','Facturas de proveedores'],['cierre','Informe de cierre']];
 const GUIA=[
  ['No sé si conviene ser sociedad o persona física','Abogado o notario','Explicar la forma legal, el capital y las responsabilidades.'],
  ['Dudas con IVA, renta o la factura electrónica','Contador público autorizado o el sitio oficial de Hacienda','Presentar declaraciones bien y evitar multas.'],
@@ -1263,7 +1275,7 @@ const newForm=()=>({tema:'',dato:'',alts:['','',''],dec:'',why:'',firma:''});
 const newCart=()=>({inst:'',det:'',qty:'',unit:'Unid',max:'',req:''});
 const newOf=()=>({cartel:'',price:'',cost:'',iva:13,plazo:'15',vig:'30',gar:'6',firma:'',ok:false});
 const newAf=()=>({date:dayKey(),tema:'',con:'',res:''});
-view.gr='ficha';view.gcf=newCart();view.gform=newForm();view.gof=newOf();view.gaf=newAf();view.gerr=[];
+view.gr='act';view.gcf=newCart();view.gform=newForm();view.gof=newOf();view.gaf=newAf();view.gerr=[];
 const gd=s=>s?String(s).split('-').reverse().join('/'):'—';
 const pad3=n=>String(n).padStart(3,'0');
 const gOpts=(arr,v)=>arr.map(o=>{const a=Array.isArray(o)?o:[o,o];return `<option value="${esc(a[0])}"${String(a[0])===String(v)?' selected':''}>${esc(a[1])}</option>`}).join('');
@@ -1398,7 +1410,7 @@ function gCierre(){const g=S.ger,e=g.equipo,ch=gChecks();
   <div class="btnrow" style="margin-top:14px"><button type="button" class="btn" data-g="pdf-port">Descargar portafolio (PDF)</button></div></div>`}
 function renderGer(){ensureGer();const el=$('#dept-ger');if(!el)return;el.className='v-ger';
  const nav=GNAV.map(n=>`<button type="button" data-g="nav" data-v="${n[0]}" aria-pressed="${view.gr===n[0]}">${n[1]}</button>`).join('');
- const body=({ficha:gFicha,org:gOrg,kpi:gKpi,areas:gAreas,neg:()=>gdPage('neg_ger'),tab:gTab,estado:gEstado,actas:gActas,ase:gAse,prov:()=>provHTML('ger'),cierre:gCierre}[view.gr]||gFicha)();
+ const body=({act:()=>actPage('ger'),ficha:gFicha,org:gOrg,kpi:gKpi,areas:()=>gdPage('plan_ger'),riesgos:()=>gdPage('riesgos'),obl:()=>gdPage('obligaciones'),neg:()=>gdPage('neg_ger'),tab:gTab,estado:gEstado,actas:gActas,ase:()=>gAse()+'<div style="height:20px"></div>'+gdPage('asesoria'),prov:()=>provHTML('ger'),cierre:gCierre}[view.gr]||(()=>actPage('ger')))();
  el.innerHTML=`<div class="seg" role="group" aria-label="Secciones de Gerencia">${nav}</div>${view.gr==='ficha'||view.gr==='org'||view.gr==='tab'||view.gr==='cierre'?gErrHTML():''}${body}`}
 /* ---- acciones ---- */
 const gShowErr=()=>{renderGer();const x=$('#gErr')||$('#dept-ger .alert');if(x&&x.scrollIntoView)x.scrollIntoView({block:'center'})};
@@ -1548,7 +1560,7 @@ function gBind(e){const t=e.target;if(!t.dataset||!t.dataset.gp||!t.closest('#de
 $('#dept-ger').addEventListener('input',gBind);$('#dept-ger').addEventListener('change',gBind);
 
 /* ===== Talento Humano ===== */
-const THNAV=[['staff','Colaboradores y contratos'],['plan','Planilla'],['cargas','Cargas sociales y pólizas'],['reg','Reglamento interno'],['manual','Manual de funciones'],['capac','Capacitación y desempeño'],['neg','Negociación y contrato'],['cult','Cultura y clima'],['prov','Facturas de proveedores']];
+const THNAV=[['act','Mis 12 actividades'],['staff','Colaboradores y contratos'],['plan','Planilla y boletas'],['cargas','Cargas sociales y pólizas'],['reg','Reglamento interno'],['manual','Manual de funciones'],['recl','Perfil y selección'],['capac','Capacitación y desempeño'],['salud','Salud y seguridad'],['cult','Cultura y clima'],['parea','Plan del área'],['neg','Negociación y contrato'],['prov','Facturas de proveedores']];
 const CONTR=[['indef','Plazo indefinido'],['fijo','Plazo fijo'],['obra','Por obra determinada']];
 const CONTR_N={indef:'Plazo indefinido',fijo:'Plazo fijo',obra:'Por obra determinada'};
 const CLIMA_Q=['Me siento respetado y respetada en la empresa.','Sé qué se espera de mi trabajo.','Hay buena comunicación entre los departamentos.','Tengo lo que necesito para hacer bien mi trabajo.','Recomendaría esta empresa como lugar de trabajo.'];
@@ -1567,7 +1579,7 @@ function ensureTh(){const d=defaultTh(),t=S.th||{};S.th=Object.assign(d,t);['rat
  if(!Array.isArray(S.th.cult.v))S.th.cult.v=['','',''];['staff','clima','regx'].forEach(k=>{if(!Array.isArray(S.th[k]))S.th[k]=[]})}
 const newSf=()=>({name:'',ced:'',puesto:'',dept:'mkt',ingreso:dayKey(),salario:'',contrato:'indef',funciones:'',horario:'',lugar:'',pago:'Mensual',duracion:'',prueba:'',vac:'',extra:''});
 const newCf=()=>({date:dayKey(),a:['','','','',''],com:''});
-view.tr='staff';view.thEdit=null;view.trg={t:'',txt:''};view.thm=dayKey().slice(0,7);view.thf=newSf();view.tkf=newCf();view.terr=[];
+view.tr='act';view.thEdit=null;view.trg={t:'',txt:''};view.thm=dayKey().slice(0,7);view.thf=newSf();view.tkf=newCf();view.terr=[];
 function tRoot(p){if(p.startsWith('x.'))return[view.trg,p.slice(2)];if(p.startsWith('f.'))return[view.thf,p.slice(2)];if(p.startsWith('k.'))return[view.tkf,p.slice(2)];return[S.th,p]}
 function tSet(p,v){const r=tRoot(p),ks=r[1].split('.'),last=ks.pop();ks.reduce((a,b)=>a[b],r[0])[last]=v}
 const tPersist=p=>!/^[fkx]\./.test(p);
@@ -1643,7 +1655,7 @@ function tCult(){const C=S.th.cult,k=view.tkf,avg=tClimaAvg();
 function renderTh(){ensureTh();const el=$('#dept-th');if(!el)return;el.className='v-th';
  const nav=THNAV.map(n=>`<button type="button" data-t="nav" data-v="${n[0]}" aria-pressed="${view.tr===n[0]}">${n[1]}</button>`).join('');
  const who=(S.ger&&S.ger.org&&S.ger.org.th)||'';
- el.innerHTML=`<div class="seg" role="group" aria-label="Secciones de Talento Humano">${nav}</div>${who?`<p class="hint" style="margin:-6px 0 14px">Responsable del departamento: <strong>${esc(who)}</strong></p>`:''}`+({staff:tStaff,plan:tPlan,cargas:tCargas,reg:tReg,manual:()=>gdPage('manual'),capac:()=>gdPage('capac'),neg:()=>gdPage('neg_th'),cult:tCult,prov:()=>provHTML('th')}[view.tr]||tStaff)()}
+ el.innerHTML=`<div class="seg" role="group" aria-label="Secciones de Talento Humano">${nav}</div>${who?`<p class="hint" style="margin:-6px 0 14px">Responsable del departamento: <strong>${esc(who)}</strong></p>`:''}`+({act:()=>actPage('th'),recl:()=>gdPage('reclutamiento'),salud:()=>gdPage('salud'),parea:()=>gdPage('plan_th'),staff:tStaff,plan:tPlan,cargas:tCargas,reg:tReg,manual:()=>gdPage('manual'),capac:()=>gdPage('capac'),neg:()=>gdPage('neg_th'),cult:tCult,prov:()=>provHTML('th')}[view.tr]||tStaff)()}
 /* ---- PDF ---- */
 function thAddContrato(st,s){const e=S.company;
  st.title('Contrato individual de trabajo',e.name+' · Documento de práctica, sin validez legal');
@@ -1763,7 +1775,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-pv]');if(!
 function pvBind(e){const t=e.target;if(!t.dataset||!t.dataset.pp)return;const p=t.dataset.pp.split('.'),d=p[0];view.pff[d][p[1]]=t.value;const c=$('#pvcalc-'+d);if(c)c.innerHTML=pvCalcHTML(d)}
 document.addEventListener('input',pvBind);document.addEventListener('change',pvBind);
 /* ===== Marketing y ventas ===== */
-const MKNAV=[['marca','Marca y cliente'],['prod','Producto (1.ª P)'],['precio','Precio (2.ª P)'],['plaza','Plaza (3.ª P)'],['promo','Promoción (4.ª P)'],['plan','Plan estratégico'],['publi','Publicidad'],['neg','Negociación y contrato'],['cat','Catálogo'],['cot','Cotizaciones'],['prov','Facturas de proveedores'],['ventas','Ventas y clientes']];
+const MKNAV=[['act','Mis 12 actividades'],['marca','Marca y cliente'],['prod','Producto (1.ª P)'],['precio','Precio (2.ª P)'],['plaza','Plaza (3.ª P)'],['promo','Promoción (4.ª P)'],['plan','Plan estratégico'],['publi','Publicidad'],['parea','Plan del área'],['neg','Negociación y contrato'],['cat','Catálogo'],['cot','Cotizaciones'],['prov','Facturas de proveedores'],['ventas','Ventas y clientes']];
 const CANALES=['Tienda o puesto físico','Redes sociales','WhatsApp','Sitio web o tienda en línea','Entrega a domicilio','Ferias y actividades del colegio','Distribuidores o revendedores'];
 const OBJS=['Dar a conocer la empresa','Vender más','Lanzar un producto nuevo','Fidelizar clientes'];
 function defaultMk(){return{nextId:10,cotN:0,marca:{cliente:'',propuesta:'',mensaje:''},
@@ -1773,7 +1785,7 @@ function ensureMk(){const d=defaultMk(),t=S.mk||{};S.mk=Object.assign(d,t);['mar
 const newMkf=()=>({name:'',desc:'',tipo:'Producto',unit:'Unid',cost:'',price:'',iva:13,code:''});
 const newMpf=()=>({name:'',obj:OBJS[0],publico:'',canal:CANALES[1],presu:'',ini:dayKey(),fin:'',meta:''});
 const newMqf=()=>({cli:{name:'',idType:'02',id:'',mail:''},vig:'15',cond:'01',plazo:'',lines:[{item:'',qty:1,disc:0}]});
-view.mr='marca';view.mkf=newMkf();view.mpf=newMpf();view.mqf=newMqf();view.merr=[];
+view.mr='act';view.mkf=newMkf();view.mpf=newMpf();view.mqf=newMqf();view.merr=[];
 function mRoot(p){if(p.startsWith('f.'))return[view.mkf,p.slice(2)];if(p.startsWith('g.'))return[view.mpf,p.slice(2)];if(p.startsWith('q.'))return[view.mqf,p.slice(2)];return[S.mk,p]}
 function mSet(p,v){const r=mRoot(p),ks=r[1].split('.'),last=ks.pop();ks.reduce((a,b)=>a[b],r[0])[last]=v}
 const mPersist=p=>!/^[fgq]\./.test(p);
@@ -1784,15 +1796,15 @@ const merrHTML=()=>view.merr&&view.merr.length?`<div class="alert bad" role="ale
 const mShowErr=()=>{renderMk();const x=$('#mErr');if(x&&x.scrollIntoView)x.scrollIntoView({block:'center'})};
 function mMarca(){const M=S.mk.marca,c=S.company;
  const P=[['prod','Producto','¿Qué vendemos y para quién?'],['precio','Precio','¿Cuánto cobramos y cuánto ganamos?'],['plaza','Plaza','¿Dónde y cómo llega al cliente?'],['promo','Promoción','¿Cómo damos a conocer la empresa?']];
- return `<div class="card"><h2 style="margin-bottom:6px">Las 4 P del marketing</h2><p class="hint" style="margin-bottom:12px">Toda estrategia de marketing responde cuatro preguntas. Entra a cada una.</p>
+ return `<div class="card"><h2 style="margin-bottom:6px">Las 4 P del marketing</h2><p class="hint" style="margin-bottom:12px">Toda estrategia de marketing responde cuatro preguntas. Entra a cada una; cada una tiene su PDF.</p>
   <div class="depts">${P.map(p=>`<article class="dept" style="--dc:var(--tax)"><h3>${p[1]}</h3><p>${p[2]}</p><button type="button" class="btn sec sm" data-m="nav" data-v="${p[0]}">Ir a ${p[1]}</button></article>`).join('')}</div></div>
- <div class="card" style="margin-top:20px"><div class="head-row"><h2>Marca y cliente</h2><button type="button" class="btn sm" data-m="pdf-plan">Descargar plan de marketing (PDF)</button></div>
+ <div class="card" style="margin-top:20px"><div class="head-row"><h2>Marca y cliente</h2><button type="button" class="btn sm" data-m="pdf-marca">Marca y cliente (PDF)</button></div>
   <p class="hint" style="margin-bottom:12px">Empresa: <strong>${esc(c.name)}</strong>${c.lema?' · Lema: '+esc(c.lema):''}. El logo, el color y el lema se cambian en la portada.</p>
   <div class="grid"><div class="field wide"><label for="m-cli">¿Quién es nuestro cliente ideal?</label><textarea id="m-cli" maxlength="300" data-mp="marca.cliente">${esc(M.cliente)}</textarea></div>
    <div class="field wide"><label for="m-prop">¿Por qué nos van a elegir a nosotros? (propuesta de valor)</label><textarea id="m-prop" maxlength="300" data-mp="marca.propuesta">${esc(M.propuesta)}</textarea></div>
    <div class="field wide"><label for="m-msg">Mensaje principal de la marca</label><input id="m-msg" maxlength="120" autocomplete="off" data-mp="marca.mensaje" value="${esc(M.mensaje)}"></div></div></div>`}
 function mProd(){const f=view.mkf,rows=S.mk.items.map((it,i)=>`<tr><td>${esc(it.name)}<span class="sub">${esc(it.desc)}</span></td><td>${esc(it.tipo)}</td><td>${esc(it.unit)}</td><td class="r">${fmt(it.price)}</td><td><button type="button" class="link" data-m="item-rm" data-i="${i}">Quitar</button></td></tr>`).join('');
- return `<div class="card"><h2 style="margin-bottom:6px">Producto: lo que vende la empresa</h2><p class="hint" style="margin-bottom:12px">Agrega cada producto o servicio. Después ajustas el costo y el precio en la sección Precio.</p>${merrHTML()}
+ return `<div class="card"><div class="head-row"><h2>Producto: lo que vende la empresa</h2><button type="button" class="btn sm" data-m="pdf-producto">Productos (PDF)</button></div><p class="hint" style="margin-bottom:12px">Agrega cada producto o servicio. Después ajustas el costo y el precio en la sección Precio.</p>${merrHTML()}
   <div class="grid"><div class="field wide"><label for="m-name">Nombre</label><input id="m-name" maxlength="70" autocomplete="off" data-mp="f.name" value="${esc(f.name)}"></div>
    <div class="field wide"><label for="m-desc">Descripción corta</label><input id="m-desc" maxlength="120" autocomplete="off" data-mp="f.desc" value="${esc(f.desc)}"></div>
    <div class="field"><label for="m-tipo">Es un…</label><select id="m-tipo" data-mp="f.tipo">${gOpts(['Producto','Servicio'],f.tipo)}</select></div>
@@ -1808,13 +1820,13 @@ function mPrecio(){const rows=S.mk.items.map((it,i)=>{const gan=r2(num(it.price)
   <p class="hint" style="margin-bottom:12px">Precio = costo + ganancia. Escribe el margen que quieres ganar (por ejemplo 40) y pulsa "Aplicar" para que la página calcule el precio sin IVA. Después el IVA se suma.</p>
   ${rows?`<div class="tscroll"><table class="mv" style="min-width:900px"><thead><tr><th>Producto</th><th>Costo</th><th>Precio sin IVA</th><th>IVA</th><th class="r">Precio con IVA</th><th class="r">Ganancia y margen</th><th>Margen deseado</th></tr></thead><tbody>${rows}</tbody></table></div>`:'<p class="hint">Agrega productos en la sección Producto.</p>'}</div>`}
 function mPlaza(){const P=S.mk.plaza;
- return `<div class="card"><h2 style="margin-bottom:6px">Plaza: dónde y cómo llega al cliente</h2><p class="hint" style="margin-bottom:12px">Marca los canales por los que va a vender la empresa.</p>
+ return `<div class="card"><div class="head-row"><h2>Plaza: dónde y cómo llega al cliente</h2><button type="button" class="btn sm" data-m="pdf-plaza">Plaza (PDF)</button></div><p class="hint" style="margin-bottom:12px">Marca los canales por los que va a vender la empresa.</p>
   <div class="grid" style="margin-bottom:14px">${CANALES.map((c,i)=>`<label class="ck"><input type="checkbox" data-mp="plaza.canales.${i}"${P.canales[i]?' checked':''}><span>${esc(c)}</span></label>`).join('')}</div>
   <div class="grid"><div class="field wide"><label for="m-zona">¿A qué zona llegamos?</label><input id="m-zona" maxlength="120" autocomplete="off" data-mp="plaza.zona" value="${esc(P.zona)}"></div>
    <div class="field wide"><label for="m-hor">Horario de atención</label><input id="m-hor" maxlength="120" autocomplete="off" data-mp="plaza.horario" value="${esc(P.horario)}"></div>
    <div class="field wide"><label for="m-ent">¿Cómo se entrega el producto o servicio?</label><textarea id="m-ent" maxlength="300" data-mp="plaza.entrega">${esc(P.entrega)}</textarea></div></div></div>`}
 function mPromo(){const f=view.mpf,rows=S.mk.promos.map((p,i)=>{const pc=num(p.meta)>0?Math.round(num(p.vendido)/num(p.meta)*100):0;return `<tr><td>${esc(p.name)}<span class="sub">${esc(p.obj)} · ${esc(p.canal)}</span></td><td style="white-space:nowrap">${esc(gd(p.ini))} al ${esc(gd(p.fin))}</td><td class="r">${fmt(p.presu)}</td><td class="r">${fmt(p.meta)}</td><td><input class="mono" style="width:120px" type="number" min="0" step="0.01" data-mp="promos.${i}.vendido" data-rr aria-label="Vendido en ${esc(p.name)}" value="${esc(p.vendido)}"></td><td><span class="pill ${pc>=100?'ok':'warn'}">${pc}% de la meta</span></td><td style="white-space:nowrap"><button type="button" class="btn sec sm" data-m="promo-fact" data-i="${i}">Registrar factura</button> <button type="button" class="link" data-m="promo-rm" data-i="${i}">Quitar</button></td></tr>`}).join('');
- return `<div class="card"><h2 style="margin-bottom:6px">Promoción: cómo damos a conocer la empresa</h2><p class="hint" style="margin-bottom:12px">Planifica una campaña, anota cuánto vendió y compara con la meta. La factura del gasto (por ejemplo, el proveedor de la publicidad) se registra y queda por pagar en Contabilidad.</p>${merrHTML()}
+ return `<div class="card"><div class="head-row"><h2>Promoción: cómo damos a conocer la empresa</h2><button type="button" class="btn sm" data-m="pdf-promo">Promoción (PDF)</button></div><p class="hint" style="margin-bottom:12px">Planifica una campaña, anota cuánto vendió y compara con la meta. La factura del gasto (por ejemplo, el proveedor de la publicidad) se registra y queda por pagar en Contabilidad.</p>${merrHTML()}
   <div class="grid"><div class="field wide"><label for="m-pn">Nombre de la campaña</label><input id="m-pn" maxlength="70" autocomplete="off" data-mp="g.name" value="${esc(f.name)}"></div>
    <div class="field"><label for="m-po">Objetivo</label><select id="m-po" data-mp="g.obj">${gOpts(OBJS,f.obj)}</select></div>
    <div class="field"><label for="m-pc">Canal</label><select id="m-pc" data-mp="g.canal">${gOpts(CANALES,f.canal)}</select></div>
@@ -1867,7 +1879,7 @@ function mVentas(){const s=mkSales(),t=totals(),mx=Math.max(1,...s.prod.map(p=>p
 function renderMk(){ensureMk();const el=$('#dept-mkt');if(!el)return;el.className='v-mkt';
  const nav=MKNAV.map(n=>`<button type="button" data-m="nav" data-v="${n[0]}" aria-pressed="${view.mr===n[0]}">${n[1]}</button>`).join('');
  const who=(S.ger&&S.ger.org&&S.ger.org.mkt)||'';
- el.innerHTML=`<div class="seg" role="group" aria-label="Secciones de Marketing y ventas">${nav}</div>${who?`<p class="hint" style="margin:-6px 0 14px">Responsable del departamento: <strong>${esc(who)}</strong></p>`:''}`+({marca:mMarca,prod:mProd,precio:mPrecio,plaza:mPlaza,promo:mPromo,plan:()=>gdPage('plan_mk'),publi:()=>gdPage('publi'),neg:()=>gdPage('neg_mkt'),cat:mCat,cot:mCot,prov:()=>provHTML('mkt'),ventas:mVentas}[view.mr]||mMarca)()}
+ el.innerHTML=`<div class="seg" role="group" aria-label="Secciones de Marketing y ventas">${nav}</div>${who?`<p class="hint" style="margin:-6px 0 14px">Responsable del departamento: <strong>${esc(who)}</strong></p>`:''}`+({act:()=>actPage('mkt'),parea:()=>gdPage('plan_mkt'),marca:mMarca,prod:mProd,precio:mPrecio,plaza:mPlaza,promo:mPromo,plan:()=>gdPage('plan_mk'),publi:()=>gdPage('publi'),neg:()=>gdPage('neg_mkt'),cat:mCat,cot:mCot,prov:()=>provHTML('mkt'),ventas:mVentas}[view.mr]||mMarca)()}
 /* ---- PDF ---- */
 function mkAddPlan(st){const M=S.mk,c=S.company;st.title('Plan de marketing: las 4 P',c.name);
  st.h2('Marca y cliente');if(c.lema)st.kv('Lema',c.lema);st.kv('Cliente ideal',M.marca.cliente);st.kv('Propuesta de valor',M.marca.propuesta);st.kv('Mensaje',M.marca.mensaje);st.y+=2;
@@ -1889,8 +1901,13 @@ function mkAddVentas(st){const s=mkSales();st.title('Informe de ventas',S.compan
  st.table([{h:'Indicador',w:110},{h:'Valor',w:70,a:'r'}],[['Ventas netas (sin IVA)',moneyPdf(s.net)],['Facturas emitidas',String(s.n)],['Venta promedio (con IVA)',moneyPdf(s.avg)],['Cotizaciones aceptadas',s.acc+' de '+s.cots+' ('+s.tasa+'%)'],['Campañas: vendido / meta',moneyPdf(s.vend)+' / '+moneyPdf(s.meta)]]);
  st.h2('Mejores clientes');st.table([{h:'Cliente',w:100},{h:'Facturas',w:24,a:'r'},{h:'Total con IVA',w:56,a:'r'}],s.cli.map(c=>[c.k,String(c.n),nf(c.t)]));
  st.h2('Lo que más se vende');st.table([{h:'Producto o servicio',w:100},{h:'Cantidad',w:24,a:'r'},{h:'Venta sin IVA',w:56,a:'r'}],s.prod.map(p=>[p.k,String(p.q),nf(p.t)]))}
+function mkAddPart(st,kind){const M=S.mk,c=S.company;
+ if(kind==='marca'){st.title('Marca y cliente',c.name);if(c.lema)st.kv('Lema',c.lema);st.kv('Cliente ideal',M.marca.cliente);st.kv('Propuesta de valor',M.marca.propuesta);st.kv('Mensaje',M.marca.mensaje)}
+ else if(kind==='producto'){st.title('Producto: lo que vende la empresa',c.name);st.table([{h:'Producto o servicio',w:66},{h:'Tipo',w:22},{h:'Descripción',w:56},{h:'Precio sin IVA',w:28,a:'r'}],M.items.map(it=>[it.name,it.tipo,it.desc||'',nf(it.price)]))}
+ else if(kind==='plaza'){st.title('Plaza: dónde y cómo llega al cliente',c.name);const ch=CANALES.filter((x,i)=>M.plaza.canales[i]);st.kv('Canales',ch.join(', '));st.kv('Zona',M.plaza.zona);st.kv('Horario',M.plaza.horario);st.kv('Entrega',M.plaza.entrega)}
+ else if(kind==='promo'){st.title('Promoción: campañas',c.name);st.table([{h:'Campaña',w:48},{h:'Canal',w:30},{h:'Fechas',w:32},{h:'Presupuesto',w:26,a:'r'},{h:'Meta',w:22,a:'r'},{h:'Vendido',w:22,a:'r'}],M.promos.map(p=>[p.name,p.canal,gd(p.ini)+' al '+gd(p.fin),nf(p.presu),nf(p.meta),nf(p.vendido)]))}}
 function mkBuild(kind,arg){const st=gPdf();if(!st)return null;st.head();
- if(kind==='plan')mkAddPlan(st);else if(kind==='precios')mkAddPrecios(st);else if(kind==='cat')mkAddCat(st);else if(kind==='cot')mkAddCot(st,arg);else if(kind==='ventas')mkAddVentas(st);
+ if(kind==='marca'||kind==='producto'||kind==='plaza'||kind==='promo')mkAddPart(st,kind);else if(kind==='plan')mkAddPlan(st);else if(kind==='precios')mkAddPrecios(st);else if(kind==='cat')mkAddCat(st);else if(kind==='cot')mkAddCot(st,arg);else if(kind==='ventas')mkAddVentas(st);
  return st.finish('Marketing y ventas · '+S.company.name)}
 /* ---- eventos ---- */
 document.addEventListener('click',e=>{const b=e.target.closest('#dept-mkt [data-m]');if(!b)return;const a=b.dataset.m,M=S.mk,id=+b.dataset.i;
@@ -1921,6 +1938,10 @@ document.addEventListener('click',e=>{const b=e.target.closest('#dept-mkt [data-
    q.fact=true;save();view.prev=null;renderTaxForm();renderPreview();renderMk();setDept('fin');setTab('tax');toast('Borrador de factura listo. Revísalo y emítelo.');break}
   case 'cat-copy':{const u=M.cat.link.trim();if(okUrl(u)){try{navigator.clipboard.writeText(u).then(()=>toast('Enlace copiado.'),()=>toast('No se pudo copiar. Selecciona el enlace y cópialo.'))}catch(err){toast('No se pudo copiar.')}}break}
   case 'pdf-plan':savePdf(mk(()=>mkBuild('plan')),'plan-de-marketing.pdf');break;
+  case 'pdf-marca':savePdf(mk(()=>mkBuild('marca')),'marca-y-cliente.pdf');break;
+  case 'pdf-producto':savePdf(mk(()=>mkBuild('producto')),'productos.pdf');break;
+  case 'pdf-plaza':savePdf(mk(()=>mkBuild('plaza')),'plaza.pdf');break;
+  case 'pdf-promo':savePdf(mk(()=>mkBuild('promo')),'promocion.pdf');break;
   case 'pdf-precios':savePdf(mk(()=>mkBuild('precios')),'lista-de-precios.pdf');break;
   case 'pdf-cat':savePdf(mk(()=>mkBuild('cat')),'catalogo.pdf');break;
   case 'pdf-ventas':savePdf(mk(()=>mkBuild('ventas')),'informe-de-ventas.pdf');break;
@@ -1932,12 +1953,12 @@ function mBind(e){const t=e.target;if(!t.dataset||!t.dataset.mp||!t.closest('#de
 $('#dept-mkt').addEventListener('input',mBind);$('#dept-mkt').addEventListener('change',mBind);
 
 /* ===== Producción ===== */
-const PRNAV=[['ruta','Mi ruta'],['prods','1. Producto y layout'],['plan','2. Plan y proceso'],['mat','3. Compra de materiales'],['ord','4. Producción'],['cal','5. Control de calidad'],['desp','6. Despacho'],['inf','Informe'],['procs','Procesos'],['estrella','Producto estrella'],['neg','Negociación y contrato'],['costo','Costos'],['inv','Inventario'],['prov','Facturas de proveedores']];
+const PRNAV=[['act','Mis 12 actividades'],['ruta','Mi ruta de producción'],['prods','1. Producto y layout'],['plan','2. Plan y proceso'],['mat','3. Compra de materiales'],['ord','4. Producción'],['cal','5. Control de calidad'],['desp','6. Despacho'],['inf','Informe'],['procs','Procesos'],['estrella','Producto estrella'],['parea','Plan del área'],['neg','Negociación y contrato'],['costo','Costos'],['inv','Inventario'],['prov','Facturas de proveedores']];
 const ORD_ST=['Pendiente','En proceso','Terminada'];
 const DEF_QC=[];
 function defaultPr(){return{prods:[],nextId:1,ordN:0,qcN:0,umbral:5,arts:[],proc:{},bom:{},cost:{},qc:{},min:{},movs:[],ords:[],insp:[],ocN:0,dpN:0,plan:{},zonas:{},layNota:'',compras:[],desp:[]}}
 function ensurePr(){const d=defaultPr(),t=S.pr||{};S.pr=Object.assign(d,t);['proc','bom','cost','qc','min','plan','zonas'].forEach(k=>{if(!S.pr[k]||typeof S.pr[k]!=='object')S.pr[k]={}});['movs','ords','insp','arts','prods','compras','desp'].forEach(k=>{if(!Array.isArray(S.pr[k]))S.pr[k]=[]})}
-view.pr='ruta';view.prn={name:'',unit:'unidad',price:'',desc:''};view.prp=null;view.perr2=[];
+view.pr='act';view.prn={name:'',unit:'unidad',price:'',desc:''};view.prp=null;view.perr2=[];
 view.prs={txt:'',resp:'',min:''};view.prr={name:'',kind:'m',unit:'',ini:'',min:''};view.prb={name:'',qty:'',unit:'unidad',cost:'',prov:''};view.pre={mat:'',qty:'',date:dayKey()};
 view.pra={tgt:'',qty:'',mot:''};view.pro={item:'',qty:'',ent:'',nota:'',resp:''};view.poc={prov:'',date:dayKey(),nota:''};view.pol={mat:'',qty:'',cost:''};view.pocl=[];view.pod={name:'',qty:'',dest:'',lugar:'',rec:'',transp:'',nota:'',date:dayKey()};view.pri={ord:'',insp:'',def:'0',acc:'',checks:{}};
 function pRoot(p){const m={'n.':view.prn,'r.':view.prr,'s.':view.prs,'b.':view.prb,'e.':view.pre,'a.':view.pra,'o.':view.pro,'i.':view.pri,'c.':view.poc,'l.':view.pol,'d.':view.pod,'v.':view};const k=p.slice(0,2);if(m[k])return[m[k],p.slice(2)];return[S.pr,p]}
@@ -2147,7 +2168,7 @@ function pCal(){const it=prCur();if(!it)return prNone();const qc=prQc(it.id),f=v
 function renderPr(){ensurePr();ensureMk();const el=$('#dept-prod');if(!el)return;el.className='v-prod';
  const nav=PRNAV.map(n=>`<button type="button" data-pr="nav" data-v="${n[0]}" aria-pressed="${view.pr===n[0]}">${n[1]}</button>`).join('');
  const who=(S.ger&&S.ger.org&&S.ger.org.prod)||'';
- el.innerHTML=`<div class="seg" role="group" aria-label="Secciones de Producción">${nav}</div>${who?`<p class="hint" style="margin:-6px 0 14px">Responsable del departamento: <strong>${esc(who)}</strong></p>`:''}`+({ruta:pRuta,prods:pProds,plan:pPlan,proc:pPlan,mat:pMat,costo:pCosto,inv:pInv,ord:pOrd,cal:pCal,desp:pDesp,inf:pInf,procs:()=>gdPage('procesos'),estrella:()=>gdPage('estrella'),neg:()=>gdPage('neg_prod'),prov:()=>provHTML('prod')}[view.pr]||pRuta)()}
+ el.innerHTML=`<div class="seg" role="group" aria-label="Secciones de Producción">${nav}</div>${who?`<p class="hint" style="margin:-6px 0 14px">Responsable del departamento: <strong>${esc(who)}</strong></p>`:''}`+({act:()=>actPage('prod'),parea:()=>gdPage('plan_prod'),ruta:pRuta,prods:pProds,plan:pPlan,proc:pPlan,mat:pMat,costo:pCosto,inv:pInv,ord:pOrd,cal:pCal,desp:pDesp,inf:pInf,procs:()=>gdPage('procesos'),estrella:()=>gdPage('estrella'),neg:()=>gdPage('neg_prod'),prov:()=>provHTML('prod')}[view.pr]||pRuta)()}
 /* ---- PDF ---- */
 function prAddProc(st){st.title('Fichas del proceso de producción',S.company.name);
  prItems().forEach(it=>{const s=prSteps(it.id);st.h2(it.name);st.table([{h:'N.º',w:12},{h:'Paso',w:100},{h:'Responsable',w:44},{h:'Minutos',w:24,a:'r'}],s.map((x,i)=>[String(i+1),x.txt,x.resp,String(x.min)]));if(s.length)st.p('Tiempo total: '+s.reduce((a,x)=>a+num(x.min),0)+' minutos.',{c:PC.mut,s:9})})}
@@ -2331,6 +2352,37 @@ const GDOCS={
    {t:'Pasos del procedimiento',l:{k:'pasos',add:'Agregar paso',imp:'imp-pasos',impT:'Traer pasos de Plan y proceso',num:true,cols:[{k:'p',l:'Qué se hace',t:'a'},{k:'r',l:'Quién'},{k:'t',l:'Minutos',t:'n'},{k:'c',l:'Qué se revisa'}]}},
    {t:'Calidad, seguridad y registros',f:[{k:'seg',l:'Normas de higiene y seguridad',t:'a'},{k:'cal',l:'¿Cómo sabemos que quedó bien?',t:'a'},{k:'reg',l:'Formularios que se llenan',ph:'Orden de producción, informe de calidad…'}]}]}};
 
+GDOCS.asesoria={dept:'ger',title:'Informe de asesoría con una persona experta',
+ steps:['Elijan a una persona experta que pueda orientar a la empresa: contador, abogado, asesor de una institución o emprendedor con experiencia.','Antes de la reunión, escriban las preguntas más importantes.','Durante la reunión, anoten cada recomendación con la acción que harán.','Al final, escriban qué decidió la gerencia con lo que aprendió.'],
+ ej:'Persona: contadora externa · Pregunta: ¿cómo declaramos el IVA cada mes? · Recomendación: presentar la declaración antes del día 15 · Acción: Contabilidad lo hace',
+ secs:[{t:'1. Persona asesora',f:[{k:'per',l:'Nombre de la persona experta'},{k:'cargo',l:'Profesión o institución',ph:'Ej.: contadora pública autorizada'},{k:'fecha',l:'Fecha de la asesoría',t:'d'},{k:'medio',l:'Lugar o medio',ph:'Presencial, videollamada…'}]},
+  {t:'2. Preparación',f:[{k:'tema',l:'Tema que queremos aclarar',t:'a'},{k:'preg',l:'Preguntas que vamos a hacer',t:'a'}]},
+  {t:'3. Recomendaciones recibidas',l:{k:'rec',add:'Agregar recomendación',cols:[{k:'r',l:'Recomendación',t:'a'},{k:'a',l:'Acción que haremos'},{k:'resp',l:'Responsable'},{k:'f',l:'Fecha',t:'d'}]}},
+  {t:'4. Decisión de gerencia',f:[{k:'dec',l:'¿Qué decidimos con lo que aprendimos?',t:'a'},{k:'ref',l:'¿Qué fue lo más útil de la asesoría?',t:'a'}]}]};
+GDOCS.riesgos={dept:'ger',title:'Matriz de riesgos y plan de contingencia',
+ steps:['Piensen qué cosas pueden salir mal en la empresa: dinero, personas, producción, ventas o trámites.','Para cada riesgo, elijan qué tan probable es y cuánto daño haría.','Escriban cómo lo van a evitar y qué harán si ocurre (plan B).','Escojan a una persona responsable de vigilar cada riesgo.'],
+ ej:'Riesgo: se atrasa el proveedor de materiales · Probabilidad: Media · Impacto: Alto · Cómo evitarlo: tener dos proveedores · Plan B: comprar en otra tienda',
+ secs:[{t:'Riesgos de la empresa',l:{k:'rie',add:'Agregar riesgo',cols:[{k:'r',l:'Riesgo'},{k:'area',l:'Área',t:'s',o:AREAS.map(a=>a[1])},{k:'p',l:'Probabilidad',t:'s',o:['Baja','Media','Alta']},{k:'i',l:'Impacto',t:'s',o:['Bajo','Medio','Alto']},{k:'ev',l:'Cómo evitarlo',t:'a'},{k:'pb',l:'Plan B si ocurre',t:'a'},{k:'resp',l:'Responsable'}]}},
+  {t:'Riesgo más importante',f:[{k:'top',l:'¿Cuál es el riesgo que más nos preocupa y por qué?',t:'a'},{k:'ref',l:'¿Qué haremos esta semana para prepararnos?',t:'a'}]}]};
+GDOCS.obligaciones={dept:'ger',title:'Calendario de obligaciones de la empresa',
+ steps:['Hagan una lista de lo que la empresa debe cumplir cada mes y cada año.','Para cada obligación, anoten la institución, cada cuánto se hace y la fecha límite.','Confirmen las fechas vigentes en el sitio oficial de cada institución, porque cambian con el tiempo.','Marquen el estado y escojan una persona responsable.'],
+ ej:'Obligación: declaración de IVA · Institución: Ministerio de Hacienda · Frecuencia: mensual · Fecha límite: confirmar la vigente · Responsable: Contabilidad',
+ secs:[{t:'Obligaciones',l:{k:'obl',add:'Agregar obligación',cols:[{k:'o',l:'Obligación',ph:'IVA, CCSS, INS, patente…'},{k:'ins',l:'Institución'},{k:'frec',l:'Frecuencia',t:'s',o:['Mensual','Trimestral','Anual','Una sola vez']},{k:'f',l:'Fecha límite',t:'d'},{k:'resp',l:'Responsable'},{k:'est',l:'Estado',t:'s',o:['Pendiente','En proceso','Listo']}]}},
+  {t:'Notas',f:[{k:'nota',l:'¿Cuál obligación es la más urgente y qué haremos para cumplirla?',t:'a'}]}]};
+GDOCS.reclutamiento={dept:'th',title:'Perfil de puesto y proceso de selección',
+ steps:['Elijan un puesto que la empresa necesita llenar.','Escriban el perfil de la persona: estudios, experiencia y habilidades.','Armen los pasos para seleccionar: publicar, recibir hojas de vida, entrevistar y decidir.','Anoten los criterios para escoger y lo que la empresa ofrece.'],
+ ej:'Puesto: vendedor de mostrador · Estudios: secundaria completa · Habilidad: buen trato con clientes · Paso 1: publicar el puesto en redes',
+ secs:[{t:'1. El puesto',f:[{k:'puesto',l:'Nombre del puesto'},{k:'area',l:'Área',t:'s',o:AREAS.map(a=>a[1])},{k:'vac',l:'Cantidad de personas que se necesitan',t:'n'},{k:'jefe',l:'Responde a'}]},
+  {t:'2. Perfil de la persona',f:[{k:'est',l:'Estudios que debe tener',t:'a'},{k:'exp',l:'Experiencia que debe tener',t:'a'},{k:'hab',l:'Habilidades y actitudes que buscamos',t:'a'}]},
+  {t:'3. Pasos de la selección',l:{k:'pasos',add:'Agregar paso',num:true,cols:[{k:'p',l:'Paso'},{k:'resp',l:'Responsable'},{k:'f',l:'Fecha',t:'d'}]}},
+  {t:'4. Decisión y oferta',f:[{k:'crit',l:'Criterios para escoger a la persona',t:'a'},{k:'sal',l:'Salario mensual que ofrecemos (₡)',t:'n'},{k:'ben',l:'Horario y beneficios que ofrecemos',t:'a'}]}]};
+GDOCS.salud={dept:'th',title:'Plan de salud ocupacional y seguridad',
+ steps:['Recorran la empresa y anoten los peligros que puede haber para las personas.','Para cada peligro, escriban cómo prevenirlo y qué equipo de protección se necesita.','Escriban qué hará el personal en una emergencia: accidente, incendio o sismo.','Escojan a las personas de la comisión de salud y cada cuánto se revisa el plan.'],
+ ej:'Peligro: piso mojado en la cocina · Dónde: área de producción · Prevención: secar y poner una señal · Equipo: zapatos antideslizantes',
+ secs:[{t:'1. Peligros en la empresa',l:{k:'pel',add:'Agregar peligro',cols:[{k:'p',l:'Peligro'},{k:'d',l:'Dónde está'},{k:'pre',l:'Cómo se previene',t:'a'},{k:'eq',l:'Equipo de protección'}]}},
+  {t:'2. Plan de emergencia',f:[{k:'acc',l:'¿Qué se hace si alguien se accidenta?',t:'a'},{k:'inc',l:'¿Qué se hace en un incendio o un sismo?',t:'a'},{k:'bot',l:'Botiquín y teléfonos de emergencia',t:'a'}]},
+  {t:'3. Comisión y revisión',f:[{k:'com',l:'Personas de la comisión de salud ocupacional'},{k:'rev',l:'¿Cada cuánto se revisa este plan?',ph:'Ej.: cada 3 meses'},{k:'cap',l:'Capacitación de seguridad que dará la empresa',t:'a'}]}]};
+
 const NEGS={ger:['Gerencia','Una alianza o un servicio externo para toda la empresa (por ejemplo, el alquiler del local o un contador externo).','Empresa: Contadores Rojas · Qué se negocia: llevar la contabilidad por ₡40 000 al mes'],
  mkt:['Marketing y ventas','La venta de su producto a un cliente, o un servicio de publicidad.','Empresa: Cafetería La Esquina · Qué se negocia: comprar 50 unidades al mes durante 3 meses'],
  th:['Talento Humano','Un servicio para el personal, como una capacitación o un servicio de reclutamiento.','Empresa: Academia Futuro · Qué se negocia: curso de atención al cliente para 5 personas'],
@@ -2345,7 +2397,7 @@ Object.keys(NEGS).forEach(d=>{const n=NEGS[d];GDOCS['neg_'+d]={dept:d,title:'Neg
   {t:'4. Condiciones finales',f:[{k:'vig',l:'Vigencia del contrato',ph:'Ej.: 3 meses'},{k:'term',l:'¿Cómo se puede cambiar o terminar el contrato?',t:'a'},{k:'inc',l:'¿Qué pasa si alguien no cumple?',t:'a'}]},
   {t:'5. Firmas',f:[{k:'f1',l:'Firma por nuestra empresa (nombre y cargo)'},{k:'f2',l:'Firma por la otra empresa (nombre y cargo)'},{k:'ff',l:'Fecha de la firma',t:'d'}]},
   {t:'6. Reflexión',f:[{k:'ref',l:'¿Qué salió bien y qué mejoraríamos en la próxima negociación?',t:'a'}]}]}});
-AREAS.forEach(a=>{GDOCS['plan_'+a[0]]={dept:'ger',title:'Plan del área: '+a[1],
+AREAS.forEach(a=>{GDOCS['plan_'+a[0]]={dept:a[0],title:'Plan del área: '+a[1],
  steps:['Escribe para qué existe el área y qué quiere lograr.','Pon metas con su indicador y su plazo.','Lista las actividades con responsable y fecha.','Anota el presupuesto y los riesgos que ves.'],
  ej:'Meta: reducir defectos a menos de 5 % · Indicador: % de defectos · Plazo: noviembre',
  secs:[{t:'Punto de partida',f:[{k:'obj',l:'Objetivo del área',t:'a'},{k:'sit',l:'Situación actual: ¿cómo estamos hoy?',t:'a'}]},
@@ -2406,7 +2458,8 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-gdc]');if(
 /* métricas automáticas */
 function gdMetricas(){const m=gMetrics(),t=m.t,pt=prTot(),tile=(l,v)=>`<div class="tile"><span class="sub">${l}</span><strong>${v}</strong></div>`;
  return `<div class="card" style="margin-bottom:20px"><h2 style="margin-bottom:6px">Métricas del simulador (se llenan solas)</h2><p class="hint" style="margin-bottom:12px">Estos números salen de lo que ya hicieron en los departamentos. Úsenlos para llenar la columna "Lo actual" de sus KPI.</p><div class="tiles">${tile('Ventas facturadas',fmt(t.ventas))}${tile('Compras y gastos',fmt(t.compras))}${tile('Utilidad estimada',fmt(t.util))}${tile('Dinero en bancos',fmt(t.bancos))}${tile('Trámites hechos',m.tram.d+' de '+m.tram.t)}${tile('Tareas del plan listas',m.plan.d+' de '+m.plan.t)}${tile('Unidades producidas',pt.t.ent)}${tile('Unidades despachadas',pt.t.desp)}${tile('Colaboradores',((S.th&&S.th.staff)||[]).length)}</div></div>`}
-function renderFinGest(){const el=$('#finGest');if(el)el.innerHTML=gdPage('presup')+'<div style="height:20px"></div>'+gdPage('polfin')+'<div style="height:20px"></div>'+gdPage('neg_fin')}
+function renderFinGest(){const el=$('#finGest');if(el)el.innerHTML=gdPage('presup')+'<div style="height:20px"></div>'+gdPage('polfin')+'<div style="height:20px"></div>'+gdPage('plan_fin')+'<div style="height:20px"></div>'+gdPage('neg_fin')}
+function renderFinActs(){const el=$('#finActs');if(el)el.innerHTML=actPage('fin')}
 function gKpi(){return gdPage('kpi',gdMetricas())}
 function gAreas(){const a=view.gdarea||'ger';return `<div class="card" style="margin-bottom:20px"><h2 style="margin-bottom:6px">Planes por área funcional</h2><p class="hint" style="margin-bottom:10px">Cada área de la empresa tiene su propio plan. Elige el área y complétalo.</p><div class="seg" role="group" aria-label="Área">${AREAS.map(x=>`<button type="button" data-gdc="sel" data-v="${x[0]}" aria-pressed="${a===x[0]}">${esc(x[1])} · ${gdPct('plan_'+x[0])} %</button>`).join('')}</div></div>`+gdPage('plan_'+a)}
 /* paleta */
@@ -2436,8 +2489,8 @@ function informeBody(st){ensureGer();ensureTh();ensureMk();ensurePr();const c=S.
  st.sign('','Docente')}
 
 /* informe general del docente: todos los equipos */
-function teamStats(){ensureGer();ensureTh();ensureMk();ensurePr();const m=gMetrics(),E=prEstado(),ks=Object.keys(GDOCS),avg=Math.round(ks.reduce((a,k)=>a+gdPct(k),0)/ks.length);
- return{docs:avg,ruta:E.filter(x=>x.s==='listo').length,tram:m.tram.d+'/'+m.tram.t,nf:S.invoices.length,ventas:m.t.ventas,bancos:m.t.bancos}}
+function teamStats(){ensureGer();ensureTh();ensureMk();ensurePr();const m=gMetrics(),ks=Object.keys(GDOCS),avg=Math.round(ks.reduce((a,k)=>a+gdPct(k),0)/ks.length);
+ return{docs:avg,ruta:actTotal(),tram:m.tram.d+'/'+m.tram.t,nf:S.invoices.length,ventas:m.t.ventas,bancos:m.t.bancos}}
 async function docenteInforme(){
  if(!isDoc()){toast('Entra primero con tu cuenta de docente.');return}
  const list=docList();if(!list.length){toast('Primero agrega los códigos de los equipos.');return}
@@ -2453,10 +2506,10 @@ async function docenteInforme(){
   const stub=defaults();stub.company=Object.assign({},stub.company,{name:'Colegio Técnico Profesional de San Sebastián',ced:'',act:'Emprendimiento e Innovación',hdr:['Emprendimiento e Innovación','Informe para el docente'],color:'#1C7C3C',color2:'#F2A900',logo:undefined});
   S=stub;const st=gPdf();if(!st)throw new Error('pdf');st.head();
   st.title('Informe general del docente',gd(dayKey())+' · '+teams.length+' equipo(s)');
-  const rows=teams.map(t=>{S=Object.assign(defaults(),t.st);normalizeS();const x=teamStats();return[String(t.it.label||'—'),String(S.company.name),x.ruta+'/6',x.docs+' %',x.tram,String(x.nf),moneyPdf(x.ventas)]});
+  const rows=teams.map(t=>{S=Object.assign(defaults(),t.st);normalizeS();const x=teamStats();return[String(t.it.label||'—'),String(S.company.name),x.ruta+'/60',x.docs+' %',x.tram,String(x.nf),moneyPdf(x.ventas)]});
   S=stub;st.h2('Resumen de los equipos');
-  st.table([{h:'Equipo',w:28},{h:'Empresa',w:44},{h:'Ruta prod.',w:20},{h:'Docs',w:16},{h:'Trámites',w:20},{h:'Facturas',w:18},{h:'Ventas',w:34,a:'r'}],rows);
-  st.p('Ruta prod.: actividades de la ruta de Producción listas. Docs: promedio de avance de los documentos de gestión. Trámites: puesta en operación.',{c:PC.mut,s:8.5,i:1});
+  st.table([{h:'Equipo',w:28},{h:'Empresa',w:40},{h:'Actividades',w:24},{h:'Docs',w:16},{h:'Trámites',w:20},{h:'Facturas',w:18},{h:'Ventas',w:34,a:'r'}],rows);
+  st.p('Actividades: PDF listos de las 60 actividades (12 por departamento). Docs: promedio de avance de los documentos de gestión. Trámites: puesta en operación.',{c:PC.mut,s:8.5,i:1});
   if(miss.length)st.p('No se pudieron leer: '+miss.join(', ')+'.',{c:PC.mut,s:9});
   teams.forEach(t=>{S=Object.assign(defaults(),t.st);normalizeS();st.page();st.p('Equipo: '+(t.it.label||'—')+' · código '+t.it.code,{b:1,s:9,c:PC.mut});informeBody(st)});
   S=stub;blob=st.finish('Informe general del docente · '+gd(dayKey()))
@@ -2475,7 +2528,7 @@ const DEPTS=[
   t:[],u:'Actividad de la empresa y proveedores.',ready:true},
  {k:'fin',n:'Contabilidad y finanzas',col:'--acct',d:'Lleva el dinero de la empresa: banco, facturación, compras, impuestos y libros.',
   t:['Banco: pagos, transferencias, SINPE Móvil y comprobantes en PDF.','Factura electrónica con los datos y el logo de la empresa.','Contabilidad: compras, declaración de IVA, pago de impuestos y libro diario.'],u:'Todos los datos de la empresa.',ready:true}];
-const HOW=['Escribe los datos de tu empresa aquí en la portada y elige tu paleta de colores.','Mira cómo queda tu hoja membretada y descárgala en PDF.','Entra a cada departamento y haz sus tareas.','Al final, descarga el informe general de tu empresa en PDF.'];
+const HOW=['Escribe los datos de tu empresa aquí en la portada y elige tu paleta de colores.','Mira cómo queda tu hoja membretada y descárgala en PDF.','Entra a tu departamento y empieza por "Mis 12 actividades": cada una termina con un PDF.','Al final, descarga el informe general de tu empresa en PDF.'];
 const rgbOf=h=>{const m=/^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(h||'');return m?[parseInt(m[1],16),parseInt(m[2],16),parseInt(m[3],16)]:[10,106,98]};
 const DEF_NAME='Mi Empresa de Práctica S.A.',DEF_CED='3-101-000000';
 function dataMissing(){const c=S.company,m=[];if(!c.name.trim()||c.name===DEF_NAME)m.push('el nombre');if(!c.ced.trim()||c.ced===DEF_CED)m.push('la cédula jurídica');if(!c.act.trim())m.push('la actividad');if(!c.logo)m.push('el logo');return m}
@@ -2498,12 +2551,12 @@ function buildLetterheadPdf(){
   doc.setDrawColor(col[0],col[1],col[2]);doc.setLineWidth(.8);doc.line(M,262,W-M,262);
   pfnt(doc,'normal',8.5,PC.mut);doc.text(pdfSafe(c.lema||(c.name+' - '+c.dir)),W/2,268,{align:'center'});
   return doc.output('blob')}
-function setDept(k){view.dept=k;if(k==='ger')renderGer();if(k==='th')renderTh();if(k==='mkt')renderMk();if(k==='prod')renderPr();['home','ger','mkt','th','prod','fin'].forEach(x=>{const s=$('#dept-'+x);if(s)s.hidden=x!==k;const b=$('#dt-'+x);if(b)b.setAttribute('aria-selected',String(x===k))});window.scrollTo({top:0})}
+function setDept(k){view.dept=k;if(k==='ger')renderGer();if(k==='th')renderTh();if(k==='mkt')renderMk();if(k==='prod')renderPr();['home','ger','mkt','th','prod','fin'].forEach(x=>{const s=$('#dept-'+x);if(s)s.hidden=x!==k;const b=$('#dt-'+x);if(b)b.setAttribute('aria-selected',String(x===k))});applyGates();window.scrollTo({top:0})}
 document.addEventListener('click',e=>{
   const dp=e.target.closest('[data-dept]');if(dp){setDept(dp.dataset.dept);return}
   const lh=e.target.closest('[data-act="lh-pdf"]');if(lh)savePdf(mk(()=>buildLetterheadPdf()),'hoja-membretada.pdf')});
 
-function renderAll(){renderDepts();renderGer();renderTh();renderMk();renderPr();renderFinGest();renderCompany();renderAccts();renderMoves();renderPay();renderTaxForm();renderPreview();renderHist();renderAcct()}
+function renderAll(){renderDepts();renderGer();renderTh();renderMk();renderPr();renderFinGest();renderCompany();renderAccts();renderMoves();renderPay();renderTaxForm();renderPreview();renderHist();renderAcct();renderFinActs();applyGates()}
 /* ---------- Nube: empresa compartida por código (Firebase) ---------- */
 const FB_CONFIG={apiKey:"AIzaSyDcWs4CUq-rSv1FKSX82s3OHR-OC17KdzM",authDomain:"simulador-empresa-1ceed.firebaseapp.com",projectId:"simulador-empresa-1ceed",storageBucket:"simulador-empresa-1ceed.firebasestorage.app",messagingSenderId:"930736900267",appId:"1:930736900267:web:379d0acb563c72f349cfee"};
 const FB_BASE='https://www.gstatic.com/firebasejs/13.0.0/';
@@ -2517,7 +2570,7 @@ const withTimeout=(p,ms,msg)=>Promise.race([p,new Promise((_,rej)=>setTimeout(()
 const syncKeys=()=>Object.keys(S).filter(k=>k!=='draft'&&k!=='v');
 const enc=k=>JSON.stringify(S[k]===undefined?null:S[k]);
 const isDirty=()=>syncKeys().some(k=>enc(k)!==cloud.last[k]);
-function normalizeS(){S.ger=S.ger||null;S.th=S.th||null;S.mk=S.mk||null;S.pr=S.pr||null;S.company=Object.assign({act:'',lema:'',color:'#0A6A62',color2:'#F2A900'},S.company);S.docs=S.docs||{};S.receipts=S.receipts||{};S.purchases=S.purchases||[];S.decls=S.decls||[];S.checks=S.checks||{};S.draft=S.draft||blankDraft();S.sinpe=S.sinpe||{day:'',total:0}}
+function normalizeS(){S.acts=(S.acts&&typeof S.acts==='object')?S.acts:{};S.ger=S.ger||null;S.th=S.th||null;S.mk=S.mk||null;S.pr=S.pr||null;S.company=Object.assign({act:'',lema:'',color:'#0A6A62',color2:'#F2A900'},S.company);S.docs=S.docs||{};S.receipts=S.receipts||{};S.purchases=S.purchases||[];S.decls=S.decls||[];S.checks=S.checks||{};S.draft=S.draft||blankDraft();S.sinpe=S.sinpe||{day:'',total:0}}
 function newCode(){const a=new Uint8Array(8);crypto.getRandomValues(a);let s='';for(let i=0;i<8;i++){s+=ALPHA[a[i]%32];if(i===3)s+='-'}return s}
 function normCode(v){const s=String(v||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(s.length!==8)return null;for(const ch of s)if(ALPHA.indexOf(ch)<0)return null;return s.slice(0,4)+'-'+s.slice(4)}
 function errText(e){const c=(e&&e.code)||'',m=String((e&&e.message)||'');
@@ -2624,6 +2677,7 @@ function applyFull(d){
   Object.keys(d).forEach(f=>{if(f.slice(0,2)!=='k_')return;const k=f.slice(2);try{n[k]=JSON.parse(d[f]);cloud.last[k]=d[f]}catch(e){}});
   S=n;normalizeS()}
 function leaveCloud(){
+  dpUnwatch();
   clearTimeout(cloud.timer);
   if(cloud.unsub){try{cloud.unsub()}catch(e){}cloud.unsub=null}
   cloud.on=false;cloud.ro=false;cloud.code='';cloud.ref=null;cloud.last={};cloud.status='solo';cloud.err='';cloud.pendingRender=false;clearTimeout(cloud.renderTimer)}
@@ -2642,6 +2696,7 @@ async function joinCompany(code,opt){
     applyFull(snap.data());
     if(!cloud.ro){lsSet(LS_MODE,'nube');lsSet(LS_CODE,code);lsSet(KEY+':'+code,JSON.stringify(S))}
     cloud.unsub=fs.onSnapshot(ref,onRemote,err=>setStatus('err',err));
+    dpWatch();
     closeModal();renderAll();updateBar();
     if(!cloud.ro)cloudPush();
     toast(cloud.ro?'Vista de docente: solo lectura.':'Entraste a la empresa.')
@@ -2661,6 +2716,7 @@ async function createCompany(){
     keys.forEach(k=>{cloud.last[k]=data['k_'+k]});
     lsSet(LS_MODE,'nube');lsSet(LS_CODE,code);lsSet(KEY+':'+code,JSON.stringify(S));
     cloud.unsub=fs.onSnapshot(ref,onRemote,err=>setStatus('err',err));
+    dpWatch();
     renderAll();updateBar();showCreated(code)
   }catch(e){setModalBusy('');modalErr(errText(e))}
   finally{cloud.busy=false}}
@@ -2714,9 +2770,13 @@ function openDocente(){
   <p class="hint">Escribe el código que te da cada equipo para ver su empresa en tiempo real, solo lectura. Los códigos se guardan solo en esta computadora.</p>
   <div class="cmopt"><div class="row"><input type="text" id="cmCode" maxlength="9" placeholder="XXXX-XXXX" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Código del equipo"><input type="text" id="cmLabel" maxlength="40" placeholder="Nombre del equipo (opcional)" aria-label="Nombre del equipo" style="text-transform:none;letter-spacing:0;font:600 1rem var(--f-body)"><button type="button" class="btn" data-cl="docadd">Agregar</button></div></div>
   <div class="cmlist" id="cmList">${list.length?'<p class="hint">Cargando equipos…</p>':'<p class="hint">Aún no has agregado equipos.</p>'}</div>
+  <div class="cmopt"><h3>Claves de los departamentos</h3>
+   <p class="hint">Cada departamento pide su clave a los equipos. Tú las defines y se las das a quien corresponda. Las claves se guardan en esta computadora para que las puedas ver después; no importa si usan mayúsculas o minúsculas. Un campo vacío no cambia esa clave.</p>
+   <div id="dpwBox"><p class="hint">Cargando claves…</p></div></div>
   <p class="cmerr" id="cmErr" role="alert"></p>
   <div class="row"><button type="button" class="btn" data-cl="docinf">Informe general de todos los equipos (PDF)</button><button type="button" class="btn sec" data-cl="back">Volver</button><button type="button" class="link" data-cl="doclogout">Cerrar sesión de docente</button></div>`);
-  if(list.length)fillDocList(list)}
+  if(list.length)fillDocList(list);
+  fillDpw()}
 async function fillDocList(list){
   const box=$('#cmList');if(!box)return;
   try{await fbInit()}catch(e){box.innerHTML='<p class="cmerr">'+esc(errText(e))+'</p>';return}
@@ -2735,6 +2795,190 @@ async function fillDocList(list){
     const lab=r.it.label||r.name||'Equipo';
     const info=r.miss?'No existe (¿código mal escrito?)':r.err?'No se pudo leer ahora':`${esc(r.name)} · Bancos: ${r.bancos==null?'—':fmt(r.bancos)} · Facturas: ${r.nf==null?'—':r.nf}${r.t?' · Última actividad: '+esc(fmtDate(r.t)):''}`;
     return `<div class="cmitem"><span class="nm"><strong>${esc(lab)} <span class="mono">${esc(r.it.code)}</span></strong><span class="sub">${info}</span></span><span class="row">${r.miss||r.err?'':`<button type="button" class="btn sm" data-cl="docver" data-code="${esc(r.it.code)}">Ver</button>`}<button type="button" class="link" data-cl="docrm" data-code="${esc(r.it.code)}">Quitar</button></span></div>`}).join('')}
+
+/* ===== Claves por departamento =====
+   La docente define una clave por departamento en el panel docente. Se guarda solo su huella (SHA-256) en Firestore, doc config/departamentos.
+   Los equipos piden la clave al entrar a un departamento. Es un candado de clase (en el navegador), no seguridad de banco. */
+const DKEYS=['ger','mkt','th','prod','fin'];
+const LS_DPW='sim-empresa-claves-dept',SS_UNL='sim-empresa-dept-abiertos';
+const ssGet=k=>{try{return sessionStorage.getItem(k)}catch(e){return null}};
+const ssSet=(k,v)=>{try{sessionStorage.setItem(k,v)}catch(e){}};
+const dpNorm=v=>String(v||'').trim().toLowerCase();
+async function dpHash(k,pw){
+  if(!(window.crypto&&window.crypto.subtle))throw Object.assign(new Error('Sin crypto'),{code:'no-crypto'});
+  const buf=await window.crypto.subtle.digest('SHA-256',new TextEncoder().encode('sim-empresa|'+k+'|'+dpNorm(pw)));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('')}
+const dpSaved=()=>{try{const o=JSON.parse(lsGet(LS_DPW)||'{}');return o&&typeof o==='object'?o:{}}catch(e){return{}}};
+function dpUnlocked(k){
+  const h=cloud.dp&&cloud.dp[k];if(!h)return true;
+  try{const o=JSON.parse(ssGet(SS_UNL)||'{}');return(o[cloud.code]||{})[k]===h}catch(e){return false}}
+function dpLocked(k){return !!(cloud.on&&!cloud.ro&&!isDoc()&&cloud.dp&&cloud.dp[k]&&!dpUnlocked(k))}
+function applyGates(){
+  DKEYS.forEach(k=>{
+    const sec=$('#dept-'+k),tab=$('#dt-'+k),has=!!(cloud.on&&!cloud.ro&&!isDoc()&&cloud.dp&&cloud.dp[k]);
+    if(sec){if(dpLocked(k))sec.setAttribute('data-locked','1');else sec.removeAttribute('data-locked')}
+    if(tab){tab.classList.toggle('locked',has);tab.title=has?'Este departamento pide clave':''}});
+  renderGate()}
+function renderGate(){
+  const g=$('#deptGate');if(!g)return;
+  const k=view.dept;
+  if(DKEYS.indexOf(k)<0||!dpLocked(k)){g.hidden=true;g.innerHTML='';delete g.dataset.k;return}
+  if(g.dataset.k===k&&!g.hidden)return;
+  g.dataset.k=k;g.hidden=false;
+  g.innerHTML=`<div class="card dgate"><h2>${esc(DNAME[k])}</h2><p class="hint">Este departamento pide una clave. Pídesela a tu docente.</p>
+  <div class="field"><label for="dgPass">Clave del departamento</label><input type="password" id="dgPass" autocomplete="off" autocapitalize="none" spellcheck="false"></div>
+  <p class="cmerr" id="dgErr" role="alert"></p>
+  <div class="btnrow"><button type="button" class="btn" data-dg="open">Entrar</button><button type="button" class="btn sec" data-dept="home">Volver a la portada</button></div></div>`;
+  setTimeout(()=>{const f=$('#dgPass');if(f)f.focus()},30)}
+function dgErr(t){const e=$('#dgErr');if(e)e.textContent=t||''}
+async function dgOpen(){
+  const k=view.dept,f=$('#dgPass'),pw=f?f.value:'';
+  if(!dpNorm(pw)){dgErr('Escribe la clave.');return}
+  try{
+    const h=await dpHash(k,pw);
+    if(!cloud.dp||h!==cloud.dp[k]){dgErr('Clave incorrecta. Pídesela a tu docente.');if(f){f.value='';f.focus()}return}
+    const o=JSON.parse(ssGet(SS_UNL)||'{}');(o[cloud.code]=o[cloud.code]||{})[k]=h;ssSet(SS_UNL,JSON.stringify(o));
+    applyGates();setDept(k)
+  }catch(e){dgErr('Este navegador no pudo revisar la clave. Prueba con Chrome o Edge actualizados.')}}
+function dpUnwatch(){
+  if(cloud.dpUnsub){try{cloud.dpUnsub()}catch(e){}cloud.dpUnsub=null}
+  cloud.dp=null;cloud.dpErr=''}
+function dpWatch(){
+  dpUnwatch();
+  if(!cloud.on||cloud.ro||!cloud.mods)return;
+  const fs=cloud.mods.fs;
+  try{cloud.dpUnsub=fs.onSnapshot(fs.doc(cloud.db,'config','departamentos'),sn=>{
+      const d=sn.exists()?sn.data():{},o={};
+      DKEYS.forEach(k=>{const h=d['h_'+k];if(typeof h==='string'&&h)o[k]=h});
+      cloud.dp=Object.keys(o).length?o:null;cloud.dpErr='';applyGates()},
+    err=>{cloud.dp=null;cloud.dpErr=String((err&&err.code)||'error');applyGates()})}catch(e){}}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-dg="open"]');if(b)dgOpen()});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='dgPass'){e.preventDefault();dgOpen()}});
+
+/* panel docente: poner, cambiar y quitar claves */
+async function fillDpw(){
+  const box=$('#dpwBox');if(!box)return;
+  let server={},readErr='';
+  try{await fbInit();const fs=cloud.mods.fs,sn=await withTimeout(fs.getDoc(fs.doc(cloud.db,'config','departamentos')),12000);if(sn.exists())server=sn.data()}
+  catch(e){readErr=(e&&e.code==='permission-denied')?'perm':'net'}
+  const saved=dpSaved();
+  const rows=await Promise.all(DKEYS.map(async k=>{
+    const sh=typeof server['h_'+k]==='string'?server['h_'+k]:'';let show='';
+    if(sh&&saved[k]){try{if(await dpHash(k,saved[k])===sh)show=saved[k]}catch(e){}}
+    return{k,sh,show}}));
+  const b2=$('#dpwBox');if(!b2)return;
+  const note=readErr==='perm'?'<p class="cmerr">Firebase no deja leer ni guardar las claves todavía. Falta publicar la regla de "config" (mira las instrucciones que te entregué).</p>':readErr?'<p class="cmerr">No se pudo leer el estado de las claves ahora. Revisa el internet.</p>':'';
+  b2.innerHTML=note+`<div class="dpw">${rows.map(r=>`<div class="field"><label for="dpw-${r.k}">${esc(DNAME[r.k])}</label><div class="row">
+    <input type="text" id="dpw-${r.k}" data-dpk="${r.k}" maxlength="24" autocomplete="off" autocapitalize="none" spellcheck="false" value="${esc(r.show)}" placeholder="${r.sh?'Clave puesta (escribe otra para cambiarla)':'Sin clave'}">
+    <span class="st">${r.sh?'Con clave':'Sin clave'}</span>${r.sh?`<button type="button" class="link" data-cl="dpclear" data-k="${r.k}">Quitar clave</button>`:''}</div></div>`).join('')}</div>
+    <div class="row"><button type="button" class="btn" data-cl="dpsave">Guardar claves</button></div>`}
+async function dpSave(){
+  if(!isDoc()){modalErr('Entra primero con tu cuenta de docente.');return}
+  const vals={};let bad='';
+  DKEYS.forEach(k=>{const el=$('#dpw-'+k);const v=el?el.value.trim():'';if(!v)return;if(v.length<4||v.length>24)bad=bad||('La clave de '+DNAME[k]+' debe tener entre 4 y 24 caracteres.');else vals[k]=v});
+  if(bad){modalErr(bad);return}
+  if(!Object.keys(vals).length){modalErr('Escribe al menos una clave nueva.');return}
+  const keys=Object.keys(vals);
+  if(new Set(keys.map(k=>dpNorm(vals[k]))).size<keys.length){modalErr('Cada departamento debe tener una clave distinta.');return}
+  setModalBusy('Guardando…');
+  try{
+    await fbInit();const fs=cloud.mods.fs,data={t:fs.serverTimestamp()};
+    for(const k of keys)data['h_'+k]=await dpHash(k,vals[k]);
+    await withTimeout(fs.setDoc(fs.doc(cloud.db,'config','departamentos'),data,{merge:true}),15000);
+    const sv=dpSaved();keys.forEach(k=>{sv[k]=vals[k]});lsSet(LS_DPW,JSON.stringify(sv));
+    setModalBusy('');toast('Claves guardadas.');fillDpw()
+  }catch(e){setModalBusy('');modalErr(e&&e.code==='permission-denied'?'Firebase no dejó guardar. Falta publicar la regla de "config" en las reglas de Firestore.':errText(e))}}
+async function dpClear(k){
+  if(!isDoc()||DKEYS.indexOf(k)<0)return;
+  setModalBusy('Quitando…');
+  try{
+    await fbInit();const fs=cloud.mods.fs;
+    await withTimeout(fs.setDoc(fs.doc(cloud.db,'config','departamentos'),{['h_'+k]:fs.deleteField(),t:fs.serverTimestamp()},{merge:true}),15000);
+    const sv=dpSaved();delete sv[k];lsSet(LS_DPW,JSON.stringify(sv));
+    setModalBusy('');toast('Clave de '+DNAME[k]+' quitada.');fillDpw()
+  }catch(e){setModalBusy('');modalErr(e&&e.code==='permission-denied'?'Firebase no dejó guardar. Falta publicar la regla de "config" en las reglas de Firestore.':errText(e))}}
+
+/* ===== Mis 12 actividades por departamento (cada una con su entregable en PDF) ===== */
+const ACT12={
+ ger:[['Ficha de la empresa y trámites de puesta en operación','PDF de la ficha y el índice de la carpeta digital','ficha'],
+  ['Misión, visión, organigrama y plan de trabajo','PDF del organigrama y plan de trabajo','org'],
+  ['Metas, KPI y métricas','PDF de Metas y KPI','kpi'],
+  ['Plan del área de Gerencia','PDF del plan del área','areas'],
+  ['Centro de operaciones: datos para decidir','PDF del resumen de operaciones','tab'],
+  ['Compra del Estado simulada: oferta','PDF de la oferta firmada','estado'],
+  ['Acta de decisión de gerencia','PDF del acta','actas'],
+  ['Asesoría con una persona experta','PDF del informe de asesoría','ase'],
+  ['Matriz de riesgos y plan de contingencia','PDF de la matriz de riesgos','riesgos'],
+  ['Calendario de obligaciones de la empresa','PDF del calendario','obl'],
+  ['Negociación con una empresa y contrato','PDF de la negociación y el contrato','neg'],
+  ['Informe de cierre y portafolio','PDF del portafolio','cierre']],
+ mkt:[['Marca, cliente y propuesta de valor','PDF de marca y cliente','marca'],
+  ['Producto: qué vendemos y para quién','PDF de productos y servicios','prod'],
+  ['Precio: cuánto cobramos y cuánto ganamos','PDF de la lista de precios','precio'],
+  ['Plaza: dónde y cómo llega al cliente','PDF de plaza','plaza'],
+  ['Promoción: campañas para dar a conocer la empresa','PDF de promoción','promo'],
+  ['Plan estratégico de mercadeo y ventas','PDF del plan estratégico','plan'],
+  ['Estrategias de publicidad','PDF de publicidad','publi'],
+  ['Catálogo de productos y servicios','PDF del catálogo','cat'],
+  ['Cotización para un cliente','PDF de la cotización','cot'],
+  ['Registro de ventas y clientes','PDF del informe de ventas','ventas'],
+  ['Plan del área de Marketing y ventas','PDF del plan del área','parea'],
+  ['Negociación con una empresa y contrato','PDF de la negociación y el contrato','neg']],
+ th:[['Colaboradores y contrato de trabajo','PDF de un contrato individual','staff'],
+  ['Planilla mensual','PDF de la planilla','plan'],
+  ['Boletas de pago','PDF de las boletas','plan'],
+  ['Cargas sociales y póliza de riesgos del trabajo','PDF del resumen de cargas','cargas'],
+  ['Reglamento interno de trabajo','PDF del reglamento','reg'],
+  ['Manual descriptivo de funciones','PDF del manual','manual'],
+  ['Perfil de puesto y proceso de selección','PDF del perfil y la selección','recl'],
+  ['Capacitación y evaluación del desempeño','PDF del plan de capacitación','capac'],
+  ['Salud ocupacional y seguridad','PDF del plan de salud y seguridad','salud'],
+  ['Cultura y clima de la empresa','PDF de cultura y clima','cult'],
+  ['Plan del área de Talento Humano','PDF del plan del área','parea'],
+  ['Negociación con una empresa y contrato','PDF de la negociación y el contrato','neg']],
+ prod:[['Producto y layout del área de producción','PDF de la ficha y el layout','prods'],
+  ['Plan de producción: meta, personas y días','PDF del plan de producción','plan'],
+  ['Mapa de procesos de la empresa','PDF del mapa de procesos','procs'],
+  ['Procedimiento del producto estrella','PDF del procedimiento','estrella'],
+  ['Compra de materiales con orden de compra','PDF de la orden de compra','mat'],
+  ['Orden de producción','PDF de la orden de producción','ord'],
+  ['Control de calidad','PDF del informe de calidad','cal'],
+  ['Despacho del producto','PDF de la nota de despacho','desp'],
+  ['Costos de producción','PDF de la hoja de costos','costo'],
+  ['Inventario','PDF del reporte de inventario','inv'],
+  ['Plan del área de Producción','PDF del plan del área','parea'],
+  ['Negociación con un proveedor y contrato','PDF de la negociación y el contrato','neg']],
+ fin:[['Pago desde el banco','PDF del comprobante del pago','bank'],
+  ['Transferencia o SINPE Móvil','PDF del comprobante de la transferencia','bank'],
+  ['Factura electrónica','PDF de la factura','tax'],
+  ['Registro de compras y gastos','PDF de las compras','acct:compras'],
+  ['Pago a proveedores','PDF del comprobante del pago','acct:compras'],
+  ['Libro diario','PDF del libro diario','acct:diario'],
+  ['Declaración de IVA','PDF de la declaración','acct:iva'],
+  ['Pago de impuestos y cargas','PDF del comprobante del pago','acct:iva'],
+  ['Presupuesto mensual y flujo de caja','PDF del presupuesto','gest'],
+  ['Políticas de cobro, pago y control del dinero','PDF de las políticas','gest'],
+  ['Plan del área de Contabilidad y finanzas','PDF del plan del área','gest'],
+  ['Negociación con una empresa y contrato','PDF de la negociación y el contrato','gest']]};
+const actStore=d=>{if(!S.acts||typeof S.acts!=='object')S.acts={};if(!Array.isArray(S.acts[d]))S.acts[d]=[];return S.acts[d]};
+const actCount=d=>{const a=(S.acts&&Array.isArray(S.acts[d]))?S.acts[d]:[];return ACT12[d].filter((x,i)=>a[i]&&a[i].d).length};
+const actTotal=()=>Object.keys(ACT12).reduce((n,d)=>n+actCount(d),0);
+function actPage(d){
+  const L=ACT12[d],A=(S.acts&&Array.isArray(S.acts[d]))?S.acts[d]:[],n=actCount(d);
+  const rows=L.map((x,i)=>{const r=A[i]||{};
+    return `<tr><td class="r">${i+1}</td><td>${esc(x[0])}<span class="sub">Entregable: ${esc(x[1])}</span></td>
+    <td><input id="a12-${d}-${i}" data-a12r="${d}|${i}" maxlength="60" autocomplete="off" aria-label="Responsable de la actividad ${i+1}" placeholder="Nombre" value="${esc(r.r||'')}"></td>
+    <td><label class="ck"><input type="checkbox" data-a12d="${d}|${i}"${r.d?' checked':''}><span>PDF listo</span></label></td>
+    <td><button type="button" class="btn sec sm" data-a12="${d}|${x[2]}">Ir a la actividad</button></td></tr>`}).join('');
+  return `<div class="card"><div class="head-row"><h2>Mis 12 actividades · ${esc(DNAME[d])}</h2><span class="pill ${n===12?'ok':'info'}" data-a12pill="${d}">${n} de 12 listas</span></div>
+  <p class="hint" style="margin-bottom:12px">Cada actividad termina con un PDF que se entrega. Escriban quién es la persona responsable, hagan la actividad en su pestaña, descarguen el PDF y marquen "PDF listo".</p>
+  <div class="tscroll"><table class="mv" style="min-width:760px"><thead><tr><th class="r">N.º</th><th>Actividad y entregable</th><th>Responsable</th><th>Estado</th><th></th></tr></thead><tbody>${rows}</tbody></table></div></div>`}
+document.addEventListener('input',e=>{const t=e.target;if(!t.dataset||!t.dataset.a12r||cloud.ro)return;const q=t.dataset.a12r.split('|'),a=actStore(q[0]),i=+q[1];a[i]=a[i]||{};a[i].r=t.value;save()});
+document.addEventListener('change',e=>{const t=e.target;if(!t.dataset||!t.dataset.a12d||cloud.ro)return;const q=t.dataset.a12d.split('|'),a=actStore(q[0]),i=+q[1];a[i]=a[i]||{};a[i].d=!!t.checked;save();
+  const p=document.querySelector('[data-a12pill="'+q[0]+'"]');if(p){const n=actCount(q[0]);p.textContent=n+' de 12 listas';p.className='pill '+(n===12?'ok':'info')}});
+document.addEventListener('click',e=>{const b=e.target.closest('[data-a12]');if(!b)return;const q=b.dataset.a12.split('|'),d=q[0],t=q[1];
+  if(d==='fin'){const pp=t.split(':');setTab(pp[0]);if(pp[1]){view.ac=pp[1];renderAcct()}window.scrollTo({top:0});return}
+  const m={ger:['gr',renderGer],th:['tr',renderTh],mkt:['mr',renderMk],prod:['pr',renderPr]}[d];if(!m)return;view[m[0]]=t;m[1]();window.scrollTo({top:0})});
 
 /* archivo de avance */
 function exportFile(){
@@ -2765,6 +3009,8 @@ function cloudAct(a,b){
     case 'dlother':{const bx=$('#dlEmailBox');if(bx){bx.hidden=false;b.hidden=true;const f=$('#dlEmail');if(f)f.focus()}break}
     case 'doclogout':docLogout();break;
     case 'docinf':docenteInforme();break;
+    case 'dpsave':dpSave();break;
+    case 'dpclear':dpClear(b.dataset.k);break;
     case 'informe':savePdf(mk(()=>buildInforme()),'informe-'+String(S.company&&S.company.name||'empresa').replace(/\s+/g,'-')+'.pdf');break;
     case 'docadd':{const c=normCode(($('#cmCode')||{}).value);if(!c){modalErr('Escribe el código completo del equipo.');break}
       const lab=String(($('#cmLabel')||{}).value||'').trim().slice(0,40),l=docList().filter(x=>x.code!==c);l.push({code:c,label:lab});docSave(l);openDocente();break}
