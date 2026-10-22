@@ -270,6 +270,9 @@ body.ro-mode .wrap input,body.ro-mode .wrap select,body.ro-mode .wrap textarea{p
 .cmlist{display:flex;flex-direction:column;gap:8px}
 .cmitem{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;background:var(--surface)}
 .cmitem .nm{display:flex;flex-direction:column;min-width:0}
+#dept-fin>.tabs{border-bottom:0;gap:6px;margin-block:20px 18px;align-items:stretch}
+#dept-fin>.tabs .tab{font:600 .95rem var(--f-body);min-height:44px;padding:0 16px;border-radius:var(--r);border:1px solid var(--line);background:var(--surface);color:var(--ink);margin-bottom:0}
+#dept-fin>.tabs .tab[aria-selected="true"]{background:var(--tc);border-color:var(--tc);color:#fff}
 .tab.locked::after{content:"";display:inline-block;width:.75em;height:.75em;margin-left:.4em;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 10V7a5 5 0 0 1 10 0v3h1a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1h1zm2 0h6V7a3 3 0 0 0-6 0v3z'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 10V7a5 5 0 0 1 10 0v3h1a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1h1zm2 0h6V7a3 3 0 0 0-6 0v3z'/%3E%3C/svg%3E") center/contain no-repeat}
 section[data-locked]{display:none!important}
 .dgate{max-width:520px;margin:24px auto;display:flex;flex-direction:column;gap:12px}
@@ -294,7 +297,7 @@ section[data-locked]{display:none!important}
       </div>
     </div>
     <p class="flag">Simulación educativa<br>No es dinero real ni tiene validez tributaria</p>
-    <p class="sub" id="verTag" style="position:absolute;right:16px;top:4px;font-size:11px;opacity:.7">Versión 22-oct-2026 (v10)</p>
+    <p class="sub" id="verTag" style="position:absolute;right:16px;top:4px;font-size:11px;opacity:.7">Versión 22-oct-2026 (v12)</p>
   </header>
   <div class="cloudbar" id="cloudBar" aria-live="polite"></div>
 
