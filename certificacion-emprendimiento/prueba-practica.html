@@ -1,0 +1,1192 @@
+<title>Certificación de Emprendimiento e Innovación</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: una hoja de examen. Pregunta a la izquierda, hoja de respuestas numerada a la derecha; en teléfono se apilan. */
+:root{
+  --font-display:'Bricolage Grotesque','Segoe UI',system-ui,sans-serif;
+  --font-body:'IBM Plex Sans','Segoe UI',system-ui,sans-serif;
+  --font-mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+  --bg:#F2F5F3; --surface:#FFFFFF; --surface-2:#E8EEEB;
+  --ink:#14201D; --muted:#55645F; --line:#D2DBD7;
+  --accent:#0D6B5B; --accent-ink:#FFFFFF; --accent-soft:#D9EEE8;
+  --ok:#1B7A3D; --ok-soft:#DDF1E4;
+  --bad:#B3261E; --bad-soft:#FADFDC;
+  --warn:#8A5300; --warn-soft:#F8E9CC;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1614; --surface:#16221F; --surface-2:#1E2D29;
+    --ink:#E6EFEC; --muted:#9DB0AA; --line:#2B3C37;
+    --accent:#52C7AE; --accent-ink:#05201A; --accent-soft:#1A3B34;
+    --ok:#66D391; --ok-soft:#173A26;
+    --bad:#FF8F85; --bad-soft:#43201D;
+    --warn:#F0B45A; --warn-soft:#3B2E14;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1614; --surface:#16221F; --surface-2:#1E2D29;
+  --ink:#E6EFEC; --muted:#9DB0AA; --line:#2B3C37;
+  --accent:#52C7AE; --accent-ink:#05201A; --accent-soft:#1A3B34;
+  --ok:#66D391; --ok-soft:#173A26;
+  --bad:#FF8F85; --bad-soft:#43201D;
+  --warn:#F0B45A; --warn-soft:#3B2E14;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.5}
+.wrap{max-width:1080px;margin:0 auto;padding-block:20px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--font-display);font-weight:600;line-height:1.15;margin:0;text-wrap:balance}
+p{margin:0}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+
+.top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:28px}
+.brand{font-family:var(--font-display);font-weight:700;font-size:1.05rem}
+.tag-practica{font:500 .75rem var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+
+.btn{font:500 1rem var(--font-body);min-height:44px;padding:0 18px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.primary:hover:not(:disabled){filter:brightness(1.06)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap}
+
+/* Inicio */
+.intro{max-width:62ch;display:flex;flex-direction:column;gap:14px;margin-bottom:28px}
+.intro h1{font-size:clamp(1.9rem,5.5vw,2.8rem)}
+.intro p{color:var(--muted)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:20px}
+.start-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:start}
+.panel h2{font-size:1.15rem;margin-bottom:12px}
+.table-scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:500 .72rem var(--font-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+td.num,th.num{text-align:right;font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+tfoot td{font-weight:600;border-bottom:0}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:18px}
+.field label,.legend{font-weight:600;font-size:.95rem}
+.field input[type=text],.field input[type=password]{font:inherit;min-height:44px;padding:0 12px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);width:100%}
+fieldset{border:0;margin:0 0 20px;padding:0;display:flex;flex-direction:column;gap:8px;min-width:0}
+.mode{display:flex;gap:10px;align-items:center;min-height:44px;padding:8px 12px;border:1px solid var(--line);border-radius:6px;cursor:pointer;background:var(--bg)}
+.mode.sel{border-color:var(--accent);background:var(--accent-soft)}
+.mode input{accent-color:var(--accent);width:18px;height:18px;flex:none}
+.mode .cnt{margin-left:auto;font:500 .85rem var(--font-mono);color:var(--muted)}
+.small{font-size:.85rem;color:var(--muted)}
+
+/* Examen */
+.exam-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.exam-bar .where{font:500 .95rem var(--font-mono);font-variant-numeric:tabular-nums}
+.progress{height:6px;background:var(--surface-2);border-radius:3px;overflow:hidden;margin-bottom:20px}
+.progress span{display:block;height:100%;background:var(--accent);width:0}
+.confirm{margin-bottom:20px;border:1px solid var(--warn);background:var(--warn-soft);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.exam-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:24px;align-items:start}
+@media (min-width:900px){.exam-grid{grid-template-columns:minmax(0,1fr) 320px}}
+.qcard{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:clamp(16px,3vw,28px);display:flex;flex-direction:column;gap:20px}
+.eyebrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chip{font:500 .72rem var(--font-mono);letter-spacing:.05em;text-transform:uppercase;padding:3px 8px;border-radius:4px;background:var(--surface-2);color:var(--muted)}
+.chip.type{background:var(--accent-soft);color:var(--ink)}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}
+.chip.bad{background:var(--bad-soft);color:var(--bad)}
+.chip.none{background:var(--warn-soft);color:var(--warn)}
+.qtext{font-size:clamp(1.1rem,2.3vw,1.3rem);line-height:1.5;max-width:65ch}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:1px solid var(--line);border-radius:6px;cursor:pointer;background:var(--bg)}
+.opt:hover{border-color:var(--accent)}
+.opt.sel{border-color:var(--accent);background:var(--accent-soft)}
+.opt input{position:absolute;opacity:0;pointer-events:none}
+.opt:has(input:focus-visible){outline:3px solid var(--accent);outline-offset:2px}
+.mark{flex:none;width:28px;height:28px;display:grid;place-items:center;border:1px solid var(--line);border-radius:4px;font:500 .85rem var(--font-mono);background:var(--surface);color:var(--muted)}
+.opt.sel .mark{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.opt .txt{padding-top:2px;min-width:0;overflow-wrap:anywhere}
+.blank{font:500 1rem var(--font-body);display:inline-block;width:min(16ch,100%);min-height:40px;margin:2px 4px;padding:0 10px;border:0;border-bottom:2px solid var(--accent);background:var(--accent-soft);color:var(--ink);border-radius:4px 4px 0 0}
+.nav{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding-top:4px}
+.sheet{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:14px}
+@media (min-width:900px){.sheet{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto}}
+.sheet h2{font-size:1.05rem}
+.sheet h3{font:500 .72rem var(--font-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;font-family:var(--font-mono)}
+.cells{display:grid;grid-template-columns:repeat(auto-fill,minmax(34px,1fr));gap:5px}
+.cell{width:100%;min-height:34px;padding:0;border:1px solid var(--line);background:var(--bg);color:var(--muted);font:500 .75rem var(--font-mono);border-radius:4px;cursor:pointer}
+.cell.done{background:var(--accent-soft);border-color:var(--accent);color:var(--ink)}
+.cell.cur{outline:2px solid var(--ink);outline-offset:1px}
+.legend-row{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--muted)}
+.legend-row i{display:inline-block;width:12px;height:12px;border-radius:3px;border:1px solid var(--line);vertical-align:-1px;margin-right:5px}
+.legend-row i.d{background:var(--accent-soft);border-color:var(--accent)}
+
+/* Resultados */
+.res-head{display:flex;flex-direction:column;gap:6px;margin-bottom:20px}
+.res-head h1{font-size:clamp(1.7rem,5vw,2.4rem)}
+.res-top{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;margin-bottom:20px}
+@media (min-width:760px){.res-top{grid-template-columns:minmax(0,320px) minmax(0,1fr)}}
+.score{display:flex;flex-direction:column;gap:10px}
+.score .big{font-family:var(--font-display);font-weight:700;font-size:clamp(4rem,14vw,5.6rem);line-height:1;font-variant-numeric:tabular-nums}
+.score .big small{font:400 1.1rem var(--font-mono);color:var(--muted);margin-left:6px}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.stat{border:1px solid var(--line);border-radius:6px;padding:10px 12px;background:var(--bg)}
+.stat b{display:block;font:600 1.5rem var(--font-mono);font-variant-numeric:tabular-nums}
+.stat span{font-size:.8rem;color:var(--muted)}
+.res-cols{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;margin-bottom:28px}
+@media (min-width:760px){.res-cols{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.brow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;margin-bottom:14px}
+.brow .lbl{font-size:.92rem}
+.brow .val{font:500 .9rem var(--font-mono);font-variant-numeric:tabular-nums}
+.bar{grid-column:1 / -1;height:8px;background:var(--surface-2);border-radius:4px;overflow:hidden}
+.bar span{display:block;height:100%;background:var(--ok)}
+.bar.low span{background:var(--warn)}
+.review-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{font:500 .9rem var(--font-body);min-height:40px;padding:0 14px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.tab[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.rv{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
+.rv .num{font:600 .95rem var(--font-mono)}
+.rv .q{max-width:68ch}
+.ans-row{display:grid;grid-template-columns:minmax(0,9.5rem) minmax(0,1fr);gap:4px 12px;font-size:.95rem}
+.ans-row dt{color:var(--muted);font-size:.85rem;padding-top:1px}
+.ans-row dd{margin:0;overflow-wrap:anywhere}
+.ans-row .wrong{color:var(--bad);font-weight:600}
+.ans-row .right{color:var(--ok);font-weight:600}
+.why{font-size:.92rem;color:var(--muted);border-top:1px solid var(--line);padding-top:10px}
+.empty{padding:28px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:8px}
+.actions{margin:8px 0 16px}
+textarea.sum{width:100%;min-height:150px;font:400 .85rem var(--font-mono);padding:10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);margin-top:10px}
+.toast{font-size:.9rem;color:var(--ok);min-height:1.4em;margin-top:6px}
+@media (max-width:640px){
+  .start-grid{grid-template-columns:minmax(0,1fr)}
+  .stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .ans-row{grid-template-columns:minmax(0,1fr)}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+.top-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.who{font-size:.8rem;color:var(--muted)}
+.small-btn{min-height:36px;padding:0 12px;font-size:.9rem}
+.login{max-width:440px}
+.err{color:var(--bad);font-weight:600;min-height:1.4em;margin-bottom:8px}
+.resume{margin-bottom:20px}
+details.import{margin-top:18px;border-top:1px solid var(--line);padding-top:6px}
+details.import summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:600}
+details.import textarea.sum{margin-top:6px}
+.bar-actions{align-items:center}
+.field select{font:inherit;min-height:44px;padding:0 12px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);width:100%}
+.kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:20px}
+@media (min-width:760px){.kpis{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.t-filters{display:grid;grid-template-columns:minmax(0,1fr);gap:0 16px}
+.field input[type=number]{font:inherit;min-height:44px;padding:0 12px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);width:100%}
+@media (min-width:760px){.t-filters{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.teacher-entry{margin-top:24px;padding-top:20px;border-top:1px solid var(--line)}
+td.nota-low{color:var(--bad);font-weight:600}
+.school{display:flex;gap:20px;align-items:center;padding:20px;border-radius:10px;background:var(--surface);border:1px solid var(--line);border-left:6px solid #1F8A3B;margin-bottom:28px}
+.school img{width:96px;height:96px;border-radius:8px;flex:none}
+.school .s-name{font:600 .78rem var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.school .s-title{font-family:var(--font-display);font-weight:700;font-size:clamp(1.3rem,4vw,1.9rem);line-height:1.15;margin:4px 0 6px}
+.school .s-by{font-size:.95rem;color:var(--muted)}
+.brand-logo{width:28px;height:28px;border-radius:5px;vertical-align:middle;margin-right:8px}
+@media (max-width:480px){.school{flex-direction:column;align-items:flex-start}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <span class="brand"><img class="brand-logo" src="data:image/jpeg;base64,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" alt="" width="28" height="28">Emprendimiento e Innovación</span>
+    <span class="top-right">
+      <span class="who mono" id="who" hidden></span>
+      <button class="btn small-btn" type="button" id="btnLogout" hidden>Salir</button>
+      <span class="tag-practica">Certificación voluntaria · prueba de práctica</span>
+    </span>
+  </header>
+
+  <!-- INGRESO -->
+  <section id="s-login">
+    <div class="school">
+      <img src="data:image/jpeg;base64,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" alt="Escudo del Colegio Técnico Profesional de San Sebastián" width="96" height="96">
+      <div>
+        <div class="s-name">Colegio Técnico Profesional San Sebastián</div>
+        <div class="s-title">Práctica para Certificación de Emprendimiento 2026</div>
+        <div class="s-by">Promotora de Emprendimiento e Innovación<br>Jessica Salazar</div>
+      </div>
+    </div>
+    <div class="intro">
+      <h1>Ingreso a la prueba de práctica</h1>
+      <p>Entra con tu número de cédula y la contraseña que te dio tu docente. Tu avance se guarda para que puedas continuar en otro momento.</p>
+    </div>
+    <form class="panel login" id="loginForm" autocomplete="off" novalidate>
+      <div class="field">
+        <label for="ced">Número de cédula</label>
+        <input type="text" id="ced" inputmode="numeric" autocomplete="off" maxlength="16" placeholder="Por ejemplo 1-0234-0567">
+      </div>
+      <div class="field">
+        <label for="pw">Contraseña</label>
+        <input type="password" id="pw" autocomplete="off" maxlength="40">
+      </div>
+      <p class="err" id="loginErr" role="alert"></p>
+      <button class="btn primary" type="submit" id="btnLogin">Ingresar</button>
+      <p class="small" id="storageNote" style="margin-top:14px">Tu avance se guarda en este navegador. Para continuar desde otro dispositivo usa el código de avance que se te da al guardar y salir.</p>
+    </form>
+    <div class="teacher-entry">
+      <button class="btn" type="button" id="btnTeacher">Soy docente: ver estadísticas</button>
+      <p class="err" id="teacherMsg" role="alert"></p>
+    </div>
+  </section>
+
+  <!-- INICIO -->
+  <section id="s-start" hidden>
+    <div class="intro">
+      <h1>Prueba de práctica de la certificación</h1>
+      <p>Cien preguntas en tres áreas, con selección única, completar y verdadero o falso. Muchas son casos para analizar y las opciones se parecen entre sí, así que no se resuelven por descarte. Al entregar recibes tu nota y el detalle de cada pregunta que fallaste.</p>
+    </div>
+    <div class="panel resume" id="resume" hidden></div>
+    <div class="start-grid">
+      <div class="panel">
+        <h2>Cómo está armada</h2>
+        <div class="table-scroll">
+          <table id="structure"></table>
+        </div>
+        <p class="small" style="margin-top:12px">En selección única el orden de las opciones cambia en cada intento. En completar no importan las mayúsculas ni las tildes.</p>
+      </div>
+      <form class="panel" id="startForm" autocomplete="off" novalidate>
+        <div class="field">
+          <label for="name">Nombre y apellido</label>
+          <input type="text" id="name" maxlength="80" placeholder="Por ejemplo María Rojas Solano" autocomplete="off" required aria-describedby="nameErr">
+          <p class="err" id="nameErr" role="alert"></p>
+        </div>
+        <fieldset>
+          <legend class="legend" style="margin-bottom:8px">¿Qué quieres practicar?</legend>
+          <div id="modes"></div>
+        </fieldset>
+        <button class="btn primary" type="submit" id="btnStart">Comenzar prueba</button>
+        <details class="import">
+          <summary>Tengo un código de avance de otro dispositivo</summary>
+          <p class="small">Pega aquí el código que copiaste al guardar y salir. Solo funciona con la misma cédula.</p>
+          <textarea class="sum" id="codeIn" aria-label="Código de avance" spellcheck="false"></textarea>
+          <div class="btn-row" style="margin-top:10px"><button class="btn" type="button" id="btnLoadCode">Cargar código</button></div>
+          <p class="err" id="codeErr" role="alert"></p>
+        </details>
+      </form>
+    </div>
+  </section>
+
+  <!-- EXAMEN -->
+  <section id="s-exam" hidden>
+    <div class="exam-bar">
+      <span class="where" id="where"></span>
+      <div class="btn-row bar-actions">
+        <span class="chip" id="saveStat" role="status"></span>
+        <button class="btn" type="button" id="btnSaveExit">Guardar y salir</button>
+        <button class="btn" type="button" id="btnSubmit">Entregar prueba</button>
+      </div>
+    </div>
+    <div class="progress" aria-hidden="true"><span id="progFill"></span></div>
+    <div class="confirm" id="confirm" hidden role="alert">
+      <p id="confirmText"></p>
+      <div class="btn-row">
+        <button class="btn primary" type="button" id="btnYes">Sí, entregar</button>
+        <button class="btn" type="button" id="btnNo">Seguir respondiendo</button>
+      </div>
+    </div>
+    <div class="exam-grid">
+      <div class="qcard" id="qcard"></div>
+      <aside class="sheet" aria-label="Hoja de respuestas">
+        <h2>Hoja de respuestas</h2>
+        <div class="legend-row"><span><i class="d"></i>Respondida</span><span><i></i>Sin responder</span></div>
+        <div id="sheetBody"></div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- GUARDADO -->
+  <section id="s-saved" hidden>
+    <div class="intro">
+      <h1>Tu avance quedó guardado</h1>
+      <p id="savedWhere"></p>
+    </div>
+    <div class="panel">
+      <h2>Código de avance</h2>
+      <p class="small" style="margin-bottom:10px">Sirve para continuar en otro dispositivo si tu avance no quedó en tu cuenta. Guárdalo en un lugar seguro: solo funciona con tu cédula.</p>
+      <textarea class="sum" id="codeArea" readonly aria-label="Código de avance"></textarea>
+      <div class="btn-row" style="margin-top:12px">
+        <button class="btn" type="button" id="btnCopyCode">Copiar código</button>
+        <button class="btn primary" type="button" id="btnExit">Salir</button>
+      </div>
+      <div class="toast" id="toastCode" role="status"></div>
+    </div>
+  </section>
+
+  <!-- DOCENTE -->
+  <section id="s-teacher" hidden>
+    <div class="intro">
+      <h1>Estadísticas del grupo</h1>
+      <p>Resultados de los estudiantes que entregaron la prueba. Contiene nombres y cédulas: no compartas esta pantalla.</p>
+    </div>
+    <div class="panel" style="margin-bottom:20px">
+      <div class="t-filters">
+        <div class="field"><label for="tMode">Prueba</label><select id="tMode"><option value="all">Prueba completa</option><option value="a1">Oportunidades de negocios</option><option value="a2">Modelo de negocios</option><option value="a3">Creación de empresas</option></select></div>
+        <div class="field"><label for="tSearch">Buscar estudiante</label><input type="text" id="tSearch" placeholder="Nombre o cédula" autocomplete="off"></div>
+        <div class="field"><label for="tGoal">Nota para aprobar</label><input type="number" id="tGoal" min="1" max="100" value="70" inputmode="numeric"></div>
+        <div class="field"><label for="tSort">Ordenar por</label><select id="tSort"><option value="name">Nombre</option><option value="notaDesc">Nota, de mayor a menor</option><option value="notaAsc">Nota, de menor a mayor</option><option value="fecha">Fecha más reciente</option></select></div>
+      </div>
+      <div class="btn-row" style="margin-top:12px">
+        <button class="btn" type="button" id="tRefresh">Actualizar</button>
+        <button class="btn" type="button" id="tCsv">Copiar tabla</button>
+        <button class="btn" type="button" id="tBack">Volver al ingreso</button>
+      </div>
+      <div class="toast" id="tToast" role="status"></div>
+      <div id="tCsvWrap"></div>
+    </div>
+    <div id="tStats"></div>
+    <div class="panel" style="margin:20px 0">
+      <h2>En curso (empezaron y no han entregado)</h2>
+      <div class="table-scroll" id="tProg"></div>
+    </div>
+    <div class="panel" style="margin:20px 0">
+      <h2>Estudiantes</h2>
+      <div class="table-scroll" id="tTable"></div>
+    </div>
+    <details class="import panel">
+      <summary>Agregar resultados con código</summary>
+      <p class="small">Para quien no pudo enviar su resultado automáticamente. Pega uno o varios códigos de resultado, separados por espacios o saltos de línea.</p>
+      <textarea class="sum" id="tCodes" aria-label="Códigos de resultado" spellcheck="false"></textarea>
+      <div class="btn-row" style="margin-top:10px"><button class="btn" type="button" id="tAdd">Agregar</button></div>
+      <p class="small" id="tAddMsg" role="status"></p>
+    </details>
+  </section>
+
+  <!-- RESULTADOS -->
+  <section id="s-results" hidden>
+    <div class="res-head">
+      <span class="tag-practica" id="resMeta"></span>
+      <h1 id="resName">Resultado</h1>
+    </div>
+    <div class="res-top">
+      <div class="panel score">
+        <span class="chip" style="align-self:flex-start">Nota</span>
+        <div class="big" id="resNota"></div>
+        <div id="resVerdict"></div>
+        <p class="small" id="resGoalNote"></p>
+      </div>
+      <div class="panel">
+        <h2>Resumen</h2>
+        <div class="stats" id="resStats"></div>
+        <div class="actions btn-row" style="margin-top:16px">
+          <button class="btn primary" type="button" id="btnRetry">Repetir solo lo que falló</button>
+          <button class="btn" type="button" id="btnCopy">Copiar resumen</button>
+          <button class="btn" type="button" id="btnNew">Nueva prueba</button>
+        </div>
+        <div class="toast" id="toast" role="status"></div>
+        <div id="sumWrap"></div>
+      </div>
+    </div>
+    <div class="panel" id="sendPanel" style="margin-bottom:20px">
+      <h2>Resultado para tu docente</h2>
+      <p class="small" id="sendStat" role="status"></p>
+      <div class="btn-row" style="margin-top:12px">
+        <button class="btn" type="button" id="btnResend" hidden>Enviar de nuevo</button>
+        <button class="btn" type="button" id="btnCopyResult">Copiar código de resultado</button>
+      </div>
+      <div class="toast" id="toastRes" role="status"></div>
+      <div id="resCodeWrap"></div>
+    </div>
+    <div class="res-cols">
+      <div class="panel"><h2>Por área</h2><div id="byArea"></div></div>
+      <div class="panel"><h2>Por tipo de pregunta</h2><div id="byType"></div></div>
+    </div>
+    <div class="review-head">
+      <h2 style="font-size:1.4rem">Detalle de las preguntas</h2>
+      <div class="tabs" id="tabs"></div>
+    </div>
+    <div id="review"></div>
+  </section>
+</div>
+
+<script>
+/*DATA-START*/
+const AREAS={1:"Oportunidades de Negocios",2:"Modelo de negocios",3:"Creación de Empresas"};
+const TYPES={su:"Selección única",co:"Completar",vf:"Verdadero o falso"};
+const QS=[
+/* ===== ÁREA 1: OPORTUNIDADES DE NEGOCIOS ===== */
+{a:1,t:"su",q:"Caso: Marta nota que sus vecinos compran el pan en otro distrito porque la panadería local cierra a las 2 p. m. Antes de abrir, decide medir cuánta gente compraría pan fresco por la tarde y a qué precio. Esta decisión muestra que Marta:",o:["Detectó una necesidad insatisfecha y busca validar si es una oportunidad real antes de invertir","Ya decidió abrir la panadería y solo busca datos que confirmen lo que piensa hacer","Quiere copiar a la competencia, así que necesita conocer su horario y sus precios","Evita el riesgo propio del emprendimiento, porque posterga la apertura sin límite de tiempo"],c:0,e:"Marta parte de una necesidad no atendida y la contrasta con datos de demanda y precio antes de invertir. Eso es validar una oportunidad, no confirmar una decisión ya tomada."},
+{a:1,t:"su",q:"Ana propone «vender camisetas porque me gusta la ropa deportiva». Luis propone «vender camisetas deportivas a estudiantes del colegio, que hoy deben viajar al centro para comprarlas». ¿Qué elemento de la justificación de un proyecto tiene Luis y le falta a Ana?",o:["Identifica el problema que resuelve y las personas a quienes beneficia","Calcula el punto de equilibrio y el margen de ganancia por camiseta","Define la forma jurídica y el nombre comercial con que operará","Describe el proceso de producción y los equipos que necesitará"],c:0,e:"La justificación explica por qué el proyecto es necesario, qué problema resuelve y a quién beneficia. Los otros elementos pertenecen a estudios posteriores (financiero, legal y técnico)."},
+{a:1,t:"vf",q:"Una idea se convierte en oportunidad de negocio cuando existe una necesidad no satisfecha y personas con capacidad y disposición de pagar por la solución.",c:true,e:"Sin personas dispuestas y con capacidad de pagar solo hay una idea o una necesidad, no una oportunidad."},
+{a:1,t:"su",q:"Una emprendedora reinvierte las ganancias del primer año en inventario y además solicita un préstamo a un banco. ¿Cómo se clasifica su financiamiento?",o:["Mixto: las ganancias reinvertidas son propias y el préstamo es externo","Propio: todo dinero que ingresa al negocio se considera aporte de la dueña","Externo: el inventario se compra a proveedores y no con dinero propio","Estatal: los bancos regulados por el Estado prestan con fondos públicos"],c:0,e:"Las ganancias reinvertidas son una fuente propia; el préstamo bancario es externo. Al combinar ambas, el financiamiento es mixto."},
+{a:1,t:"su",q:"Un emprendedor quiere saber qué productos de limpieza ecológicos buscan más las familias de su cantón. ¿Qué uso de la tecnología le aporta información más útil para generar su idea?",o:["Analizar búsquedas, comentarios y reseñas sobre esos productos en buscadores y redes","Abrir un perfil comercial con fotos de productos que todavía no ha definido","Consultar plataformas de venta de maquinaria para fabricar los productos","Llevar sus gastos en una hoja de cálculo para controlar el dinero del negocio"],c:0,e:"Para generar ideas se necesita información sobre lo que el mercado busca y opina. Las otras opciones son usos válidos de la tecnología, pero para otras etapas (promoción, producción, finanzas)."},
+{a:1,t:"co",q:"En el análisis PESTEL, la letra T se refiere al factor {_}.",c:["tecnológico","tecnologico","tecnológica","tecnologia"],e:"PESTEL agrupa factores políticos, económicos, sociales, tecnológicos, ecológicos y legales."},
+{a:1,t:"su",q:"En un mercado donde la demanda se mantiene igual, aparecen cinco empresas nuevas que ofrecen el mismo servicio. ¿Qué efecto es más probable?",o:["Mayor competencia: las empresas deberán bajar precios o diferenciar su valor","Mayor demanda, porque más opciones disponibles hacen que más personas compren","Precios más altos, porque cada empresa debe cubrir más gastos de publicidad","Menos competencia, porque el mercado se reparte en partes iguales entre todas"],c:0,e:"Con demanda constante y más oferta, crece la competencia; para sostenerse, las empresas bajan precios o se diferencian. Más oferta no crea por sí sola más demanda."},
+{a:1,t:"su",q:"En un análisis PESTEL de una empresa de transporte escolar, ¿cuál factor se clasifica como legal?",o:["Una reforma que exige revisiones técnicas más frecuentes a los vehículos escolares","El aumento del precio internacional del combustible durante el último año","La preferencia de las familias por rutas más cortas y con menos paradas","La aparición de baterías de mayor autonomía para vehículos eléctricos"],c:0,e:"Una norma que cambia las obligaciones de la empresa es un factor legal. El combustible es económico, la preferencia de las familias es social y las baterías son tecnológicas."},
+{a:1,t:"su",q:"¿Cuál situación representa una oportunidad de negocio y no solo una idea?",o:["Adultos mayores de una zona sin entrega de medicamentos, con familias dispuestas a pagar por ella","Una joven que quiere abrir una tienda de ropa porque le gusta la moda y tiene un local libre","Un estudiante que cocina muy bien y piensa que sus recetas le gustarían a todo el mundo","Un grupo que desea vender videojuegos porque ve que están de moda en sus redes sociales"],c:0,e:"Hay oportunidad cuando existe una necesidad concreta, un grupo identificable y disposición de pago. Las otras tres opciones parten de gustos personales o modas, sin evidencia de demanda."},
+{a:1,t:"vf",q:"En el proceso creativo, la etapa de verificación consiste en generar la mayor cantidad posible de ideas sin evaluarlas.",c:false,e:"Verificar es evaluar la idea y comprobar que funciona. Generar muchas ideas sin juzgarlas corresponde a etapas anteriores del proceso."},
+{a:1,t:"su",q:"Caso: en un barrio se acumulan residuos de construcción en lotes baldíos y los vecinos pagan para que los retiren. Un emprendedor propone recolectarlos y convertirlos en bloques para aceras. ¿Qué afirmación describe mejor su propuesta?",o:["Responde a una problemática ambiental y social con un modelo que puede generar ingresos","Es una tarea propia del servicio público y, por eso, no puede ser un negocio rentable","Es una innovación de mercadotecnia, porque cambia la forma de promocionar el servicio","Es una oportunidad débil, porque los vecinos ya pagan hoy por retirar los residuos"],c:0,e:"Resuelve un problema ambiental y social y reutiliza el residuo como insumo. Que los vecinos ya paguen por retirarlo es evidencia de demanda; no la debilita."},
+{a:1,t:"su",q:"Una tienda virtual quiere saber por qué los clientes abandonan la compra justo antes de pagar. ¿Qué herramienta de recolección conviene aplicar primero?",o:["Entrevistas breves a personas que dejaron el carrito, junto con los datos de la plataforma","Una encuesta general sobre hábitos de consumo enviada a toda la población del cantón","Un censo de los negocios competidores ubicados en las zonas comerciales del cantón","Un grupo focal con personas que nunca han comprado por internet en toda su vida"],c:0,e:"Para entender un comportamiento específico hay que preguntar a quienes lo tuvieron y cruzarlo con datos reales de la plataforma. Las otras opciones recogen información general o de personas ajenas al problema."},
+{a:1,t:"co",q:"Al grupo específico de personas al que una empresa dirige su producto se le llama mercado {_}.",c:["meta","objetivo"],e:"El mercado meta (u objetivo) es el segmento al que se dirige la oferta."},
+{a:1,t:"su",q:"Un equipo generó 40 ideas en una lluvia de ideas y debe elegir una para un colegio con poco presupuesto. ¿Cuál es el paso más adecuado?",o:["Evaluarlas en una matriz con criterios ponderados, como costo, demanda y viabilidad técnica","Repetir la lluvia de ideas hasta reunir más de cien y escoger la idea que más se repita","Escoger por votación la idea que más guste al grupo, sin comparar criterios objetivos","Aplicar SCAMPER a las 40 ideas antes de descartar cualquiera de ellas por el costo"],c:0,e:"Seleccionar exige comparar con criterios definidos. Repetir la lluvia de ideas o aplicar SCAMPER genera o mejora ideas, pero no elige; votar por gusto ignora la viabilidad."},
+{a:1,t:"su",q:"¿Cuál de los siguientes ejemplos es una innovación de proceso?",o:["Una fábrica rediseña su línea para reducir desperdicios y tiempos de producción","Una heladería lanza un sabor vegano que no existía en su catálogo de productos","Una ferretería empieza a vender por internet con retiro del pedido en la tienda","Una academia cambia su estructura de equipos para tomar decisiones con más rapidez"],c:0,e:"La innovación de proceso cambia cómo se produce o entrega. El sabor nuevo es de producto, la venta en línea es de comercialización y el cambio de equipos es de organización."},
+{a:1,t:"su",q:"Una marca de ropa cambia el diseño del empaque y la forma de promocionar su producto, sin modificar la prenda. Esta es una innovación de:",o:["Mercadotecnia, porque modifica presentación y promoción","Producto, porque el empaque forma parte de lo que se vende","Proceso, porque cambia la manera de vender la prenda al público","Organización, porque redefine cómo trabaja el equipo de ventas"],c:0,e:"Cambiar el diseño, la presentación y la promoción sin alterar el producto en sí es innovación de mercadotecnia."},
+{a:1,t:"vf",q:"Una innovación de producto y una innovación de proceso son lo mismo, porque en ambas se genera valor.",c:false,e:"Se diferencian por lo que cambian: la de producto cambia lo que se ofrece al cliente; la de proceso cambia cómo se produce o se entrega."},
+{a:1,t:"su",q:"Un grupo propone 15 ideas originales para reducir el desperdicio de comida en el comedor, pero ninguna se prueba ni se aplica. Según la diferencia entre ambos conceptos, el grupo mostró:",o:["Creatividad, pero todavía no innovación, porque las ideas no se llevaron a la práctica","Innovación, porque las ideas son originales y podrían generar valor en el futuro","Creatividad e innovación, porque propuso soluciones nuevas a un problema real","Ninguna de las dos, porque sin resultados medibles no existe ni siquiera creatividad"],c:0,e:"Generar ideas nuevas es creatividad; innovar exige aplicarlas y generar valor. Sin implementación hay creatividad, pero no innovación."},
+{a:1,t:"su",q:"Un equipo reunió información sobre un problema y dejó de trabajar en él unos días. De pronto, mientras caminaba, apareció la solución. ¿A qué etapa del proceso creativo corresponde ese momento?",o:["Iluminación: la solución aparece de forma clara y repentina","Preparación: se reúne y analiza la información del problema","Incubación: la mente procesa el problema sin trabajarlo de forma consciente","Verificación: se comprueba que la solución sea útil y viable"],c:0,e:"La iluminación es el momento en que la idea aparece. Antes ocurren la preparación y la incubación; después, la verificación."},
+{a:1,t:"co",q:"En el proceso creativo, la etapa en que se deja de trabajar de forma consciente en el problema para que la mente procese las ideas se llama {_}.",c:["incubación","incubacion"],e:"La incubación permite que las ideas maduren antes de la iluminación."},
+{a:1,t:"su",q:"Un taller de pintura automotriz abre cerca de una escuela. ¿Qué medida reduce a la vez el impacto ambiental y el riesgo para la salud de la comunidad?",o:["Instalar captación de vapores y entregar los residuos de solventes a gestores autorizados","Pintar solo por las noches para que la comunidad no perciba el olor de los solventes","Diluir los residuos de pintura con agua antes de verterlos en el alcantarillado sanitario","Mantener las puertas abiertas durante el trabajo para dispersar los vapores en el aire"],c:0,e:"Hay que controlar la emisión en la fuente y gestionar el residuo peligroso. Las otras medidas solo ocultan o trasladan la contaminación y siguen exponiendo a la comunidad."},
+{a:1,t:"su",q:"¿Cuál emprendimiento integra mejor las tres dimensiones del desarrollo sostenible?",o:["Recicla plástico, emplea a madres jefas de hogar con salario justo y cubre sus costos","Recicla plástico con gran ganancia, pero con empleo informal y sin seguridad laboral","Emplea a personas con buenas condiciones, pero depende de donaciones y contamina el río","Usa energía limpia y paga bien, pero no cubre sus costos y cierra en menos de un año"],c:0,e:"La sostenibilidad requiere equilibrio entre lo ambiental, lo social y lo económico. Cada alternativa incorrecta falla en al menos una de las tres dimensiones."},
+{a:1,t:"vf",q:"Un emprendimiento puede ser rentable y, aun así, no ser sostenible si ignora su impacto social o ambiental.",c:true,e:"La rentabilidad es solo una de las tres dimensiones. Sin equilibrio social y ambiental, el negocio no es sostenible."},
+{a:1,t:"su",q:"Una joven vende productos por redes sociales, no entrega factura y no inscribe su actividad porque «todavía es pequeña». ¿Qué responsabilidad de la persona emprendedora incumple?",o:["Los trámites administrativos y tributarios que corresponden a su actividad económica","La obligación de contratar personal fijo desde el primer día de operación del negocio","La responsabilidad de tener un local comercial propio, rotulado y abierto al público","El deber de constituir una sociedad anónima antes de realizar su primera venta formal"],c:0,e:"Cumplir con los trámites administrativos y tributarios es responsabilidad de quien emprende, aunque el negocio sea pequeño. No hay obligación de contratar personal, tener local propio ni constituir una sociedad anónima para vender."},
+{a:1,t:"su",q:"Un equipo prueba una idea nueva y fracasa. La gerencia analiza qué se aprendió y autoriza un segundo intento con ajustes. ¿Qué rasgo de la cultura emprendedora refleja?",o:["Aprender del error como parte natural del proceso de probar y mejorar ideas","Evitar los riesgos para proteger siempre los resultados del trimestre","Premiar solo los éxitos para motivar al resto del personal a no fallar","Mantener los procesos sin cambios para evitar que se repitan los fracasos"],c:0,e:"En una cultura emprendedora el error es fuente de aprendizaje. Las otras opciones castigan el riesgo o frenan el cambio."},
+{a:1,t:"su",q:"Un estudio de mercado muestra que 8 de cada 10 personas consultadas valoran el producto, pero solo 1 de cada 10 pagaría el precio propuesto. ¿Cuál es la conclusión más sólida?",o:["Hay interés, pero el precio o la propuesta de valor deben ajustarse antes de invertir","El producto fracasará, por lo que conviene abandonar la idea de inmediato y sin más análisis","El precio es adecuado, porque la mayoría de las personas reconoce el valor del producto","El mercado es demasiado pequeño, así que lo mejor es dirigirse a otro segmento distinto"],c:0,e:"Valorar el producto no equivale a pagar por él. Los datos indican interés con una barrera de precio; lo razonable es ajustar antes de invertir, no abandonar ni asumir que el precio es correcto."},
+{a:1,t:"co",q:"El dinero que proviene de los ahorros del dueño y de las ganancias reinvertidas es financiamiento {_}.",c:["propio","propia","interno"],e:"Los recursos del propio negocio o de su dueño son financiamiento propio; los de bancos o proveedores, externo."},
+{a:1,t:"su",q:"Una tienda de uniformes nota que cada año los colegios cambian los requisitos de sus uniformes y que las familias prefieren pagar en línea. ¿Qué fuente de ideas está aprovechando?",o:["Los cambios en los requisitos y en las preferencias de las personas clientes","La imitación directa de la competencia más grande que opera en la zona","La reducción de costos mediante compras al por mayor a un solo proveedor","El apoyo de aliados que amplían los canales de distribución del negocio"],c:0,e:"Los cambios en las exigencias y hábitos del mercado son una fuente de ideas para ajustar la oferta. Las otras opciones describen estrategias de imitación, costos o distribución."},
+{a:1,t:"su",q:"Una academia incorpora práctica de inglés con inteligencia artificial adaptada a cada nivel, mientras sus competidores solo ofrecen clases presenciales. ¿Qué busca principalmente con esa decisión?",o:["Diferenciarse y mantenerse por delante de la competencia usando tecnología","Reducir costos de personal para poder cobrar menos que las demás academias","Cumplir un requisito legal para conservar su permiso de funcionamiento vigente","Seguir una moda pasajera que no cambia la necesidad de las personas clientes"],c:0,e:"Incorporar tecnología para ofrecer algo que los competidores no ofrecen busca diferenciarse y mantenerse a la cabeza. No se trata de bajar costos, cumplir una norma ni seguir una moda."},
+{a:1,t:"su",q:"Un emprendedor necesita ₡2 000 000 para comprar equipo. ¿Qué fuente de financiamiento implica compartir la propiedad y las decisiones del negocio?",o:["Un socio inversionista que aporta capital a cambio de participación en el negocio","Un préstamo bancario que se paga con intereses en cuotas mensuales durante tres años","El crédito de un proveedor de equipo con plazo de pago de treinta días calendario","Los ahorros que acumuló durante dos años de trabajo antes de empezar a emprender"],c:0,e:"Quien aporta capital a cambio de participación se convierte en socio y comparte decisiones. Un préstamo o un crédito de proveedor se paga, pero no cede propiedad."},
+{a:1,t:"su",q:"Una empresa invierte en mejorar su producto, pero nunca consulta a sus clientes qué valoran. Seis meses después, las ventas bajan. ¿Qué principio ignoró?",o:["Que el cliente es el eje del negocio: sin saber lo que valora, mejorar puede no crear valor","Que la tecnología debe renovarse cada seis meses para conservar a las personas clientes","Que los precios deben bajar siempre que la empresa invierte en mejoras del producto actual","Que la competencia define la dirección de las mejoras que el mercado realmente exige"],c:0,e:"El cliente es quien define el valor. Mejorar sin escucharlo es adivinar, y por eso puede no mover las ventas."},
+{a:1,t:"co",q:"La técnica que usa los verbos sustituir, combinar, adaptar, modificar, poner otros usos, eliminar y reordenar para mejorar ideas se llama {_}.",c:["SCAMPER"],e:"SCAMPER es una lista de verbos que guía el cambio de un producto o servicio."},
+{a:1,t:"vf",q:"Si el estudio de mercado se hace con una muestra amplia, el éxito del negocio queda garantizado.",c:false,e:"El estudio de mercado reduce la incertidumbre, pero no garantiza el éxito; el negocio depende también de su ejecución y de los cambios del entorno."},
+{a:1,t:"co",q:"Una empresa de transporte reemplaza su flota por vehículos eléctricos para reducir emisiones. La dimensión del desarrollo sostenible que más mejora es la {_}.",c:["ambiental","ecológica","ecologica","ambiente"],e:"Reducir emisiones es un efecto ambiental."},
+/* ===== ÁREA 2: MODELO DE NEGOCIOS ===== */
+{a:2,t:"su",q:"Una app conecta a personas que tienen herramientas sin usar con vecinos que las necesitan por pocas horas. Cobra una comisión por cada alquiler y paga una suscripción mensual al servicio de nube donde opera. ¿En qué bloques del Canvas se ubican, respectivamente, la comisión y la suscripción?",o:["Fuentes de ingresos y estructura de costos, en ese orden","Estructura de costos y fuentes de ingresos, en ese orden","Recursos clave y fuentes de ingresos, en ese orden","Aliados clave y actividades clave, en ese orden"],c:0,e:"La comisión es dinero que entra (fuentes de ingresos); la suscripción es dinero que sale para operar (estructura de costos)."},
+{a:2,t:"su",q:"Una cafetería vende a oficinistas entre semana y a turistas los fines de semana. Sus necesidades, horarios y disposición de pago son distintos. En el Canvas, esto implica:",o:["Definir dos segmentos de clientes, con propuestas de valor y canales ajustados a cada uno","Mantener un solo segmento y comunicar la misma propuesta de valor a todas las personas","Crear un único canal de venta, porque la cafetería ofrece el mismo producto a ambos grupos","Reducir la relación con los clientes para poder atender a más personas cada hora"],c:0,e:"Cuando las necesidades difieren, se definen segmentos distintos y se ajustan propuesta, canales y relación a cada uno."},
+{a:2,t:"su",q:"Una panadería crea un grupo de mensajería donde sus clientes habituales comparten recetas, opinan sobre nuevos productos y reciben avisos de hornadas, con el fin de fidelizarlos. ¿Qué bloque del Canvas desarrolla?",o:["Relación con los clientes: construye una comunidad que fideliza","Canales: es el medio por el cual entrega los pedidos al público","Aliados clave: los clientes participan como socios del negocio","Actividades clave: hornear y publicar contenido en el grupo"],c:0,e:"El tipo de vínculo que se construye con cada segmento, aquí una comunidad, es la relación con los clientes. El grupo no es el medio de entrega ni una alianza."},
+{a:2,t:"vf",q:"Un producto mínimo viable puede ser tan simple como una página con un formulario de pedidos, si permite comprobar si hay personas dispuestas a pagar.",c:true,e:"El PMV se mide por lo que enseña, no por su complejidad: lo importante es validar la hipótesis con clientes reales con el menor esfuerzo."},
+{a:2,t:"su",q:"¿Cuál afirmación distingue correctamente un canal de una relación con los clientes?",o:["El canal es el medio para comunicar y entregar el valor; la relación es el tipo de vínculo con el cliente","El canal es el vínculo que se mantiene con cada segmento; la relación es el medio por el que se vende","Ambos significan lo mismo, aunque el canal se utiliza solamente cuando la empresa vende por internet","La relación aplica solo a clientes actuales y el canal solo a quienes todavía no han comprado nunca"],c:0,e:"Canal: cómo llegas al cliente (comunicar, vender, entregar). Relación: qué tipo de vínculo mantienes con él (asistencia personal, autoservicio, comunidad)."},
+{a:2,t:"su",q:"Un taller de bicicletas eléctricas anota en su Canvas: «técnicos certificados en baterías», «marca registrada», «banco de diagnóstico» y «ensamblar y reparar bicicletas». ¿Cuál es una actividad clave y no un recurso clave?",o:["Ensamblar y reparar las bicicletas eléctricas","Contar con técnicos certificados en baterías","Poseer la marca registrada del taller","Tener un banco de diagnóstico para baterías"],c:0,e:"Una actividad es algo que la empresa hace; un recurso es algo que posee o con lo que cuenta (personas, marca, equipo)."},
+{a:2,t:"co",q:"Una repostería tiene costos fijos de ₡300 000 al mes. Cada pastel se vende a ₡5 000 y su costo variable es de ₡2 000. ¿Cuántos pasteles debe vender al mes para llegar al punto de equilibrio? Escribe solo el número: {_}",c:["100"],e:"Cada pastel deja ₡3 000 (5 000 − 2 000) para cubrir los costos fijos. 300 000 ÷ 3 000 = 100 pasteles."},
+{a:2,t:"su",q:"¿En qué caso un proveedor es un aliado clave y no solo un proveedor común?",o:["Cuando el negocio depende de él para un insumo diferenciador y ambos comparten beneficios y riesgos","Cuando entrega todos los insumos que el negocio compra y los cobra al precio de mercado","Cuando es el proveedor más barato entre las varias opciones que el negocio ha cotizado","Cuando el negocio le compra en mayor volumen que el resto de sus competidores directos"],c:0,e:"Un aliado clave aporta algo difícil de reemplazar y comparte riesgos y beneficios con el negocio. Vender barato o en gran volumen no crea una alianza."},
+{a:2,t:"su",q:"Una heladería tiene estos costos: alquiler del local, salario fijo del personal, compra de leche y suscripción mensual a una plataforma de publicidad. Si vende más helados, ¿cuál aumenta de forma directa con la cantidad vendida?",o:["La compra de leche y de los demás insumos que lleva el helado","El alquiler del local donde funciona la heladería todos los meses","El salario fijo que se paga al personal sin importar las ventas","La suscripción mensual a la plataforma de publicidad en línea"],c:0,e:"Los costos variables cambian con la producción (insumos). El alquiler, el salario fijo y la suscripción son costos fijos."},
+{a:2,t:"co",q:"El nivel de ventas en el que los ingresos igualan a los costos, sin ganancia ni pérdida, se llama punto de {_}.",c:["equilibrio"],e:"En el punto de equilibrio no hay ganancia ni pérdida."},
+{a:2,t:"su",q:"Dos tiendas venden el mismo café. La primera dice «café de calidad». La segunda ofrece «café de productores de la zona, tostado cada semana y entregado en bolsa compostable». ¿Cuál tiene una propuesta de valor más diferenciadora y por qué?",o:["La segunda, porque concreta atributos verificables que la competencia no destaca","La primera, porque un mensaje general se adapta a más tipos de personas clientes","La segunda, porque incluye más palabras y detalles para describir el producto","La primera, porque el café de calidad no necesita ninguna explicación adicional"],c:0,e:"Diferenciar es concretar atributos específicos y verificables. Un mensaje genérico lo puede decir cualquiera, y la extensión del texto no es lo que diferencia."},
+{a:2,t:"su",q:"Un equipo redacta el enunciado: «Los estudiantes necesitan comprar su comida en menos de cinco minutos porque el receso es corto». ¿Qué etapa del Design Thinking completó?",o:["Definir, porque formuló el problema desde las necesidades observadas","Empatizar, porque conversó con estudiantes sobre su experiencia","Idear, porque propuso soluciones para el problema del receso","Probar, porque verificó la solución con las personas usuarias"],c:0,e:"Redactar el problema a partir de lo observado es definir. Empatizar es observar y escuchar; idear, proponer soluciones; probar, someterlas a las personas usuarias."},
+{a:2,t:"su",q:"¿Qué acción corresponde a la etapa de idear en el Design Thinking?",o:["Generar y seleccionar soluciones posibles con técnicas creativas","Observar a las personas usuarias en su entorno real de trabajo","Construir una versión sencilla para que las personas la utilicen","Reunir los datos de las pruebas para decidir qué se debe ajustar"],c:0,e:"Idear es generar y elegir soluciones. Observar es empatizar, construir es prototipar y analizar los datos de las pruebas es probar."},
+{a:2,t:"vf",q:"En el Design Thinking, la etapa de probar puede llevar a regresar a etapas anteriores para redefinir el problema o ajustar la solución.",c:true,e:"El proceso es iterativo: lo aprendido al probar puede obligar a redefinir el problema o a idear nuevas soluciones."},
+{a:2,t:"co",q:"Un emprendedor compra un producto a ₡6 000 y lo vende a ₡8 000. ¿Qué porcentaje del precio de venta es su margen de ganancia? Escribe solo el número: {_}",c:["25"],e:"La ganancia por unidad es ₡2 000 (8 000 − 6 000). 2 000 ÷ 8 000 = 0,25, es decir, 25 % del precio de venta."},
+{a:2,t:"su",q:"Una startup vende una versión muy básica de su app a 20 personas para medir cuántas la usan por segunda vez y así decidir si ajusta o cambia la propuesta. ¿Qué enfoque aplica?",o:["Lean Startup: construir, medir y aprender a partir de un producto mínimo viable","Design Thinking: empatizar y definir sin construir nada antes de entender al usuario","Plan de negocios tradicional: proyectar ventas a cinco años antes de salir al mercado","Análisis PESTEL: evaluar factores políticos y económicos antes de decidir el lanzamiento"],c:0,e:"Medir con clientes reales una versión básica para aprender y decidir es el ciclo construir-medir-aprender de Lean Startup."},
+{a:2,t:"su",q:"¿Cuál sería un buen producto mínimo viable para validar un servicio de entrega de comida casera a oficinas?",o:["Ofrecer dos platillos por mensajería a una oficina durante una semana y medir pedidos repetidos","Alquilar un local, comprar equipo industrial y contratar cocineros antes del primer pedido","Desarrollar una app completa con pagos, rastreo y calificaciones antes de ofrecer el servicio","Imprimir mil volantes con el menú completo y repartirlos en todos los barrios del cantón"],c:0,e:"Un PMV prueba la hipótesis con el menor costo. Las otras opciones invierten mucho antes de saber si hay demanda."},
+{a:2,t:"su",q:"Un emprendedor lanza su PMV. 200 personas dicen que «les gusta», pero solo 3 compran. ¿Qué indicador es más confiable para validar el modelo?",o:["El número de personas que realmente compran y vuelven a comprar","La cantidad de personas que expresaron que les gusta el producto","El crecimiento de seguidores y reacciones en las redes del negocio","La opinión favorable de familiares y amistades que probaron el producto"],c:0,e:"Validar significa comprobar comportamiento, no opinión: las compras y las recompras. Los «me gusta» y los comentarios cercanos no prueban disposición de pago."},
+{a:2,t:"su",q:"Tras tres semanas con su PMV, los datos muestran que los clientes usan una función secundaria y casi ignoran la principal. Según Lean Startup, ¿cuál es la decisión más coherente?",o:["Considerar un pivote: reorientar la propuesta hacia lo que los clientes sí valoran","Perseverar sin cambios, porque los datos de tres semanas todavía no son relevantes","Abandonar el negocio, porque el producto original resultó un fracaso completo","Invertir más en la función principal para lograr que los clientes la usen"],c:0,e:"Cuando los datos contradicen la hipótesis, Lean Startup propone pivotar: cambiar de rumbo con base en lo aprendido, sin abandonar ni insistir a ciegas."},
+{a:2,t:"co",q:"A un producto que le cuesta ₡4 000 producir se le quiere sumar una ganancia del 25 % sobre ese costo. ¿Cuál debe ser el precio de venta en colones? Escribe solo el número: {_}",c:["5000","5 000"],e:"La ganancia es 25 % de 4 000 = ₡1 000. El precio es 4 000 + 1 000 = ₡5 000."},
+{a:2,t:"su",q:"Para abrir un puesto de comidas, una emprendedora lista: cocina y utensilios, inventario de las primeras dos semanas, permisos y trámites, y el salario de su ayudante durante los primeros tres meses. ¿Cuáles forman parte de la inversión inicial?",o:["Todos, porque se necesitan para arrancar antes de que existan ingresos suficientes","Solo la cocina y los utensilios, porque son los únicos activos fijos del negocio","La cocina, los utensilios y los permisos; el inventario y el salario son gastos diarios","Solo el inventario y los permisos, porque se pagan una única vez antes de abrir"],c:0,e:"La inversión inicial incluye todo lo necesario para empezar: activos, inventario, trámites y capital de trabajo (como los primeros salarios) hasta que haya ingresos."},
+{a:2,t:"co",q:"El dinero necesario para operar el día a día antes de que entren las ventas, como el inventario y los primeros salarios, forma parte del capital de {_}.",c:["trabajo"],e:"El capital de trabajo financia la operación corriente."},
+{a:2,t:"su",q:"Un negocio recibe un pedido grande que le pagarán a 60 días, pero debe pagar a su proveedor en 15. ¿Qué riesgo financiero enfrenta?",o:["Falta de liquidez temporal, aun cuando la venta resulte rentable","Pérdida segura, porque toda venta a crédito termina generando pérdidas","Exceso de inventario, por comprar las materias primas con mucha anticipación","Aumento automático de impuestos por el volumen del pedido recibido"],c:0,e:"Pagar antes de cobrar tensiona el flujo de caja. Una venta puede ser rentable y aun así dejar sin liquidez al negocio."},
+{a:2,t:"su",q:"Una emprendedora vende pasteles desde su casa y quiere venderle a cafeterías con factura. ¿Qué paso corresponde a formalizar su actividad?",o:["Inscribirse ante el Ministerio de Hacienda y emitir facturas según corresponda","Contratar a su primera colaboradora y pagarle en efectivo sin registrarla","Registrar el nombre de la marca antes de contar con los primeros clientes","Abrir cuentas en redes sociales con el nombre comercial del negocio"],c:0,e:"Para facturar a empresas debe inscribirse ante Hacienda. Registrar la marca protege el nombre, pero no formaliza la actividad tributaria; pagar sin registrar es informalidad."},
+{a:2,t:"vf",q:"Registrar la marca en el Registro Nacional equivale a inscribirse como contribuyente ante Hacienda.",c:false,e:"Son trámites distintos: el registro de marca protege el nombre comercial; la inscripción ante Hacienda formaliza la actividad tributaria."},
+{a:2,t:"su",q:"Un negocio cambia el empaque de su producto, lo vende en tiendas naturistas en lugar de ferias y mantiene su precio. ¿Qué elementos de las 4 P modificó?",o:["Producto (empaque) y plaza (puntos de venta)","Precio (costo al público) y promoción (comunicación)","Plaza (puntos de venta) y precio (costo al público)","Producto (empaque) y promoción (comunicación)"],c:0,e:"El empaque es producto; las tiendas naturistas son plaza. El precio no cambió y no se mencionó ningún cambio en la comunicación."},
+{a:2,t:"su",q:"Dos reposterías venden productos similares. Una cambia nombre y logotipo cada mes; la otra mantiene colores, nombre y estilo constantes. ¿Qué función de la marca aprovecha mejor la segunda?",o:["Ser reconocible y generar recuerdo y confianza en las personas clientes","Reducir costos de producción mediante la repetición del mismo diseño","Impedir que la competencia venda productos parecidos en la misma zona","Sustituir la propuesta de valor por una imagen más atractiva visualmente"],c:0,e:"Una marca consistente se vuelve reconocible y genera confianza. No reduce costos de producción, no bloquea a la competencia ni sustituye la propuesta de valor."},
+{a:2,t:"su",q:"Un proveedor ofrece descuento si la emprendedora paga por adelantado, pero ella necesita plazo para pagar. ¿Qué estrategia busca un acuerdo ganar-ganar?",o:["Proponer un volumen mensual mayor a cambio de un descuento y pago a 30 días","Aceptar el pago adelantado para no perder el descuento aunque quede sin liquidez","Exigir el descuento sin cambiar nada y amenazar con buscar otro proveedor","Retrasar la respuesta hasta que el proveedor ceda por cansancio o por presión"],c:0,e:"Ganar-ganar combina intereses: ella obtiene descuento y plazo; el proveedor obtiene más volumen. Aceptar sin analizar la perjudica, y presionar o retrasar rompe la confianza."},
+{a:2,t:"su",q:"Un cliente dice: «No pagaré más de ₡5 000». La vendedora pregunta para qué lo necesita y descubre que busca regalos para treinta personas. ¿Qué estrategia aplicó?",o:["Indagar los intereses detrás de la posición para hallar opciones que beneficien a ambas partes","Aceptar la posición del cliente para cerrar la venta sin analizar otras alternativas posibles","Rechazar la posición del cliente para mantener su precio y demostrar firmeza ante él","Ceder el precio completo para asegurar que el cliente vuelva a comprar en el futuro"],c:0,e:"Detrás de una posición (un precio) hay un interés (regalos para treinta personas). Explorarlo abre opciones, como paquetes por volumen."},
+{a:2,t:"vf",q:"Negociar de forma ética permite ocultar información relevante al cliente si con eso se logra un mejor acuerdo para el negocio.",c:false,e:"La honestidad es un valor ético universal; ocultar información relevante afecta la confianza y la justicia del acuerdo."},
+{a:2,t:"vf",q:"En el Canvas, todos los segmentos de clientes deben tener el mismo canal y el mismo tipo de relación.",c:false,e:"Cada segmento puede requerir canales y relaciones distintos, según sus necesidades."},
+{a:2,t:"su",q:"Una empresa de limpieza contrata personas sin contrato escrito, no las inscribe en la seguridad social y les paga por debajo del salario mínimo. ¿Qué derecho vulnera principalmente?",o:["El derecho a un trabajo en condiciones justas y favorables, con protección social","El derecho a la libertad cultural y al progreso científico de las personas contratadas","El derecho a la educación gratuita para las familias de las personas contratadas","El derecho a un ambiente sano para las comunidades vecinas a las instalaciones"],c:0,e:"Sin contrato, seguridad social ni salario mínimo se vulnera el derecho a condiciones de trabajo justas y a la protección social."},
+{a:2,t:"vf",q:"Una propuesta de negocio puede ser rentable y, aun así, vulnerar derechos económicos o sociales de las personas trabajadoras.",c:true,e:"La rentabilidad no garantiza el respeto a los derechos; por eso las propuestas deben evaluarse también con valores éticos y derechos."},
+/* ===== ÁREA 3: CREACIÓN DE EMPRESAS ===== */
+{a:3,t:"su",q:"Un grupo de agricultores crea una organización donde cada persona tiene un voto, los excedentes se reparten según lo que cada una entregó a la organización y una parte se destina a educación. ¿Qué forma asociativa corresponde mejor?",o:["Cooperativa: voto por persona y excedentes según la participación","Asociación solidarista: ahorro de personas trabajadoras con aporte patronal","Sociedad anónima: capital en acciones y voto según el capital aportado","Sociedad de responsabilidad limitada: capital en cuotas y pocas personas socias"],c:0,e:"Voto por persona, excedentes según la participación y educación cooperativa son rasgos de una cooperativa. En la S.A. el voto sigue al capital; la solidarista es entre personas trabajadoras de una empresa y su patrono."},
+{a:3,t:"su",q:"¿Cuál enunciado distingue correctamente la asociación solidarista de la cooperativa?",o:["La solidarista reúne personas trabajadoras de una empresa y su patrono; la cooperativa, personas que emprenden una actividad en conjunto","La solidarista reparte utilidades según las acciones de cada persona; la cooperativa reparte según el número de votos que posee","La solidarista la crea el Estado para su personal; la cooperativa puede constituirla cualquier empresa privada con fines de lucro","Ambas se rigen por la misma ley y se diferencian únicamente por el tamaño del capital con que inician sus actividades"],c:0,e:"La solidarista se forma entre personas trabajadoras y su patrono (Ley 6970); la cooperativa asocia personas con una actividad económica común (Ley 4179), con un voto por persona."},
+{a:3,t:"su",q:"Una empresa de 40 personas quiere crear una asociación solidarista. ¿Qué ley debe consultar para conocer el modelo, los beneficios y los requisitos?",o:["Ley de Asociaciones Solidaristas, Ley 6970","Ley de Asociaciones Cooperativas, Ley 4179","Ley de Fortalecimiento de las Finanzas Públicas, Ley 9635","Ley de Competencia y Defensa del Consumidor, Ley 7472"],c:0,e:"La Ley 6970 regula las asociaciones solidaristas. La 4179 regula las cooperativas; la 9635 y la 7472 tratan otros temas."},
+{a:3,t:"vf",q:"En una cooperativa, cada persona asociada tiene un voto, sin importar el capital que haya aportado.",c:true,e:"La gestión democrática (una persona, un voto) es un principio cooperativo."},
+{a:3,t:"su",q:"Tres amigos quieren emprender con responsabilidad limitada a lo aportado, con pocas personas socias y un capital dividido en cuotas. ¿Qué forma jurídica se ajusta mejor?",o:["S.R.L.: capital dividido en cuotas y un número reducido de socios","S.A.: capital dividido en acciones y gran número de socios","Empresa individual: una sola persona dueña con responsabilidad limitada","Solidarista: ahorro entre personas trabajadoras de una empresa"],c:0,e:"En la S.R.L. el capital se divide en cuotas y suele haber pocas personas socias. En la S.A. se divide en acciones; la empresa individual tiene una sola persona dueña."},
+{a:3,t:"co",q:"Un negocio vende 150 unidades a ₡4 000 cada una. Tiene costos fijos de ₡200 000 y un costo variable de ₡1 500 por unidad. ¿Cuál es su utilidad en colones? Escribe solo el número: {_}",c:["175000","175 000"],e:"Ingresos: 150 × 4 000 = 600 000. Costos variables: 150 × 1 500 = 225 000. Utilidad = 600 000 − 225 000 − 200 000 = ₡175 000."},
+{a:3,t:"vf",q:"En una asociación solidarista, el patrono no hace aportes, porque el ahorro proviene solo del salario de las personas trabajadoras.",c:false,e:"En el modelo solidarista, tanto las personas trabajadoras como el patrono hacen aportes."},
+{a:3,t:"su",q:"Una emprendedora presenta a una entidad financiera solo su Canvas y su idea. La entidad le pide un plan de negocios. ¿Qué parte pesa más para evaluar el crédito?",o:["El estudio económico y financiero, con flujo de caja y punto de equilibrio","El diseño del logotipo y la paleta de colores que usará la marca del negocio","La lista de redes sociales donde planea promocionar el producto cada semana","El organigrama con los nombres y cargos de todo el personal del negocio"],c:0,e:"Para decidir un crédito importa si el negocio genera dinero y puede pagarlo: eso lo muestra el estudio económico y financiero. La marca, las redes y el organigrama no responden esa pregunta."},
+{a:3,t:"su",q:"Antes de abrir una panadería, una persona analiza el tamaño del local, la ubicación, la maquinaria y el flujo del proceso de producción. ¿Qué estudio realiza?",o:["Técnico: define recursos, localización y procesos para producir","De mercado: analiza demanda, oferta y características del consumidor","De mercadeo: define producto, precio, plaza y promoción","Financiero: calcula inversión, costos y rentabilidad esperada"],c:0,e:"El estudio técnico responde cómo y con qué se producirá. El de mercado analiza la demanda; el de mercadeo, las estrategias para llegar a ella; el financiero, el dinero."},
+{a:3,t:"vf",q:"El plan de negocios integra los estudios de mercado, mercadeo, técnico, económico y financiero con el modelo de negocios y las metas.",c:true,e:"Es el documento que reúne esos elementos para estructurar la empresa."},
+{a:3,t:"su",q:"Una persona abrirá un local de comidas. ¿Qué trámites corresponden, respectivamente, a autorizar la actividad en el cantón y a verificar las condiciones sanitarias?",o:["Patente municipal y permiso sanitario de funcionamiento del Ministerio de Salud","Permiso sanitario municipal y patente del Ministerio de Salud, en ese orden","Inscripción en la CCSS y póliza de riesgos del trabajo, respectivamente","Inscripción ante Hacienda y registro de la marca en el Registro Nacional"],c:0,e:"La patente la otorga la municipalidad y el permiso sanitario de funcionamiento, el Ministerio de Salud. La CCSS, la póliza, Hacienda y la marca son otros trámites."},
+{a:3,t:"co",q:"Para operar legalmente un local comercial en un cantón, se debe obtener la {_} municipal.",c:["patente"],e:"La patente comercial la otorga la municipalidad del cantón."},
+{a:3,t:"su",q:"Una empresa contrata a su primera persona colaboradora. ¿Qué dos obligaciones debe atender como patrona?",o:["Inscribirse como patrona ante la CCSS y asegurar a la persona con la póliza de riesgos del trabajo","Registrar la marca y emitir acciones a favor de la persona contratada como parte del pago","Solicitar la patente municipal y el permiso sanitario a nombre de la persona contratada","Inscribirse como cooperativa y repartir excedentes entre todo el personal desde el primer mes"],c:0,e:"Contratar personal obliga a inscribirse como patrono en la CCSS (cargas sociales) y a asegurar a la persona contra riesgos del trabajo. Los demás elementos no corresponden a esa obligación."},
+{a:3,t:"vf",q:"Una empresa con una sola persona colaboradora también debe asegurarla con la póliza de riesgos del trabajo.",c:true,e:"La obligación de asegurar contra riesgos del trabajo recae en la persona patrona, sin importar cuántas personas contrate."},
+{a:3,t:"su",q:"Un gimnasio quiere proteger a su personal ante accidentes laborales y cubrir daños a terceros ocurridos en sus instalaciones. ¿Qué pólizas necesita?",o:["Riesgos del trabajo, que es obligatoria, y una de responsabilidad civil según su actividad","Solo riesgos del trabajo, porque esa póliza cubre cualquier daño ocurrido dentro del local","Solo responsabilidad civil, porque el personal ya queda cubierto por la CCSS en todo caso","Una póliza de vida, que sustituye todos los demás seguros que necesita el negocio"],c:0,e:"Riesgos del trabajo protege al personal; la responsabilidad civil cubre daños a terceros. No son intercambiables ni las sustituye una póliza de vida."},
+{a:3,t:"su",q:"Un negocio vende un producto gravado con la tarifa general del IVA a ₡10 000 sin impuesto. ¿Cuánto debe cobrar al cliente con el impuesto incluido?",o:["₡11 300","₡11 000","₡10 130","₡11 130"],c:0,e:"El IVA general es 13 %: 13 % de ₡10 000 son ₡1 300; el total es ₡11 300."},
+{a:3,t:"su",q:"En la cadena de valor de una distribuidora, ¿cuál es una actividad de apoyo?",o:["La gestión del talento humano, que contrata y capacita al personal","La logística de entrada, que recibe y almacena la mercadería","Las operaciones, que preparan, arman y empacan los pedidos","El servicio posventa, que atiende reclamos y garantías de clientes"],c:0,e:"En la cadena de valor, la gestión del talento humano, la tecnología, las compras y la infraestructura son actividades de apoyo. Logística, operaciones, ventas y servicio son primarias."},
+{a:3,t:"vf",q:"Según la cadena de valor, las actividades de apoyo, como la gestión de personas y la tecnología, no generan valor para el cliente.",c:false,e:"Las actividades de apoyo hacen posible y mejoran las primarias; sí contribuyen al valor que recibe el cliente."},
+{a:3,t:"su",q:"Una pizzería tarda cada vez más en entregar porque cada cocinero prepara los pedidos a su manera. ¿Qué herramienta de gestión debería implementar?",o:["Procesos y procedimientos documentados para estandarizar la preparación y los tiempos","Una campaña de promoción nueva para aumentar el número de pedidos diarios del local","Un plan de expansión hacia otros cantones con nuevos locales y personal adicional","Un cambio de la forma jurídica a sociedad anónima para poder vender acciones"],c:0,e:"El problema es la variación en cómo se hace el trabajo; la solución es documentar y estandarizar procesos y procedimientos. Promoción, expansión o cambio jurídico no lo corrigen."},
+{a:3,t:"su",q:"Cinco productores de café de una zona compran insumos en conjunto, comparten un beneficio de procesamiento y venden bajo una marca común, sin perder su independencia. ¿Qué estrategia aplican?",o:["Asociatividad: cooperan en compras, procesamiento y ventas sin perder su independencia","Fusión: se integran en una sola empresa con un solo dueño y una sola contabilidad","Competencia directa: cada productor compite por precios en el mismo mercado","Diversificación: cada productor entra a negocios que no se relacionan con el café"],c:0,e:"Cooperar manteniendo la independencia es asociatividad. Una fusión eliminaría la independencia; competir o diversificar no es cooperar."},
+{a:3,t:"co",q:"Dos socios forman una empresa: uno aporta ₡1 500 000 y el otro ₡500 000. ¿Qué porcentaje del capital tiene el socio que aportó más? Escribe solo el número: {_}",c:["75"],e:"El capital total es ₡2 000 000. 1 500 000 ÷ 2 000 000 = 0,75, es decir, 75 %."},
+{a:3,t:"su",q:"En una empresa de práctica, una estudiante de ventas emite una factura a otra empresa de práctica; esta la registra como compra y la paga con una transferencia simulada. ¿Qué objetivo educativo cumple esta dinámica?",o:["Simular el ciclo completo de una transacción entre empresas, con registro y pago","Sustituir el estudio de mercado con operaciones que no tienen ningún respaldo","Evaluar solamente la rapidez para digitar facturas y comprobantes de pago","Practicar la negociación de salarios con el área de recursos humanos"],c:0,e:"La empresa de práctica permite vivir el ciclo de vender, facturar, registrar y pagar entre empresas. No sustituye estudios ni se reduce a digitar."},
+{a:3,t:"vf",q:"En una empresa de práctica, registrar compras, ventas y pagos permite usar los datos para tomar decisiones, como en una empresa real.",c:true,e:"Registrar las transacciones genera datos con los que se analizan ventas, costos y resultados."},
+{a:3,t:"su",q:"Una papelería quiere venderle al colegio y a otras instituciones públicas. ¿Dónde debe registrarse y participar en los procedimientos de compra?",o:["En SICOP, la plataforma digital que centraliza las compras públicas","En SINPE Móvil, que permite a las instituciones cobrar y pagar","En EDUS, el expediente digital que registra los pedidos de bienes","En el Registro Nacional, que adjudica las compras de las instituciones"],c:0,e:"SICOP es la plataforma digital de compras públicas. SINPE Móvil es de pagos, EDUS es el expediente de salud y el Registro Nacional no adjudica compras."},
+{a:3,t:"su",q:"Una clienta es recibida con amabilidad, pero su pedido llega tarde y dañado y nadie resuelve su reclamo. ¿Qué diferencia entre atención y servicio ilustra el caso?",o:["Hubo buena atención en el trato, pero un servicio deficiente al no cumplir ni resolver","Hubo mala atención y mal servicio, porque el pedido llegó tarde y además dañado","Hubo buen servicio, porque la persona fue tratada con amabilidad desde el inicio","No puede evaluarse, porque atención y servicio significan exactamente lo mismo"],c:0,e:"La atención es el trato; el servicio incluye cumplir y resolver. Aquí el trato fue bueno, pero el servicio falló."},
+{a:3,t:"vf",q:"La atención y el servicio al cliente son sinónimos, pues ambos se limitan al trato amable en el punto de venta.",c:false,e:"La atención es el trato en el contacto; el servicio abarca todo lo que se hace para satisfacer la necesidad del cliente."},
+{a:3,t:"co",q:"En el triángulo del servicio, la persona cliente está al centro y los tres vértices son la estrategia de servicio, el personal y los {_}.",c:["sistemas","sistema"],e:"Los sistemas son los procesos y herramientas que sostienen el servicio."},
+{a:3,t:"su",q:"Un cliente publica una queja en redes sociales. ¿Cuál respuesta aplica mejor el manejo de quejas?",o:["Responder pronto, reconocer el problema, ofrecer una solución concreta y dar seguimiento","Borrar el comentario y escribirle por privado para que nadie más lo pueda ver","Explicar públicamente por qué el cliente se equivocó, con los datos del pedido","Ofrecer un descuento sin preguntar qué ocurrió para cerrar el tema cuanto antes"],c:0,e:"Una queja bien manejada se reconoce, se resuelve y se sigue. Borrarla, culpar al cliente o compensar sin entender el problema empeora la confianza."},
+{a:3,t:"su",q:"Una cafetería quiere que sus clientes regresen y la recomienden. ¿Cuál acción es de fidelización y no de captación de nuevos clientes?",o:["Un programa de sellos que premia las compras repetidas con una bebida gratis","Un anuncio pagado para atraer a personas que nunca han visitado la cafetería","Un descuento de inauguración para quienes visiten el local por primera vez","Un volante con el menú repartido en las oficinas más cercanas al negocio"],c:0,e:"Fidelizar es premiar y mantener a quien ya compra. Las otras acciones buscan atraer personas que aún no son clientes."},
+{a:3,t:"su",q:"Una empresa de soporte promete a una escuela «responder en menos de 4 horas hábiles y resolver en 24». ¿Mediante qué instrumento se formaliza este compromiso?",o:["Un acuerdo de nivel de servicio (SLA) con indicadores medibles","Un plan de mercadeo con objetivos de promoción para el próximo año","Un estudio técnico sobre la capacidad de atención del taller","Un acta de constitución de la empresa ante el Registro Nacional"],c:0,e:"Un SLA fija tiempos y metas medibles de servicio. Las otras opciones cumplen funciones distintas."},
+{a:3,t:"su",q:"Una veterinaria quiere recordar vacunas, conocer el historial de cada mascota y saber qué clientes no regresan hace seis meses. ¿Qué herramienta le conviene?",o:["Un sistema CRM que centralice datos, historial y seguimiento de las personas clientes","Una hoja de cálculo con el inventario de medicamentos que hay en bodega y en el local","Un blog con consejos sobre el cuidado de las mascotas y su alimentación diaria","Un software contable para emitir facturas electrónicas y llevar la contabilidad"],c:0,e:"Un CRM organiza datos, historial y seguimiento de cada persona cliente. Las otras herramientas sirven a otros fines (inventario, contenido, contabilidad)."},
+{a:3,t:"su",q:"Una emprendedora usa fotos de un banco de imágenes de otra marca, sin permiso, en su publicidad. ¿Qué implicación ética y legal del uso de tecnologías está ignorando?",o:["El respeto a los derechos de autor y a la propiedad intelectual","La protección de los datos personales de las personas clientes","La brecha digital entre quienes tienen acceso a internet y quienes no","La seguridad de las contraseñas de las cuentas comerciales del negocio"],c:0,e:"Usar imágenes ajenas sin autorización vulnera los derechos de autor. Los otros riesgos son reales, pero no son los que ocurren en este caso."},
+{a:3,t:"su",q:"Cinco estudiantes diseñan un emprendimiento y necesitan trabajar a la vez en el plan, comentar cambios y conservar el historial de versiones. ¿Qué herramienta es más adecuada?",o:["Un documento en línea compartido, con edición simultánea y comentarios","Un grupo de mensajería donde se reenvían las versiones nuevas del archivo","Un blog público donde se publica el plan para recibir opiniones de cualquiera","Una hoja impresa que circula entre los integrantes para anotar cambios"],c:0,e:"Un documento compartido permite edición simultánea, comentarios e historial. Enviar copias genera versiones paralelas; un blog público no sirve para trabajo interno."}
+];
+QS.forEach((q,i)=>{q.id=i});
+/*DATA-END*/
+(function(){
+const GOAL=70;
+const PW_HASH="c40bf588abf6f9aa6ef51c9d300d9fbdc2c9ae10a517eceb49d25c0c7ebe6838";
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt=n=>n.toLocaleString("es-CR",{maximumFractionDigits:1});
+let S=null,SES=null,SAVED=null,filter="repasar";
+const SEND={state:"idle"};
+const cloud={db:null,user:null,uid:null,ref:null,ok:true,data:{profiles:{}},busy:false,dirty:false,timer:null};
+
+function show(name){
+  ["login","start","exam","results","saved","teacher"].forEach(n=>{$("#s-"+n).hidden=(n!==name)});
+  $("#who").hidden=!SES;
+  $("#btnLogout").hidden=!((SES&&(name==="start"||name==="results"))||name==="teacher");
+  window.scrollTo(0,0);
+}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+async function sha(s){
+  const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));
+  return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,"0")).join("");
+}
+const clone=o=>JSON.parse(JSON.stringify(o));
+
+/* ---------- Almacenamiento: navegador y, si es posible, cuenta ---------- */
+const cloudReady=(async()=>{
+  try{
+    if(!(window.claude&&window.claude.use)) return;
+    const [db,user]=await Promise.all([window.claude.use("db"),window.claude.use("user")]);
+    if(!db||!user) return;
+    cloud.user=user;
+    const id=await user.id();
+    if(!id) return;
+    cloud.db=db; cloud.user=user; cloud.uid=id;
+    cloud.ref=db.collection("data/users/"+id).doc("cert-emprendimiento");
+  }catch(e){}
+})();
+cloudReady.then(()=>{
+  if(cloud.ref) $("#storageNote").textContent="Tu avance se guarda en este navegador y también se intenta guardar en tu cuenta de Claude, para que puedas continuar desde otro dispositivo. Si no funciona, usa el código de avance que se te da al guardar y salir.";
+});
+function validState(o){
+  if(!o||!Array.isArray(o.ids)||!o.ids.length||!o.ids.every(i=>QS[i])) return false;
+  if(o.phase!=="exam"&&o.phase!=="results") return false;
+  if(!o.ans||typeof o.ans!=="object") return false;
+  if(!o.opt||typeof o.opt!=="object") o.opt={};
+  o.ids.forEach(id=>{if(QS[id].t==="su"&&!(Array.isArray(o.opt[id])&&o.opt[id].length===4)) o.opt[id]=shuffle(QS[id].o.map((_,i)=>i))});
+  o.idx=Math.max(0,Math.min(o.ids.length-1,Number(o.idx)||0));
+  return true;
+}
+function setStatus(k){
+  const el=$("#saveStat");
+  const m={local:"Guardado en este navegador",cloud:"Guardado en tu cuenta",saving:"Guardando…"};
+  el.textContent=m[k]||"";
+  el.className="chip"+(k==="cloud"?" ok":"");
+}
+function cloudUsable(){return !!(cloud.ref&&cloud.ok)}
+function saveLocal(){try{localStorage.setItem("cert2:"+SES.ph,JSON.stringify(S))}catch(e){}}
+function queueCloud(){
+  if(!cloudUsable()) return;
+  cloud.dirty=true; clearTimeout(cloud.timer);
+  cloud.timer=setTimeout(flushCloud,1500);
+}
+async function flushCloud(){
+  if(cloud.busy||!cloud.dirty||!cloudUsable()||!SES||!S) return;
+  cloud.busy=true; cloud.dirty=false; setStatus("saving");
+  try{
+    cloud.data.profiles=cloud.data.profiles||{};
+    cloud.data.profiles[SES.ph]=clone(S);
+    await cloud.ref.set(cloud.data);
+    setStatus("cloud");
+  }catch(e){
+    cloud.ok=false; setStatus("local");
+  }
+  cloud.busy=false;
+  if(cloud.dirty) flushCloud();
+}
+async function flushNow(){
+  clearTimeout(cloud.timer);
+  if(!cloudUsable()) return;
+  cloud.dirty=true;
+  let n=0; while(cloud.busy&&n++<50) await new Promise(r=>setTimeout(r,100));
+  await flushCloud();
+}
+function persist(){
+  if(!SES||!S) return;
+  S.updatedAt=Date.now();
+  saveLocal();
+  if(cloudUsable()){setStatus("saving");queueCloud()}else setStatus("local");
+  queueProg();
+}
+async function loadSaved(){
+  let local=null,remote=null;
+  try{local=JSON.parse(localStorage.getItem("cert2:"+SES.ph)||"null")}catch(e){}
+  await Promise.race([cloudReady,new Promise(r=>setTimeout(r,3000))]);
+  cloud.data={profiles:{}};
+  if(cloud.ref){
+    try{
+      const snap=await cloud.ref.get();
+      if(snap.exists){cloud.data=clone(snap.data()); if(!cloud.data.profiles) cloud.data.profiles={}; remote=cloud.data.profiles[SES.ph]||null}
+    }catch(e){cloud.ok=false}
+  }
+  const cands=[local,remote].filter(validState).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
+  return cands[0]||null;
+}
+
+/* ---------- Código de avance (para otro dispositivo) ---------- */
+function makeCode(){
+  const json=JSON.stringify({h:SES.ph,s:S});
+  let bin=""; new TextEncoder().encode(json).forEach(b=>{bin+=String.fromCharCode(b)});
+  return btoa(bin);
+}
+function readCode(txt){
+  try{
+    const bin=atob(txt.replace(/\s+/g,""));
+    const bytes=Uint8Array.from(bin,c=>c.charCodeAt(0));
+    const o=JSON.parse(new TextDecoder().decode(bytes));
+    if(!o||o.h!==SES.ph) return {error:"Ese código pertenece a otra cédula."};
+    if(!validState(o.s)) return {error:"El código está incompleto o dañado."};
+    return {state:o.s};
+  }catch(e){return {error:"No se pudo leer el código. Revisa que esté completo."}}
+}
+
+/* ---------- Ingreso ---------- */
+$("#loginForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const err=$("#loginErr"); err.textContent="";
+  const ced=$("#ced").value.replace(/[\s-]/g,"");
+  if(!/^\d{9,12}$/.test(ced)){err.textContent="Escribe tu cédula solo con números, con o sin guiones, por ejemplo 1-0234-0567.";return}
+  if(!(window.crypto&&window.crypto.subtle)){err.textContent="Este navegador no permite verificar la contraseña. Prueba con otro navegador.";return}
+  const btn=$("#btnLogin"); btn.disabled=true; btn.textContent="Ingresando…";
+  try{
+    const h=await sha("pw:"+$("#pw").value.trim());
+    if(h!==PW_HASH){err.textContent="La contraseña no es correcta. Pídesela a tu docente.";return}
+    SES={ced,ph:(await sha("cert:"+ced)).slice(0,24)};
+    $("#pw").value=""; $("#ced").value="";
+    $("#who").textContent="Cédula •••••"+ced.slice(-4);
+    SAVED=await loadSaved();
+    renderStart(); show("start");
+  }finally{btn.disabled=false;btn.textContent="Ingresar"}
+});
+function logout(){
+  SEND.state="idle";S=null;SES=null;SAVED=null;cloud.data={profiles:{}};
+  $("#who").textContent=""; $("#codeIn").value=""; $("#codeErr").textContent="";
+  show("login");
+}
+$("#btnLogout").addEventListener("click",logout);
+$("#btnExit").addEventListener("click",logout);
+
+/* ---------- Calificación ---------- */
+function norm(s){
+  return String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"")
+    .replace(/[^a-z0-9\s]/g," ").replace(/\s+/g," ").trim()
+    .replace(/^(el|la|los|las|un|una)\s+/,"");
+}
+function lev(a,b){
+  const m=a.length,n=b.length; if(!m) return n; if(!n) return m;
+  let prev=Array.from({length:n+1},(_,j)=>j);
+  for(let i=1;i<=m;i++){
+    const cur=[i];
+    for(let j=1;j<=n;j++){cur[j]=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1))}
+    prev=cur;
+  }
+  return prev[n];
+}
+function grade(q,a){
+  if(a===undefined||a===null||a==="") return null;
+  if(q.t==="su"||q.t==="vf") return a===q.c;
+  const u=norm(a); if(!u) return null;
+  if(q.c.every(v=>/^[\d ]+$/.test(v))){const d=u.replace(/\s/g,"");return q.c.some(v=>v.replace(/\s/g,"")===d)}
+  return q.c.some(v=>{const n=norm(v);return u===n||(n.length>=7&&lev(u,n)<=1)});
+}
+function correctText(q){
+  if(q.t==="su") return q.o[q.c];
+  if(q.t==="vf") return q.c?"Verdadero":"Falso";
+  return q.c[0];
+}
+function givenText(q,a){
+  if(a===undefined||a===null||a==="") return null;
+  if(q.t==="su") return q.o[a];
+  if(q.t==="vf") return a?"Verdadero":"Falso";
+  return String(a);
+}
+function compute(st){
+  st=st||S;
+  const rows=st.ids.map((id,i)=>{
+    const q=QS[id], a=st.ans[id], g=grade(q,a);
+    return {n:i+1,q,a,status:g===null?"none":(g?"ok":"bad")};
+  });
+  const ok=rows.filter(r=>r.status==="ok").length;
+  const bad=rows.filter(r=>r.status==="bad").length;
+  const none=rows.filter(r=>r.status==="none").length;
+  return {rows,ok,bad,none,total:rows.length,nota:rows.length?ok/rows.length*100:0};
+}
+function modeLabel(st){
+  st=st||S;
+  if(st.mode==="all") return "Prueba completa";
+  if(st.mode==="repaso") return "Repaso de preguntas falladas";
+  return AREAS[Number(st.mode.slice(1))];
+}
+
+/* ---------- Inicio ---------- */
+function buildStart(){
+  const rows=Object.keys(AREAS).map(k=>{
+    const l=QS.filter(q=>q.a==k);
+    const c=t=>l.filter(q=>q.t===t).length;
+    return `<tr><td>${esc(AREAS[k])}</td><td class="num">${c("su")}</td><td class="num">${c("co")}</td><td class="num">${c("vf")}</td><td class="num">${l.length}</td></tr>`;
+  }).join("");
+  const tot=t=>QS.filter(q=>q.t===t).length;
+  $("#structure").innerHTML=`<thead><tr><th>Área</th><th class="num" title="Selección única">SU</th><th class="num" title="Completar">Comp.</th><th class="num" title="Verdadero o falso">V/F</th><th class="num">Total</th></tr></thead><tbody>${rows}</tbody><tfoot><tr><td>Prueba completa</td><td class="num">${tot("su")}</td><td class="num">${tot("co")}</td><td class="num">${tot("vf")}</td><td class="num">${QS.length}</td></tr></tfoot>`;
+  const modes=[["all","Prueba completa",QS.length]].concat(Object.keys(AREAS).map(k=>["a"+k,AREAS[k],QS.filter(q=>q.a==k).length]));
+  $("#modes").innerHTML=modes.map((m,i)=>`<label class="mode${i===0?" sel":""}"><input type="radio" name="mode" value="${m[0]}"${i===0?" checked":""}><span>${esc(m[1])}</span><span class="cnt">${m[2]}</span></label>`).join("");
+}
+function renderStart(){
+  const p=$("#resume");
+  if(SAVED){
+    const when=new Date(SAVED.updatedAt||Date.now()).toLocaleString("es-CR",{dateStyle:"long",timeStyle:"short"});
+    if(SAVED.phase==="exam"){
+      const d=SAVED.ids.filter(id=>{const a=SAVED.ans[id];return a!==undefined&&a!==""}).length;
+      p.innerHTML=`<h2>Tienes una prueba en curso</h2><p>${esc(modeLabel(SAVED))}: ${d} de ${SAVED.ids.length} preguntas respondidas. Guardada el ${esc(when)}.</p><div class="btn-row" style="margin-top:12px"><button class="btn primary" type="button" data-act="resume">Continuar donde quedé</button></div>`;
+    }else{
+      const R=compute(SAVED);
+      p.innerHTML=`<h2>Última prueba terminada</h2><p>${esc(modeLabel(SAVED))}: nota ${fmt(R.nota)} de 100. Guardada el ${esc(when)}.</p><div class="btn-row" style="margin-top:12px"><button class="btn primary" type="button" data-act="results">Ver ese resultado</button></div>`;
+    }
+    p.hidden=false;
+  }else p.hidden=true;
+  $("#btnStart").textContent=SAVED?"Empezar una prueba nueva (reemplaza la guardada)":"Comenzar prueba";
+  $("#name").value=(SAVED&&SAVED.name)||""; $("#nameErr").textContent="";
+}
+$("#resume").addEventListener("click",e=>{
+  const b=e.target.closest("[data-act]"); if(!b||!SAVED) return;
+  S=SAVED;
+  if(b.dataset.act==="resume"){show("exam");$("#confirm").hidden=true;renderExam();setStatus(cloudUsable()?"cloud":"local")}
+  else{filter="repasar";show("results");renderResults()}
+});
+function idsForMode(mode){
+  if(mode==="all") return QS.map(q=>q.id);
+  const a=Number(mode.slice(1));
+  return QS.filter(q=>q.a===a).map(q=>q.id);
+}
+function begin(mode,ids,name){
+  SEND.state="idle";
+  S={phase:"exam",mode,name:name||"",ids,opt:{},ans:{},idx:0,started:Date.now(),finished:null,updatedAt:Date.now()};
+  ids.forEach(id=>{if(QS[id].t==="su") S.opt[id]=shuffle(QS[id].o.map((_,i)=>i))});
+  persist(); show("exam"); $("#confirm").hidden=true; renderExam();
+}
+$("#modes").addEventListener("change",()=>{
+  document.querySelectorAll(".mode").forEach(l=>l.classList.toggle("sel",l.querySelector("input").checked));
+});
+$("#startForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  const mode=document.querySelector('input[name="mode"]:checked').value;
+  const nm=$("#name").value.replace(/\s+/g," ").trim();
+  const words=nm.split(" ").filter(w=>w.replace(/[^\p{L}]/gu,"").length>=2);
+  if(words.length<2){$("#nameErr").textContent="Escribe tu nombre y al menos un apellido.";$("#name").focus();return}
+  $("#nameErr").textContent="";
+  begin(mode,idsForMode(mode),nm);
+});
+$("#btnLoadCode").addEventListener("click",()=>{
+  const r=readCode($("#codeIn").value);
+  if(r.error){$("#codeErr").textContent=r.error;return}
+  $("#codeErr").textContent="";
+  S=r.state; S.updatedAt=Date.now(); persist();
+  if(S.phase==="exam"){show("exam");$("#confirm").hidden=true;renderExam()}
+  else{filter="repasar";show("results");renderResults()}
+});
+
+/* ---------- Examen ---------- */
+function answeredCount(){return S.ids.filter(id=>{const a=S.ans[id];return a!==undefined&&a!==""}).length}
+function renderBar(){
+  const n=S.ids.length, d=answeredCount();
+  $("#where").innerHTML=`Pregunta ${S.idx+1} de ${n} · respondidas ${d}`;
+  $("#progFill").style.width=(d/n*100)+"%";
+}
+function renderSheet(){
+  let html="",cur=null,cells="";
+  const flush=()=>{if(cur!==null) html+=`<div><h3>${esc(AREAS[cur])}</h3><div class="cells">${cells}</div></div>`};
+  S.ids.forEach((id,i)=>{
+    const q=QS[id];
+    if(q.a!==cur){flush();cur=q.a;cells=""}
+    const a=S.ans[id], done=(a!==undefined&&a!=="");
+    cells+=`<button type="button" class="cell${done?" done":""}${i===S.idx?" cur":""}" data-go="${i}" aria-label="Pregunta ${i+1}, ${done?"respondida":"sin responder"}"${i===S.idx?' aria-current="true"':""}>${i+1}</button>`;
+  });
+  flush();
+  $("#sheetBody").innerHTML=html;
+}
+function renderCard(){
+  const id=S.ids[S.idx], q=QS[id], a=S.ans[id], n=S.ids.length;
+  let body="";
+  if(q.t==="su"){
+    body=`<p class="qtext" id="qt">${esc(q.q)}</p><div class="opts" role="radiogroup" aria-labelledby="qt">`+
+      S.opt[id].map((oi,k)=>{const sel=(a===oi);return `<label class="opt${sel?" sel":""}"><input type="radio" name="o" value="${oi}"${sel?" checked":""}><span class="mark">${"ABCD"[k]}</span><span class="txt">${esc(q.o[oi])}</span></label>`}).join("")+`</div>`;
+  }else if(q.t==="vf"){
+    body=`<p class="qtext" id="qt">${esc(q.q)}</p><div class="opts" role="radiogroup" aria-labelledby="qt">`+
+      [["true","V","Verdadero",true],["false","F","Falso",false]].map(o=>{const sel=(a===o[3]);return `<label class="opt${sel?" sel":""}"><input type="radio" name="o" value="${o[0]}"${sel?" checked":""}><span class="mark">${o[1]}</span><span class="txt">${o[2]}</span></label>`}).join("")+`</div>`;
+  }else{
+    const parts=q.q.split("{_}");
+    body=`<p class="qtext">${esc(parts[0])}<input class="blank" id="blank" type="text" value="${esc(a||"")}" maxlength="60" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Tu respuesta">${esc(parts[1]||"")}</p><p class="small">Escribe la palabra o el número que completa la oración.</p>`;
+  }
+  const last=(S.idx===n-1);
+  $("#qcard").innerHTML=`<div class="eyebrow"><span class="chip">${esc(AREAS[q.a])}</span><span class="chip type">${TYPES[q.t]}</span></div>${body}<div class="nav"><button class="btn" type="button" data-nav="prev"${S.idx===0?" disabled":""}>Anterior</button><button class="btn primary" type="button" data-nav="${last?"submit":"next"}">${last?"Revisar y entregar":"Siguiente"}</button></div>`;
+}
+function renderExam(){renderBar();renderSheet();renderCard()}
+function setAns(id,v){
+  if(v===undefined||v==="") delete S.ans[id]; else S.ans[id]=v;
+  persist(); renderBar(); renderSheet(); $("#confirm").hidden=true;
+}
+function go(i){
+  S.idx=Math.max(0,Math.min(S.ids.length-1,i)); persist(); renderExam();
+  const c=$("#qcard"); if(c.getBoundingClientRect().top<0) c.scrollIntoView({block:"start"});
+}
+function askSubmit(){
+  const un=S.ids.length-answeredCount();
+  $("#confirmText").textContent=un>0
+    ?`Tienes ${un} ${un===1?"pregunta sin responder":"preguntas sin responder"}. Las preguntas sin responder cuentan como falladas. ¿Quieres entregar la prueba ahora?`
+    :"Respondiste todas las preguntas. ¿Quieres entregar la prueba?";
+  $("#confirm").hidden=false;
+  $("#confirm").scrollIntoView({block:"nearest"});
+}
+function finish(){
+  S.phase="results"; S.finished=Date.now(); persist(); filter="repasar"; show("results"); renderResults(); doSend();
+}
+$("#qcard").addEventListener("change",e=>{
+  if(e.target.name!=="o") return;
+  const id=S.ids[S.idx], q=QS[id];
+  const v=(q.t==="su")?Number(e.target.value):(e.target.value==="true");
+  document.querySelectorAll("#qcard .opt").forEach(l=>l.classList.toggle("sel",l.contains(e.target)));
+  setAns(id,v);
+});
+$("#qcard").addEventListener("input",e=>{
+  if(e.target.id!=="blank") return;
+  setAns(S.ids[S.idx],e.target.value.trim());
+});
+$("#qcard").addEventListener("click",e=>{
+  const b=e.target.closest("[data-nav]"); if(!b) return;
+  const k=b.dataset.nav;
+  if(k==="prev") go(S.idx-1); else if(k==="next") go(S.idx+1); else askSubmit();
+});
+$("#sheetBody").addEventListener("click",e=>{
+  const b=e.target.closest("[data-go]"); if(b) go(Number(b.dataset.go));
+});
+$("#btnSubmit").addEventListener("click",askSubmit);
+$("#btnNo").addEventListener("click",()=>{$("#confirm").hidden=true});
+$("#btnYes").addEventListener("click",finish);
+$("#btnSaveExit").addEventListener("click",async()=>{
+  const b=$("#btnSaveExit"); b.disabled=true; b.textContent="Guardando…";
+  try{
+    persist(); await flushNow();
+    const inCloud=cloudUsable()&&!cloud.dirty;
+    $("#savedWhere").textContent=inCloud
+      ?"Quedó guardado en este navegador y en tu cuenta. Para continuar, vuelve a entrar con tu cédula y la contraseña."
+      :"Quedó guardado en este navegador. Para continuar, vuelve a entrar desde este mismo navegador con tu cédula y la contraseña. Para seguir en otro dispositivo, usa el código de avance de abajo.";
+    $("#codeArea").value=makeCode(); $("#toastCode").textContent="";
+    show("saved");
+  }finally{b.disabled=false;b.textContent="Guardar y salir"}
+});
+$("#btnCopyCode").addEventListener("click",async()=>{
+  const t=$("#codeArea").value;
+  try{await navigator.clipboard.writeText(t);$("#toastCode").textContent="Código copiado."}
+  catch(err){$("#toastCode").textContent="No se pudo copiar automáticamente. Selecciona el texto y cópialo.";const ta=$("#codeArea");ta.focus();ta.select()}
+});
+
+/* ---------- Resultados ---------- */
+function barRow(label,ok,total){
+  const p=total?ok/total*100:0;
+  return `<div class="brow"><span class="lbl">${esc(label)}</span><span class="val">${ok} / ${total} · ${fmt(p)}</span><div class="bar${p<GOAL?" low":""}" role="img" aria-label="${esc(label)}: ${ok} de ${total}"><span style="width:${p}%"></span></div></div>`;
+}
+function renderResults(){
+  const R=compute();
+  const date=new Date(S.finished||Date.now()).toLocaleDateString("es-CR",{day:"numeric",month:"long",year:"numeric"});
+  $("#resMeta").textContent=`${modeLabel()} · ${date} · Cédula •••••${SES.ced.slice(-4)}`;
+  $("#resName").textContent=S.name?S.name:"Resultado de la prueba";
+  $("#resNota").innerHTML=`${fmt(R.nota)}<small>/ 100</small>`;
+  const pass=R.nota>=GOAL;
+  $("#resVerdict").innerHTML=`<span class="chip ${pass?"ok":"none"}">${pass?"Por encima de la meta de práctica":"Por debajo de la meta de práctica"}</span>`;
+  $("#resGoalNote").textContent=`La meta de ${GOAL} es una referencia para practicar, no la nota oficial de la certificación. ${pass?"Aun así, repasa las preguntas falladas.":"Repasa las preguntas falladas y vuelve a intentarlo."}`;
+  $("#resStats").innerHTML=`<div class="stat"><b>${R.ok}</b><span>Correctas</span></div><div class="stat"><b>${R.bad}</b><span>Incorrectas</span></div><div class="stat"><b>${R.none}</b><span>Sin responder</span></div>`;
+  $("#btnRetry").textContent=`Repetir solo lo que falló (${R.bad+R.none})`;
+  $("#btnRetry").disabled=(R.bad+R.none===0);
+  $("#toast").textContent=""; $("#sumWrap").innerHTML="";
+  $("#byArea").innerHTML=Object.keys(AREAS).map(k=>{const l=R.rows.filter(r=>r.q.a==k);return l.length?barRow(AREAS[k],l.filter(r=>r.status==="ok").length,l.length):""}).join("");
+  $("#byType").innerHTML=Object.keys(TYPES).map(t=>{const l=R.rows.filter(r=>r.q.t===t);return l.length?barRow(TYPES[t],l.filter(r=>r.status==="ok").length,l.length):""}).join("");
+  renderReview(R);
+  renderSendPanel();
+}
+function renderReview(R){
+  const counts={repasar:R.bad+R.none,todas:R.total,correctas:R.ok};
+  const labels={repasar:"Para repasar",todas:"Todas",correctas:"Correctas"};
+  $("#tabs").innerHTML=Object.keys(labels).map(k=>`<button type="button" class="tab" data-f="${k}" aria-pressed="${filter===k}">${labels[k]} (${counts[k]})</button>`).join("");
+  const list=R.rows.filter(r=>filter==="todas"||(filter==="correctas"?r.status==="ok":r.status!=="ok"));
+  if(!list.length){
+    $("#review").innerHTML=`<div class="empty">${filter==="repasar"?"No fallaste ninguna pregunta. Buen trabajo.":"No hay preguntas en esta lista."}</div>`;
+    return;
+  }
+  $("#review").innerHTML=list.map(r=>{
+    const q=r.q, given=givenText(q,r.a);
+    const text=q.t==="co"?q.q.replace("{_}","______"):q.q;
+    const chip={ok:'<span class="chip ok">Correcta</span>',bad:'<span class="chip bad">Incorrecta</span>',none:'<span class="chip none">Sin responder</span>'}[r.status];
+    return `<article class="rv"><div class="eyebrow"><span class="num">#${r.n}</span><span class="chip">${esc(AREAS[q.a])}</span><span class="chip type">${TYPES[q.t]}</span>${chip}</div><p class="q">${esc(text)}</p><dl class="ans-row" style="margin:0"><dt>Tu respuesta</dt><dd class="${r.status==="ok"?"right":(given===null?"":"wrong")}">${given===null?"Sin responder":esc(given)}</dd><dt>Respuesta correcta</dt><dd class="right">${esc(correctText(q))}</dd></dl><p class="why">${esc(q.e)}</p></article>`;
+  }).join("");
+}
+$("#tabs").addEventListener("click",e=>{
+  const b=e.target.closest("[data-f]"); if(!b) return;
+  filter=b.dataset.f; renderReview(compute());
+});
+$("#btnRetry").addEventListener("click",()=>{
+  const R=compute();
+  const ids=R.rows.filter(r=>r.status!=="ok").map(r=>r.q.id);
+  if(ids.length) begin("repaso",ids,S.name);
+});
+$("#btnNew").addEventListener("click",()=>{
+  SAVED=S; S=null; renderStart(); show("start");
+});
+function summaryText(){
+  const R=compute();
+  const date=new Date(S.finished||Date.now()).toLocaleDateString("es-CR",{day:"numeric",month:"long",year:"numeric"});
+  const failed=R.rows.filter(r=>r.status!=="ok").map(r=>r.n);
+  const lines=["Certificación de Emprendimiento e Innovación (práctica)"];
+  lines.push("Cédula: "+SES.ced);
+  lines.push("Nombre: "+(S.name||"(sin nombre)"));
+  lines.push("Fecha: "+date,"Tipo de prueba: "+modeLabel(),`Nota: ${fmt(R.nota)} / 100 (${R.ok} correctas, ${R.bad} incorrectas, ${R.none} sin responder)`);
+  Object.keys(AREAS).forEach(k=>{const l=R.rows.filter(r=>r.q.a==k);if(l.length) lines.push(`${AREAS[k]}: ${l.filter(r=>r.status==="ok").length} de ${l.length}`)});
+  lines.push("Preguntas para repasar: "+(failed.length?failed.join(", "):"ninguna"));
+  return lines.join("\n");
+}
+$("#btnCopy").addEventListener("click",async()=>{
+  const t=summaryText();
+  try{
+    await navigator.clipboard.writeText(t);
+    $("#toast").textContent="Resumen copiado."; $("#sumWrap").innerHTML="";
+  }catch(err){
+    $("#toast").textContent="No se pudo copiar automáticamente. Selecciona y copia el texto.";
+    $("#sumWrap").innerHTML=`<textarea class="sum" id="sumArea" readonly aria-label="Resumen de la prueba">${esc(t)}</textarea>`;
+    const ta=$("#sumArea"); ta.focus(); ta.select();
+  }
+});
+
+/* ---------- Resultado para la docente ---------- */
+const HK="cert2h:";
+function histGet(){try{return JSON.parse(localStorage.getItem(HK+SES.ph)||"{}")}catch(e){return {}}}
+function histPut(h){try{localStorage.setItem(HK+SES.ph,JSON.stringify(h))}catch(e){}}
+function makeEntry(){
+  const R=compute();
+  const A={},T={},res=Array(QS.length).fill("-");
+  R.rows.forEach(r=>{
+    const a=r.q.a,t=r.q.t;
+    A[a]=A[a]||[0,0]; A[a][1]++; if(r.status==="ok") A[a][0]++;
+    T[t]=T[t]||[0,0]; T[t][1]++; if(r.status==="ok") T[t][0]++;
+    res[r.q.id]=r.status==="ok"?"1":(r.status==="bad"?"0":"n");
+  });
+  const h=histGet(), m=S.mode, rec=h[m]||{a:0,h:[],t:0}, nota=Math.round(R.nota*10)/10;
+  if(rec.t!==S.finished){rec.a+=1;rec.h=rec.h.concat(nota).slice(-10);rec.t=S.finished;h[m]=rec;histPut(h)}
+  return {v:1,p:SES.ph,c:SES.ced,n:S.name||"Sin nombre",m,t:S.finished,nota,ok:R.ok,bad:R.bad,none:R.none,total:R.total,A,T,r:res.join(""),a:rec.a,h:rec.h};
+}
+function cleanEntry(e){
+  try{
+    if(!e||e.v!==1) return null;
+    if(typeof e.p!=="string"||!/^[0-9a-f]{24}$/.test(e.p)||typeof e.c!=="string"||!/^\d{9,12}$/.test(e.c)) return null;
+    if(typeof e.n!=="string"||e.n.length<3||e.n.length>80) return null;
+    if(!["all","a1","a2","a3"].includes(e.m)) return null;
+    const num=x=>typeof x==="number"&&isFinite(x);
+    if(!num(e.t)||!num(e.nota)||e.nota<0||e.nota>100) return null;
+    if(typeof e.r!=="string"||e.r.length!==QS.length||!/^[01n-]+$/.test(e.r)) return null;
+    const A={},T={};
+    [1,2,3].forEach(k=>{const a=e.A&&e.A[k];if(Array.isArray(a)&&num(a[0])&&num(a[1])) A[k]=[a[0]|0,a[1]|0]});
+    ["su","co","vf"].forEach(k=>{const a=e.T&&e.T[k];if(Array.isArray(a)&&num(a[0])&&num(a[1])) T[k]=[a[0]|0,a[1]|0]});
+    const h=Array.isArray(e.h)?e.h.filter(num).slice(-10):[];
+    return {v:1,p:e.p,c:e.c,n:e.n.replace(/\s+/g," ").slice(0,80),m:e.m,t:e.t,nota:e.nota,ok:e.ok|0,bad:e.bad|0,none:e.none|0,total:e.total|0,A,T,r:e.r,a:(e.a|0)||1,h};
+  }catch(err){return null}
+}
+function cleanProg(k,p){
+  try{
+    const num=x=>typeof x==="number"&&isFinite(x);
+    if(!p||typeof p.c!=="string"||!/^\d{9,12}$/.test(p.c)||typeof p.n!=="string"||!["all","a1","a2","a3"].includes(p.m)) return null;
+    if(!num(p.d)||!num(p.t)||!num(p.u)||p.t<1||p.d<0) return null;
+    return {k:String(k),c:p.c,n:p.n.replace(/\s+/g," ").slice(0,80),m:p.m,d:Math.min(p.d|0,p.t|0),t:p.t|0,u:p.u};
+  }catch(err){return null}
+}
+function entryCode(e){
+  let bin=""; new TextEncoder().encode(JSON.stringify(e)).forEach(b=>{bin+=String.fromCharCode(b)});
+  return btoa(bin);
+}
+function decodeEntry(tk){
+  try{
+    const bin=atob(tk);
+    const bytes=Uint8Array.from(bin,c=>c.charCodeAt(0));
+    return cleanEntry(JSON.parse(new TextDecoder().decode(bytes)));
+  }catch(err){return null}
+}
+let resChain=Promise.resolve();
+function withRes(fn){const p=resChain.then(fn,fn);resChain=p.catch(()=>{});return p}
+async function mutateRes(fn){
+  const ref=cloud.db.collection("results").doc(cloud.uid);
+  const snap=await ref.get();
+  const d=(snap.exists&&snap.data())?clone(snap.data()):{};
+  const doc={entries:d.entries||{},prog:d.prog||{}};
+  fn(doc);
+  await ref.set(doc);
+}
+async function sendResult(e){
+  if(!cloud.db||!cloud.uid) return "nocloud";
+  return withRes(async()=>{
+    try{
+      await mutateRes(doc=>{doc.entries[e.p+"_"+e.m]=e;delete doc.prog[e.p+"_"+e.m]});
+      return "ok";
+    }catch(err){return "fail"}
+  });
+}
+let progTimer=null,progLast=0;
+function queueProg(){
+  if(!cloud.db||!cloud.uid||!SES||!S||S.phase!=="exam"||S.mode==="repaso") return;
+  clearTimeout(progTimer);
+  progTimer=setTimeout(sendProg,Math.max(4000,20000-(Date.now()-progLast)));
+}
+async function sendProg(){
+  if(!cloud.db||!cloud.uid||!SES||!S||S.phase!=="exam"||S.mode==="repaso") return;
+  progLast=Date.now();
+  const key=SES.ph+"_"+S.mode, pr={c:SES.ced,n:S.name||"Sin nombre",m:S.mode,d:answeredCount(),t:S.ids.length,u:Date.now(),s:S.started||Date.now()};
+  await withRes(async()=>{try{await mutateRes(doc=>{doc.prog[key]=pr})}catch(err){}});
+}
+function setSend(k){
+  SEND.state=k;
+  const m={
+    sending:"Enviando tu resultado a tu docente…",
+    ok:"Tu resultado quedó enviado y tu docente ya puede verlo.",
+    fail:"No se pudo enviar el resultado automáticamente. Copia el código de resultado y envíaselo a tu docente.",
+    nocloud:"Para que tu docente vea tu resultado, copia el código de resultado y envíaselo.",
+    idle:"Envía tu resultado para que tu docente lo vea."
+  };
+  $("#sendStat").textContent=m[k]||"";
+  $("#btnResend").hidden=!(k==="idle"||k==="fail");
+}
+async function doSend(){
+  if(S.mode==="repaso") return;
+  if(!cloud.db||!cloud.uid){setSend("nocloud");return}
+  setSend("sending");
+  const r=await sendResult(makeEntry());
+  setSend(r);
+}
+function renderSendPanel(){
+  const pan=$("#sendPanel");
+  if(S.mode==="repaso"){pan.hidden=true;return}
+  pan.hidden=false; $("#toastRes").textContent=""; $("#resCodeWrap").innerHTML="";
+  if(SEND.state==="sending"||SEND.state==="ok"||SEND.state==="fail") setSend(SEND.state);
+  else setSend(cloud.db&&cloud.uid?"idle":"nocloud");
+}
+$("#btnResend").addEventListener("click",doSend);
+$("#btnCopyResult").addEventListener("click",async()=>{
+  const t=entryCode(makeEntry());
+  try{await navigator.clipboard.writeText(t);$("#toastRes").textContent="Código copiado. Envíaselo a tu docente.";$("#resCodeWrap").innerHTML=""}
+  catch(err){
+    $("#toastRes").textContent="No se pudo copiar automáticamente. Selecciona el código y cópialo.";
+    $("#resCodeWrap").innerHTML=`<textarea class="sum" id="resCodeArea" readonly aria-label="Código de resultado">${esc(t)}</textarea>`;
+    const ta=$("#resCodeArea"); ta.focus(); ta.select();
+  }
+});
+
+/* ---------- Panel docente ---------- */
+const TEACH={entries:[],prog:[],mode:"all",q:"",sort:"name",rows:[],goal:GOAL};
+const MODE_NAMES={all:"Prueba completa",a1:AREAS[1],a2:AREAS[2],a3:AREAS[3]};
+async function openTeacher(){
+  const msg=$("#teacherMsg"); msg.textContent="";
+  const b=$("#btnTeacher"); b.disabled=true;
+  try{
+    await Promise.race([cloudReady,new Promise(r=>setTimeout(r,3000))]);
+    if(!cloud.db||!cloud.user){msg.textContent="Para entrar como docente abre esta página con tu cuenta de Claude.";return}
+    const ok=(await cloud.user.isOwner())||(await cloud.user.canEdit());
+    if(!ok){msg.textContent="Esta sección es solo para la persona docente que creó la prueba.";return}
+    await loadTeacher();
+    show("teacher");
+  }catch(err){msg.textContent="No se pudieron cargar los resultados. Intenta de nuevo en un momento."}
+  finally{b.disabled=false}
+}
+async function loadTeacher(){
+  const map={};
+  const add=(k,raw)=>{const e=cleanEntry(raw);if(!e) return;const prev=map[k];if(!prev||e.t>prev.t) map[k]=e};
+  const s1=await cloud.db.collection("results").get();
+  const progs={};
+  s1.docs.forEach(d=>{const dd=d.data()||{};const ent=dd.entries||{};Object.keys(ent).forEach(k=>add(k,ent[k]));const pg=dd.prog||{};Object.keys(pg).forEach(k=>{const p=cleanProg(k,pg[k]);if(p) progs[k]=p})});
+  const s2=await cloud.db.collection("imports").get();
+  s2.docs.forEach(d=>add(d.id,(d.data()||{}).e));
+  TEACH.entries=Object.values(map);
+  TEACH.prog=Object.keys(progs).filter(k=>!(map[k]&&map[k].t>=progs[k].s)).map(k=>progs[k]);
+  renderTeacher();
+}
+function sortedRows(){
+  const q=norm(TEACH.q);
+  let rows=TEACH.entries.filter(e=>e.m===TEACH.mode&&(!q||norm(e.n).includes(q)||e.c.includes(q.replace(/\s/g,""))));
+  const s=TEACH.sort;
+  rows.sort((a,b)=>s==="notaAsc"?a.nota-b.nota:s==="notaDesc"?b.nota-a.nota:s==="fecha"?b.t-a.t:a.n.localeCompare(b.n,"es"));
+  return rows;
+}
+function pct(ok,t){return t?fmt(ok/t*100):"—"}
+function renderTeacher(){
+  renderProg();
+  const all=TEACH.entries.filter(e=>e.m===TEACH.mode), n=all.length, el=$("#tStats");
+  if(!n){
+    el.innerHTML=`<div class="empty">Todavía no hay resultados para «${esc(MODE_NAMES[TEACH.mode])}». Cuando los estudiantes entreguen la prueba aparecerán aquí. Si alguien no puede enviarla automáticamente, te pasa un código que puedes agregar más abajo.</div>`;
+    $("#tTable").innerHTML=""; return;
+  }
+  const notas=all.map(e=>e.nota).sort((a,b)=>a-b);
+  const mean=notas.reduce((s,x)=>s+x,0)/n;
+  const med=n%2?notas[(n-1)/2]:(notas[n/2-1]+notas[n/2])/2;
+  const goal=TEACH.goal,pass=all.filter(e=>e.nota>=goal).length,fails=n-pass;
+  const kpi=(v,l)=>`<div class="stat"><b>${v}</b><span>${l}</span></div>`;
+  const bins=[["0 a 39",0,40],["40 a 59",40,60],["60 a 69",60,70],["70 a 79",70,80],["80 a 89",80,90],["90 a 100",90,101]];
+  const hist=bins.map(b=>{const c=all.filter(e=>e.nota>=b[1]&&e.nota<b[2]).length;const p=c/n*100;return `<div class="brow"><span class="lbl">Nota ${b[0]}</span><span class="val">${c} ${c===1?"estudiante":"estudiantes"}</span><div class="bar${b[1]<goal?" low":""}" role="img" aria-label="Nota ${b[0]}: ${c}"><span style="width:${p}%"></span></div></div>`}).join("");
+  const pooled=(key,keys,names)=>keys.map(k=>{let ok=0,t=0;all.forEach(e=>{const a=e[key][k];if(a){ok+=a[0];t+=a[1]}});if(!t) return "";const p=ok/t*100;return `<div class="brow"><span class="lbl">${esc(names[k])}</span><span class="val">${fmt(p)} % de aciertos</span><div class="bar${p<goal?" low":""}" role="img" aria-label="${esc(names[k])}: ${fmt(p)} por ciento"><span style="width:${p}%"></span></div></div>`}).join("");
+  const att=Array(QS.length).fill(0),fail=Array(QS.length).fill(0);
+  all.forEach(e=>{for(let i=0;i<QS.length;i++){const c=e.r[i];if(c==="1"){att[i]++}else if(c==="0"||c==="n"){att[i]++;fail[i]++}}});
+  const minAtt=Math.min(3,n);
+  const worst=QS.map((q,i)=>({q,att:att[i],fail:fail[i],rate:att[i]?fail[i]/att[i]:0})).filter(x=>x.att>=minAtt&&x.fail>0).sort((a,b)=>b.rate-a.rate||b.att-a.att).slice(0,10);
+  const worstHtml=worst.length?worst.map(w=>{const text=w.q.t==="co"?w.q.q.replace("{_}","______"):w.q.q;return `<article class="rv"><div class="eyebrow"><span class="chip bad">${fmt(w.rate*100)} % falló</span><span class="chip">${esc(AREAS[w.q.a])}</span><span class="chip type">${TYPES[w.q.t]}</span><span class="small">${w.fail} de ${w.att}</span></div><p class="q">${esc(text)}</p><dl class="ans-row" style="margin:0"><dt>Respuesta correcta</dt><dd class="right">${esc(correctText(w.q))}</dd></dl><p class="why">${esc(w.q.e)}</p></article>`}).join(""):`<div class="empty">Todavía no hay preguntas con suficientes respuestas falladas.</div>`;
+  el.innerHTML=`<div class="kpis">${kpi(n,"Entregaron")}${kpi(fmt(mean),"Promedio")}${kpi(fmt(med),"Mediana")}${kpi(pass+" de "+n,"Aprobaron ("+fmt(pass/n*100)+" %)")+kpi(fails,"No aprobaron ("+fmt(fails/n*100)+" %)")}${kpi(fmt(notas[n-1]),"Nota más alta")}${kpi(fmt(notas[0]),"Nota más baja")}</div>
+  <div class="res-cols"><div class="panel"><h2>Distribución de notas</h2>${hist}</div><div class="panel"><h2>Aciertos por área</h2>${pooled("A",[1,2,3],AREAS)}<h2 style="margin-top:20px">Aciertos por tipo</h2>${pooled("T",["su","co","vf"],TYPES)}</div></div>
+  <h2 style="font-size:1.3rem;margin-bottom:12px">Preguntas más falladas</h2>${worstHtml}`;
+  renderTable();
+}
+function renderProg(){
+  const el=$("#tProg"),l=TEACH.prog.filter(p=>p.m===TEACH.mode).sort((a,b)=>b.u-a.u);
+  if(!l.length){el.innerHTML=`<p class="small">Nadie tiene esta prueba en curso en este momento.</p>`;return}
+  const rows=l.map(p=>`<tr><td>${esc(p.n)}</td><td class="mono">${esc(p.c)}</td><td class="num">${p.d} de ${p.t}</td><td>${esc(new Date(p.u).toLocaleString("es-CR",{day:"numeric",month:"short",hour:"numeric",minute:"2-digit"}))}</td></tr>`).join("");
+  el.innerHTML=`<table><thead><tr><th>Estudiante</th><th>Cédula</th><th class="num">Respondidas</th><th>Último avance</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+function renderTable(){
+  const rows=sortedRows(); TEACH.rows=rows;
+  if(!rows.length){$("#tTable").innerHTML=`<div class="empty">Ningún estudiante coincide con la búsqueda.</div>`;return}
+  const body=rows.map(e=>{
+    const date=new Date(e.t).toLocaleDateString("es-CR",{day:"numeric",month:"short",year:"numeric"});
+    const best=Math.max(e.nota,...(e.h||[]));
+    return `<tr><td>${esc(e.n)}</td><td class="mono">${esc(e.c)}</td><td class="num${e.nota<TEACH.goal?" nota-low":""}">${fmt(e.nota)}</td><td>${e.nota>=TEACH.goal?"Aprobó":"No aprobó"}</td><td class="num">${fmt(best)}</td><td class="num">${e.a}</td><td class="num">${e.A[1]?pct(e.A[1][0],e.A[1][1]):"—"}</td><td class="num">${e.A[2]?pct(e.A[2][0],e.A[2][1]):"—"}</td><td class="num">${e.A[3]?pct(e.A[3][0],e.A[3][1]):"—"}</td><td>${esc(date)}</td></tr>`;
+  }).join("");
+  $("#tTable").innerHTML=`<table><thead><tr><th>Estudiante</th><th>Cédula</th><th class="num">Última nota</th><th>Resultado</th><th class="num">Mejor nota</th><th class="num">Intentos</th><th class="num" title="${esc(AREAS[1])}">Área 1 %</th><th class="num" title="${esc(AREAS[2])}">Área 2 %</th><th class="num" title="${esc(AREAS[3])}">Área 3 %</th><th>Fecha</th></tr></thead><tbody>${body}</tbody></table>`;
+}
+$("#btnTeacher").addEventListener("click",openTeacher);
+$("#tBack").addEventListener("click",()=>{show("login")});
+$("#tRefresh").addEventListener("click",async()=>{
+  const b=$("#tRefresh"); b.disabled=true;
+  try{await loadTeacher();$("#tToast").textContent="Resultados actualizados."}catch(err){$("#tToast").textContent="No se pudo actualizar. Intenta de nuevo."}
+  b.disabled=false;
+});
+$("#tGoal").addEventListener("input",e=>{const v=Number(e.target.value);if(v>=1&&v<=100){TEACH.goal=v;renderTeacher()}});
+$("#tMode").addEventListener("change",e=>{TEACH.mode=e.target.value;renderTeacher()});
+$("#tSort").addEventListener("change",e=>{TEACH.sort=e.target.value;if(TEACH.entries.some(x=>x.m===TEACH.mode)) renderTable()});
+$("#tSearch").addEventListener("input",e=>{TEACH.q=e.target.value;if(TEACH.entries.some(x=>x.m===TEACH.mode)) renderTable()});
+$("#tCsv").addEventListener("click",async()=>{
+  const q=v=>'"'+String(v).replace(/"/g,'""')+'"';
+  const lines=[["Nombre","Cédula","Última nota","Resultado","Mejor nota","Intentos","Área 1 %","Área 2 %","Área 3 %","Fecha"].map(q).join(",")];
+  TEACH.rows.forEach(e=>{
+    const best=Math.max(e.nota,...(e.h||[]));
+    lines.push([e.n,e.c,e.nota,e.nota>=TEACH.goal?"Aprobó":"No aprobó",best,e.a,e.A[1]?pct(e.A[1][0],e.A[1][1]):"",e.A[2]?pct(e.A[2][0],e.A[2][1]):"",e.A[3]?pct(e.A[3][0],e.A[3][1]):"",new Date(e.t).toLocaleDateString("es-CR")].map(q).join(","));
+  });
+  const t=lines.join("\n");
+  try{await navigator.clipboard.writeText(t);$("#tToast").textContent="Tabla copiada. Pégala en una hoja de cálculo.";$("#tCsvWrap").innerHTML=""}
+  catch(err){
+    $("#tToast").textContent="No se pudo copiar automáticamente. Selecciona el texto y cópialo.";
+    $("#tCsvWrap").innerHTML=`<textarea class="sum" id="tCsvArea" readonly aria-label="Tabla en formato CSV">${esc(t)}</textarea>`;
+    const ta=$("#tCsvArea"); ta.focus(); ta.select();
+  }
+});
+$("#tAdd").addEventListener("click",async()=>{
+  const toks=$("#tCodes").value.split(/\s+/).filter(Boolean);
+  const msg=$("#tAddMsg"); if(!toks.length){msg.textContent="Pega al menos un código.";return}
+  const b=$("#tAdd"); b.disabled=true; msg.textContent="Agregando…";
+  let ok=0,old=0,bad=0;
+  for(const tk of toks){
+    const e=decodeEntry(tk); if(!e){bad++;continue}
+    try{
+      const ref=cloud.db.collection("imports").doc(e.p+"_"+e.m);
+      const s=await ref.get();
+      if(s.exists&&s.data()&&s.data().e&&s.data().e.t>=e.t){old++;continue}
+      await ref.set({e}); ok++;
+    }catch(err){bad++}
+  }
+  msg.textContent=`${ok} agregado${ok===1?"":"s"}, ${old} ya estaba${old===1?"":"n"} al día, ${bad} no se pudo${bad===1?"":"ieron"} leer o guardar.`;
+  if(ok){$("#tCodes").value="";try{await loadTeacher()}catch(err){}}
+  b.disabled=false;
+});
+
+/* ---------- Arranque ---------- */
+buildStart();
+show("login");
+})();
+</script>
