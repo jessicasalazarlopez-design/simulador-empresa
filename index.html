@@ -297,7 +297,7 @@ section[data-locked]{display:none!important}
       </div>
     </div>
     <p class="flag">Simulación educativa<br>No es dinero real ni tiene validez tributaria</p>
-    <p class="sub" id="verTag" style="position:absolute;right:16px;top:4px;font-size:11px;opacity:.7">Versión 22-oct-2026 (v12)</p>
+    <p class="sub" id="verTag" style="position:absolute;right:16px;top:4px;font-size:11px;opacity:.7">Versión 27-oct-2026 (v13)</p>
   </header>
   <div class="cloudbar" id="cloudBar" aria-live="polite"></div>
 
@@ -524,7 +524,7 @@ const dayKey=(ts)=>{const p=crParts(new Date(ts||Date.now()));return `${p.year}-
 /* ---------- Estado ---------- */
 const KEY='simulador-banco-factura-v1';
 /* Estado de la nube (el módulo completo está al final del script) */
-const cloud={on:false,ro:false,code:'',mods:null,db:null,auth:null,ref:null,unsub:null,last:{},timer:0,status:'solo',err:'',busy:false,pendingRender:false,blurHook:false,renderTimer:0,dp:null,dpUnsub:null,dpErr:''};
+const cloud={on:false,ro:false,code:'',mods:null,db:null,auth:null,ref:null,unsub:null,last:{},timer:0,status:'solo',err:'',busy:false,pendingRender:false,blurHook:false,renderTimer:0,legacy:{},inflight:false,deferredSnap:null,dp:null,dpUnsub:null,dpErr:''};
 function blankDraft(){return{type:'01',rec:{name:'',idType:'02',id:'',mail:''},cond:'01',plazo:'',pago:'04',obs:'',lines:[{det:'',code:'',qty:1,unit:'Unid',price:'',disc:0,iva:13}]}}
 function sampleDraft(){return{type:'01',rec:{name:'Cliente de Práctica S.A. (ejemplo)',idType:'02',id:'3-101-654321',mail:'compras@cliente.example'},cond:'01',plazo:'',pago:'04',obs:'',lines:[
   {det:'Impresión de afiches (ejemplo)',code:'1234567890123',qty:10,unit:'Unid',price:3500,disc:0,iva:13},
@@ -1823,7 +1823,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-pv]');if(!
 function pvBind(e){const t=e.target;if(!t.dataset||!t.dataset.pp)return;const p=t.dataset.pp.split('.'),d=p[0];view.pff[d][p[1]]=t.value;const c=$('#pvcalc-'+d);if(c)c.innerHTML=pvCalcHTML(d)}
 document.addEventListener('input',pvBind);document.addEventListener('change',pvBind);
 /* ===== Marketing y ventas ===== */
-const MKNAV=[['act','Mis 12 actividades'],['marca','Marca y cliente'],['prod','Producto (1.ª P)'],['precio','Precio (2.ª P)'],['plaza','Plaza (3.ª P)'],['promo','Promoción (4.ª P)'],['plan','Plan estratégico'],['publi','Publicidad'],['parea','Plan del área'],['neg','Negociación y contrato'],['cat','Catálogo'],['cot','Cotizaciones'],['prov','Facturas de proveedores'],['ventas','Ventas y clientes']];
+const MKNAV=[['act','Mis 12 actividades'],['marca','Marca y cliente'],['prod','Producto (1.ª P)'],['precio','Precio (2.ª P)'],['plaza','Plaza (3.ª P)'],['promo','Promoción (4.ª P)'],['plan','Plan estratégico'],['publi','Publicidad'],['parea','Plan del área'],['neg','Negociación y contrato'],['cat','Catálogo'],['cot','Cotizaciones'],['caf','Registrar ventas'],['prov','Facturas de proveedores'],['ventas','Ventas y clientes']];
 const CANALES=['Tienda o puesto físico','Redes sociales','WhatsApp','Sitio web o tienda en línea','Entrega a domicilio','Ferias y actividades del colegio','Distribuidores o revendedores'];
 const OBJS=['Dar a conocer la empresa','Vender más','Lanzar un producto nuevo','Fidelizar clientes'];
 function defaultMk(){return{nextId:10,cotN:0,marca:{cliente:'',propuesta:'',mensaje:''},
@@ -1921,13 +1921,13 @@ function mVentas(){const s=mkSales(),t=totals(),mx=Math.max(1,...s.prod.map(p=>p
  const tile=(l,v,f)=>`<div class="tile"><span class="sub">${l}</span><strong>${f?v:fmt(v)}</strong></div>`;
  return `<div class="card"><div class="head-row"><h2>Ventas y clientes</h2><button type="button" class="btn sm" data-m="pdf-ventas">Informe de ventas (PDF)</button></div>
   <p class="hint" style="margin-bottom:12px">Se llena solo con las facturas que emiten en Contabilidad y finanzas.</p>
-  <div class="tiles">${tile('Ventas netas (sin IVA)',s.net)}${tile('Facturas emitidas',s.n,1)}${tile('Venta promedio (con IVA)',s.avg)}${tile('Por cobrar a clientes',t.xcobrar)}${tile('Cotizaciones aceptadas',s.acc+' de '+s.cots+' ('+s.tasa+'%)',1)}${tile('Campañas: vendido / meta',fmt(s.vend)+' / '+fmt(s.meta),1)}</div></div>
+  <div class="tiles">${tile('Ventas netas (sin IVA)',s.net)}${tile('Ventas registradas',cafTotals().total)}${tile('Facturas emitidas',s.n,1)}${tile('Venta promedio (con IVA)',s.avg)}${tile('Por cobrar a clientes',t.xcobrar)}${tile('Cotizaciones aceptadas',s.acc+' de '+s.cots+' ('+s.tasa+'%)',1)}${tile('Campañas: vendido / meta',fmt(s.vend)+' / '+fmt(s.meta),1)}</div></div>
  <div class="cols" style="margin-top:20px"><div class="card"><h3 style="margin-bottom:10px">Mejores clientes</h3>${s.cli.length?`<table class="mv" style="min-width:0"><thead><tr><th>Cliente</th><th class="r">Facturas</th><th class="r">Total</th></tr></thead><tbody>${s.cli.map(c=>`<tr><td>${esc(c.k)}</td><td class="r">${c.n}</td><td class="r">${fmt(c.t)}</td></tr>`).join('')}</tbody></table>`:'<p class="hint">Aún no hay ventas.</p>'}</div>
   <div class="card"><h3 style="margin-bottom:10px">Lo que más se vende</h3>${s.prod.length?`<div class="bars">${s.prod.map(p=>`<div style="flex-wrap:wrap"><span style="width:100%">${esc(p.k)} · ${fmt(p.t)}</span><i style="width:${Math.max(2,Math.round(p.t/mx*100))}%"></i></div>`).join('')}</div>`:'<p class="hint">Aún no hay ventas.</p>'}</div></div>`}
 function renderMk(){ensureMk();const el=$('#dept-mkt');if(!el)return;el.className='v-mkt';
  const nav=MKNAV.map(n=>`<button type="button" data-m="nav" data-v="${n[0]}" aria-pressed="${view.mr===n[0]}">${n[1]}</button>`).join('');
  const who=(S.ger&&S.ger.org&&S.ger.org.mkt)||'';
- el.innerHTML=`<div class="seg" role="group" aria-label="Secciones de Marketing y ventas">${nav}</div>${who?`<p class="hint" style="margin:-6px 0 14px">Responsable del departamento: <strong>${esc(who)}</strong></p>`:''}`+({act:()=>actPage('mkt'),parea:()=>gdPage('plan_mkt'),marca:mMarca,prod:mProd,precio:mPrecio,plaza:mPlaza,promo:mPromo,plan:()=>gdPage('plan_mk'),publi:()=>gdPage('publi'),neg:()=>gdPage('neg_mkt'),cat:mCat,cot:mCot,prov:()=>provHTML('mkt'),ventas:mVentas}[view.mr]||mMarca)()}
+ el.innerHTML=`<div class="seg" role="group" aria-label="Secciones de Marketing y ventas">${nav}</div>${who?`<p class="hint" style="margin:-6px 0 14px">Responsable del departamento: <strong>${esc(who)}</strong></p>`:''}`+({act:()=>actPage('mkt'),parea:()=>gdPage('plan_mkt'),marca:mMarca,prod:mProd,precio:mPrecio,plaza:mPlaza,promo:mPromo,plan:()=>gdPage('plan_mk'),publi:()=>gdPage('publi'),neg:()=>gdPage('neg_mkt'),cat:mCat,cot:mCot,caf:()=>gdPage('cafeteria',null,cafResumen()),prov:()=>provHTML('mkt'),ventas:mVentas}[view.mr]||mMarca)()}
 /* ---- PDF ---- */
 function mkAddPlan(st){const M=S.mk,c=S.company;st.title('Plan de marketing: las 4 P',c.name);
  st.h2('Marca y cliente');if(c.lema)st.kv('Lema',c.lema);st.kv('Cliente ideal',M.marca.cliente);st.kv('Propuesta de valor',M.marca.propuesta);st.kv('Mensaje',M.marca.mensaje);st.y+=2;
@@ -2481,6 +2481,24 @@ AREAS.forEach(a=>{GDOCS['plan_'+a[0]]={dept:a[0],title:'Plan del área: '+a[1],
   {t:'Metas',l:{k:'metas',add:'Agregar meta',cols:[{k:'m',l:'Meta'},{k:'i',l:'Indicador'},{k:'p',l:'Plazo',t:'d'}]}},
   {t:'Actividades',l:{k:'acts',add:'Agregar actividad',cols:[{k:'a',l:'Actividad',t:'a'},{k:'r',l:'Responsable'},{k:'f',l:'Fecha',t:'d'},{k:'rec',l:'Recursos'}]}},
   {t:'Presupuesto y riesgos',f:[{k:'pres',l:'Presupuesto estimado (₡)',t:'n'},{k:'rie',l:'Riesgos y cómo los evitamos',t:'a'}]}]}});
+GDOCS.cafeteria={dept:'mkt',title:'Registrar ventas',
+ steps:['Cada vez que venden algo, agrega una línea nueva.','Escribe la fecha, qué vendiste, cuántos y el precio de cada uno (con IVA incluido).','Elige cómo pagó el cliente y quién vendió. El total sale solo.','Al final del día mira el resumen de ingresos y escribe tus observaciones.'],
+ ej:'Fecha: 27/10 · Producto: Empanada de queso · Cantidad: 3 · Precio: ₡1 500 · Pago: Efectivo · Total: ₡4 500',
+ secs:[{t:'Ventas registradas',l:{k:'ventas',add:'Agregar venta',cols:[{k:'fecha',l:'Fecha',t:'d'},{k:'prod',l:'Producto vendido'},{k:'cant',l:'Cantidad',t:'n'},{k:'precio',l:'Precio de cada uno (₡)',t:'n'},{k:'pago',l:'Forma de pago',t:'s',o:['Efectivo','SINPE Móvil','Tarjeta','Transferencia']},{k:'tot',l:'Total (₡)',t:'c',c:(r)=>fmt(r2(num(r.cant)*num(r.precio)))},{k:'quien',l:'Quién vendió'}]}},
+  {t:'Cierre del día',f:[{k:'obs',l:'Observaciones: ¿qué se vendió más? ¿Qué faltó? ¿Qué mejoramos?',t:'a'}]}]};
+function cafTotals(){const rows=gdRows('cafeteria','ventas'),t={total:0,n:0,unid:0,pago:{},prod:{}};
+ rows.forEach(r=>{const v=r2(num(r.cant)*num(r.precio));if(!(v>0))return;t.total+=v;t.n++;t.unid+=num(r.cant);const pg=r.pago||'Sin indicar';t.pago[pg]=(t.pago[pg]||0)+v;const pn=String(r.prod||'').trim()||'Sin nombre';t.prod[pn]=(t.prod[pn]||0)+v});
+ t.total=r2(t.total);return t}
+function cafResumenInner(){const t=cafTotals(),tile=(l,v)=>`<div class="tile"><span class="sub">${l}</span><strong>${v}</strong></div>`,
+  pg=Object.keys(t.pago).map(k=>`<tr><td>${esc(k)}</td><td class="r">${fmt(r2(t.pago[k]))}</td></tr>`).join(''),
+  pr=Object.keys(t.prod).sort((a,b)=>t.prod[b]-t.prod[a]).slice(0,5).map(k=>`<tr><td>${esc(k)}</td><td class="r">${fmt(r2(t.prod[k]))}</td></tr>`).join('');
+ return `<h3>Resumen de ventas</h3><p class="hint" style="margin-bottom:12px">Se calcula solo con las ventas de la tabla de arriba.</p>
+ <div class="tiles">${tile('Total vendido',fmt(t.total))}${tile('Ventas anotadas',String(t.n))}${tile('Unidades vendidas',String(t.unid))}${tile('Venta promedio',fmt(t.n?r2(t.total/t.n):0))}</div>
+ <div class="cols" style="margin-top:12px"><div class="card"><h3 style="margin-bottom:8px">Por forma de pago</h3>${pg?`<table class="mv" style="min-width:0"><tbody>${pg}</tbody></table>`:'<p class="hint">Aún no hay ventas.</p>'}</div>
+ <div class="card"><h3 style="margin-bottom:8px">Lo que más se vende</h3>${pr?`<table class="mv" style="min-width:0"><tbody>${pr}</tbody></table>`:'<p class="hint">Aún no hay ventas.</p>'}</div></div>`}
+const cafResumen=()=>`<section class="gdsec" id="cafRes">${cafResumenInner()}</section>`;
+function cafPdf(st){const t=cafTotals();st.h2('Resumen de ingresos');st.kv('Total vendido',nf(t.total));st.kv('Ventas anotadas',String(t.n));st.kv('Unidades vendidas',String(t.unid));st.y+=1;
+ const pg=Object.keys(t.pago);if(pg.length)st.table([{h:'Forma de pago',w:110},{h:'Total',w:70,a:'r'}],pg.map(k=>[k,nf(r2(t.pago[k]))]))}
 const gdR=k=>(S.docs&&S.docs[k])||{};
 const gdW=k=>{if(!S.docs||typeof S.docs!=='object')S.docs={};return S.docs[k]||(S.docs[k]={})};
 const gdRows=(k,l)=>{const r=gdR(k)[l];return Array.isArray(r)?r:[]};
@@ -2508,6 +2526,7 @@ function gdPage(k,before,after){const d=GDOCS[k],p=gdPct(k);
  ${d.secs.map(s=>`<section class="gdsec"><h3>${esc(s.t)}</h3>${s.f?`<div class="grid">${s.f.map(f=>gdField(k,f)).join('')}</div>`:''}${s.l?gdList(k,s.l):''}</section>`).join('')}${after||''}</div>`}
 function gdUpdate(k){document.querySelectorAll('[data-gdcalc^="'+k+'|"]').forEach(td=>{const q=td.dataset.gdcalc.split('|'),l=GDOCS[k].secs.map(s=>s.l).find(x=>x&&x.k===q[1]),r=gdRows(k,q[1])[+q[2]],c=l&&l.cols.find(x=>x.k===q[3]);if(r&&c)td.textContent=c.c(r,c,gdRows(k,q[1]),+q[2])});
  if(k==='presup'){const e=document.getElementById('presupRes');if(e)e.innerHTML=presupResumenInner()}
+ if(k==='cafeteria'){const e=document.getElementById('cafRes');if(e)e.innerHTML=cafResumenInner()}
  document.querySelectorAll('[data-gdsum^="'+k+'|"]').forEach(b=>{const q=b.dataset.gdsum.split('|'),l=GDOCS[k].secs.map(s=>s.l).find(x=>x&&x.k===q[1]);if(l)b.textContent=gdSum(k,l)});
  const pp=document.querySelector('[data-gdpct="'+k+'"]');if(pp){const p=gdPct(k);pp.textContent=p+' % completo';pp.className='pill '+(p>=80?'ok':p>0?'info':'')}}
 function gdBind(e){const t=e.target;if(!t.dataset||!t.dataset.gd)return;if(cloud.ro)return;const q=t.dataset.gd.split('|'),k=q[0];if(!GDOCS[k])return;const d=gdW(k);
@@ -2524,6 +2543,7 @@ function gdBuild(k){const st=gPdf();if(!st)return null;const d=GDOCS[k];st.head(
    const data=rows.map((r,i)=>(l.num?[String(i+1)]:[]).concat(cols.map(c=>c.t==='c'?c.c(r,c,rows,i):c.t==='d'?gd(r[c.k]):String(r[c.k]==null?'':r[c.k]))));
    st.table(defs,data);if(l.sum&&rows.length)st.p('Total: '+gdSum(k,l),{b:1,s:10})}});
  if(k==='presup')presupPdf(st);
+ if(k==='cafeteria')cafPdf(st);
  if(d.sign)d.sign.forEach(x=>st.sign(gdR(k)[x[0]]||'',x[1]));else st.sign(gdR(k).resp||(S.ger&&S.ger.org&&S.ger.org[d.dept])||'','Responsable');return st.finish(d.title+' · '+S.company.name)}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-gdc]');if(!b)return;const k=b.dataset.k,a=b.dataset.gdc;if(a==='sel'){view.gdarea=b.dataset.v;renderGer();return}
  if(!GDOCS[k])return;if(a==='pdf'){savePdf(mk(()=>gdBuild(k)),k+'.pdf');return}
@@ -2591,7 +2611,7 @@ async function docenteInforme(){
  try{await fbInit()}catch(e){toast(errText(e));return}
  const fs=cloud.mods.fs,teams=[],miss=[];
  await Promise.all(list.map(async it=>{try{const sn=await withTimeout(fs.getDoc(fs.doc(cloud.db,'empresas',it.code)),15000);
-  if(!sn.exists()){miss.push(it.label||it.code);return}const d=sn.data(),n=defaults();Object.keys(d).forEach(f=>{if(f.slice(0,2)!=='k_')return;try{n[f.slice(2)]=JSON.parse(d[f])}catch(e){}});teams.push({it,st:n})}catch(e){miss.push(it.label||it.code)}}));
+  if(!sn.exists()){miss.push(it.label||it.code);return}const d=sn.data(),n=defaults();cloudBuild(d,n,null);teams.push({it,st:n})}catch(e){miss.push(it.label||it.code)}}));
  if(!teams.length){toast('No se pudo leer ningún equipo ahora. Intenta de nuevo.');return}
  teams.sort((a,b)=>String(a.it.label||a.st.company&&a.st.company.name).localeCompare(String(b.it.label||b.st.company&&b.st.company.name),'es'));
  const keep=S,hold=cloud.ro;let blob=null;
@@ -2658,8 +2678,22 @@ const lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
 const lsDel=k=>{try{localStorage.removeItem(k)}catch(e){}};
 const devId=(()=>{let v=lsGet(LS_DEV);if(!v){v=Math.random().toString(36).slice(2,10);lsSet(LS_DEV,v)}return v})();
 const withTimeout=(p,ms,msg)=>Promise.race([p,new Promise((_,rej)=>setTimeout(()=>rej(Object.assign(new Error(msg||'timeout'),{code:'timeout'})),ms))]);
-const syncKeys=()=>Object.keys(S).filter(k=>k!=='draft'&&k!=='v');
-const enc=k=>JSON.stringify(S[k]===undefined?null:S[k]);
+/* Sincronización fina: docs, acts y los datos de cada departamento se guardan por secciones
+   (campo 'k_docs__plan_ger', 'k_pr__ord', etc.) para que dos estudiantes que escriben en secciones
+   distintas no se pisen los datos entre sí. */
+const SPLIT=['docs','acts','ger','th','mk','pr'],SEP='__';
+function splitOf(key){const i=key.indexOf(SEP);if(i>0&&SPLIT.indexOf(key.slice(0,i))>=0)return[key.slice(0,i),key.slice(i+2)];return null}
+const isObj=v=>v&&typeof v==='object'&&!Array.isArray(v);
+const getV=(o,key)=>{const p=splitOf(key);if(p){const c=o[p[0]];return isObj(c)?c[p[1]]:undefined}return o[key]};
+const setV=(o,key,v)=>{const p=splitOf(key);if(p){if(!isObj(o[p[0]]))o[p[0]]={};o[p[0]][p[1]]=v}else o[key]=v};
+const syncKeys=()=>{const out=[];Object.keys(S).forEach(k=>{if(k==='draft'||k==='v')return;const v=S[k];if(SPLIT.indexOf(k)>=0&&isObj(v))Object.keys(v).forEach(x=>out.push(k+SEP+x));else out.push(k)});return out};
+const enc=k=>{const v=getV(S,k);return JSON.stringify(v===undefined?null:v)};
+function cloudBuild(d,n,last){
+  const legacy=[],fine=[];
+  Object.keys(d).forEach(f=>{if(f.slice(0,2)!=='k_')return;const k=f.slice(2);(splitOf(k)?fine:legacy).push([k,d[f]])});
+  legacy.forEach(([k,raw])=>{try{const v=JSON.parse(raw);n[k]=v;
+    if(last){if(SPLIT.indexOf(k)<0||!isObj(v))last[k]=raw;else Object.keys(v).forEach(x=>{last[k+SEP+x]=JSON.stringify(v[x]===undefined?null:v[x])})}}catch(e){}});
+  fine.forEach(([k,raw])=>{try{setV(n,k,JSON.parse(raw));if(last)last[k]=raw}catch(e){}})}
 const isDirty=()=>syncKeys().some(k=>enc(k)!==cloud.last[k]);
 function normalizeS(){S.acts=(S.acts&&typeof S.acts==='object')?S.acts:{};S.ger=S.ger||null;S.th=S.th||null;S.mk=S.mk||null;S.pr=S.pr||null;S.company=Object.assign({act:'',lema:'',color:'#0A6A62',color2:'#F2A900'},S.company);S.docs=S.docs||{};S.receipts=S.receipts||{};S.purchases=S.purchases||[];S.decls=S.decls||[];S.checks=S.checks||{};S.draft=S.draft||blankDraft();S.sinpe=S.sinpe||{day:'',total:0}}
 function newCode(){const a=new Uint8Array(8);crypto.getRandomValues(a);let s='';for(let i=0;i<8;i++){s+=ALPHA[a[i]%32];if(i===3)s+='-'}return s}
@@ -2725,55 +2759,67 @@ async function doPush(){
   const dirty=syncKeys().filter(k=>enc(k)!==cloud.last[k]);
   if(!dirty.length){if(cloud.status!=='ok'&&cloud.status!=='off')setStatus('ok');return}
   const fs=cloud.mods.fs,data={};
+  /* Migración única: sube todas las secciones por separado y borra el campo viejo (así el documento no se duplica ni crece de más). */
+  const mig=SPLIT.filter(t=>cloud.legacy&&cloud.legacy[t]&&isObj(S[t]));
+  mig.forEach(t=>Object.keys(S[t]).forEach(x=>{const key=t+SEP+x;if(dirty.indexOf(key)<0)dirty.push(key)}));
   dirty.forEach(k=>{data['k_'+k]=enc(k)});
+  mig.forEach(t=>{data['k_'+t]=fs.deleteField()});
   data.by=devId;data.t=fs.serverTimestamp();
   if(dirty.indexOf('company')>=0)data.name=String(S.company&&S.company.name||'').slice(0,80);
   const size=Object.keys(data).reduce((a,f)=>a+(typeof data[f]==='string'?data[f].length:0),0);
   if(size>900000)toast('La empresa ya es muy grande para la nube. Guarda un archivo de avance.');
   const prev={},mine=cloud.ref;
   dirty.forEach(k=>{prev[k]=cloud.last[k];cloud.last[k]=data['k_'+k]});
+  cloud.inflight=true;
   try{
     await fs.updateDoc(mine,data);
+    mig.forEach(t=>{cloud.legacy[t]=false});
     if(cloud.ref===mine&&cloud.status!=='off'&&!isDirty())setStatus('ok')
   }catch(e){
-    if(cloud.ref!==mine)return;
+    if(cloud.ref!==mine){cloud.inflight=false;return}
     dirty.forEach(k=>{if(cloud.last[k]===data['k_'+k]){if(prev[k]===undefined)delete cloud.last[k];else cloud.last[k]=prev[k]}});
-    setStatus('err',e);clearTimeout(cloud.timer);cloud.timer=setTimeout(doPush,6000)}}
-let lastTypeAt=0;
-document.addEventListener('input',()=>{lastTypeAt=Date.now()},true);
+    setStatus('err',e);toast('No se pudo guardar en la nube ('+String((e&&e.code)||(e&&e.message)||'error').slice(0,60)+'). Se vuelve a intentar.');clearTimeout(cloud.timer);cloud.timer=setTimeout(doPush,6000)}
+  cloud.inflight=false;flushDeferred()}
+/* Mientras alguien escribe en un campo, la pantalla NO se redibuja (así no pierde el cursor ni lo escrito).
+   Los cambios de los compañeros se muestran cuando la persona sale del campo. */
+cloud.renderPending=false;
 function scheduleRender(){
   clearTimeout(cloud.renderTimer);
   const ae=document.activeElement,typing=ae&&/^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName)&&!ae.closest('#cloudModal');
-  if(typing&&Date.now()-lastTypeAt<3000){cloud.renderTimer=setTimeout(scheduleRender,1000);return}
-  let back=null;
-  if(typing){back={id:ae.id,gp:ae.getAttribute('data-gp')||ae.getAttribute('data-mp')||'',s:ae.selectionStart,e:ae.selectionEnd}}
-  renderAll();updateBar();
-  if(back){
-    let el=back.id?document.getElementById(back.id):null;
-    if(!el&&back.gp)el=document.querySelector('[data-gp="'+back.gp+'"],[data-mp="'+back.gp+'"]');
-    if(el&&el.focus){try{el.focus();if(back.s!=null&&el.setSelectionRange)el.setSelectionRange(back.s,back.e)}catch(err){}}}}
+  if(typing){cloud.renderPending=true;return}
+  cloud.renderPending=false;
+  renderAll();updateBar()}
+document.addEventListener('focusout',()=>{setTimeout(()=>{flushDeferred();if(cloud.renderPending&&!isTypingNow())scheduleRender()},200)},true);
+const isTypingNow=()=>{const ae=document.activeElement;return !!(ae&&/^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName)&&!ae.closest('#cloudModal'))};
+function flushDeferred(){if(!cloud.deferredSnap||isTypingNow()||cloud.inflight)return;const sn=cloud.deferredSnap;cloud.deferredSnap=null;onRemote(sn)}
 function onRemote(snap){
   if(!cloud.on)return;
+  /* Mientras la persona escribe, los datos de los compañeros esperan: nada cambia debajo de sus manos. */
+  /* Y mientras se está enviando un cambio propio, para que una respuesta atrasada no deshaga lo que se acaba de escribir. */
+  if(!cloud.ro&&(isTypingNow()||cloud.inflight)){cloud.deferredSnap=snap;return}
   if(!snap.exists()){setStatus('err',{code:'empresa-no-existe'});return}
   const d=snap.data();let changed=false;
+  SPLIT.forEach(t=>{if(cloud.legacy[t]&&!(('k_'+t) in d))cloud.legacy[t]=false});
   Object.keys(d).forEach(f=>{
     if(f.slice(0,2)!=='k_')return;
     const k=f.slice(2),raw=d[f];
+    if(SPLIT.indexOf(k)>=0)return;
     if(raw===cloud.last[k])return;
-    if(!cloud.ro&&(k in S)&&enc(k)!==cloud.last[k])return;
+    if(!cloud.ro&&getV(S,k)!==undefined&&enc(k)!==cloud.last[k])return;
     let v;try{v=JSON.parse(raw)}catch(e){return}
-    S[k]=v;cloud.last[k]=raw;changed=true});
-  if(changed){normalizeS();if(!cloud.ro)lsSet(KEY+':'+cloud.code,JSON.stringify(S));scheduleRender();if(!cloud.ro)cloudPush()}
+    setV(S,k,v);cloud.last[k]=raw;changed=true});
+  if(changed){const ch=Object.keys(d).filter(f=>f.slice(0,2)==='k_'&&SPLIT.indexOf(f.slice(2))<0).length;try{const now=Date.now();if(!cloud.ro&&now-(cloud.lastNote||0)>6000){cloud.lastNote=now;toast('Llegaron cambios de otra computadora del equipo.')}}catch(e){}normalizeS();if(!cloud.ro)lsSet(KEY+':'+cloud.code,JSON.stringify(S));scheduleRender();if(!cloud.ro)cloudPush()}
   if(cloud.status==='err'||cloud.status==='busy'&&!isDirty())setStatus('ok')}
 function applyFull(d){
   const n=defaults();n.draft=(S&&S.draft)||n.draft;cloud.last={};
-  Object.keys(d).forEach(f=>{if(f.slice(0,2)!=='k_')return;const k=f.slice(2);try{n[k]=JSON.parse(d[f]);cloud.last[k]=d[f]}catch(e){}});
+  cloudBuild(d,n,cloud.last);
+  cloud.legacy={};if(!cloud.ro)SPLIT.forEach(t=>{if(('k_'+t) in d)cloud.legacy[t]=true});
   S=n;normalizeS()}
 function leaveCloud(){
   dpUnwatch();
   clearTimeout(cloud.timer);
   if(cloud.unsub){try{cloud.unsub()}catch(e){}cloud.unsub=null}
-  cloud.on=false;cloud.ro=false;cloud.code='';cloud.ref=null;cloud.last={};cloud.status='solo';cloud.err='';cloud.pendingRender=false;clearTimeout(cloud.renderTimer)}
+  cloud.on=false;cloud.ro=false;cloud.code='';cloud.ref=null;cloud.last={};cloud.legacy={};cloud.inflight=false;cloud.deferredSnap=null;cloud.status='solo';cloud.err='';cloud.pendingRender=false;clearTimeout(cloud.renderTimer)}
 
 async function joinCompany(code,opt){
   opt=opt||{};
