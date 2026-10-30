@@ -297,7 +297,7 @@ section[data-locked]{display:none!important}
       </div>
     </div>
     <p class="flag">Simulación educativa<br>No es dinero real ni tiene validez tributaria</p>
-    <p class="sub" id="verTag" style="position:absolute;right:16px;top:4px;font-size:11px;opacity:.7">Versión 27-oct-2026 (v13)</p>
+    <p class="sub" id="verTag" style="position:absolute;right:16px;top:4px;font-size:11px;opacity:.7">Versión 29-oct-2026 (v14)</p>
   </header>
   <div class="cloudbar" id="cloudBar" aria-live="polite"></div>
 
@@ -1295,7 +1295,7 @@ const LEGACY_CART=[
  {id:'c1',inst:'Escuela Pública Ejemplo (institución ficticia)',ced:'3-007-000123',num:'2026PR-000001',det:'Afiches informativos de seguridad escolar',qty:120,unit:'Unid',max:6000,req:'Impresos a color, tamaño carta. Entrega en 15 días hábiles.'},
  {id:'c2',inst:'Municipalidad de Villa Práctica (ficticia)',ced:'3-007-000456',num:'2026PR-000002',det:'Diseño de identidad visual para campaña de reciclaje',qty:1,unit:'Sp',max:180000,req:'Logo, paleta de colores y manual básico. Entrega en 20 días hábiles.'},
  {id:'c3',inst:'Hospital Regional de Práctica (ficticio)',ced:'3-007-000789',num:'2026PR-000003',det:'Rótulos de señalización interna',qty:50,unit:'Unid',max:12000,req:'Rótulos en PVC de 30 x 20 cm. Entrega en 25 días hábiles.'}];
-const GNAV=[['act','Mis 12 actividades'],['ficha','Ficha y puesta en operación'],['org','Organigrama y plan'],['kpi','Metas y KPI'],['areas','Plan del área'],['tab','Centro de operaciones'],['estado','Compras del Estado'],['actas','Actas de decisión'],['ase','Asesoría'],['riesgos','Matriz de riesgos'],['obl','Calendario de obligaciones'],['neg','Negociación y contrato'],['prov','Facturas de proveedores'],['cierre','Informe de cierre']];
+const GNAV=[['act','Mis 12 actividades'],['ficha','Ficha y puesta en operación'],['legal','Mi estructura legal'],['org','Organigrama y plan'],['kpi','Metas y KPI'],['areas','Plan del área'],['tab','Centro de operaciones'],['estado','Compras del Estado'],['actas','Actas de decisión'],['ase','Asesoría'],['riesgos','Matriz de riesgos'],['obl','Calendario de obligaciones'],['neg','Negociación y contrato'],['prov','Facturas de proveedores'],['cierre','Informe de cierre']];
 const GUIA=[
  ['No sé si conviene ser sociedad o persona física','Abogado o notario','Explicar la forma legal, el capital y las responsabilidades.'],
  ['Dudas con IVA, renta o la factura electrónica','Contador público autorizado o el sitio oficial de Hacienda','Presentar declaraciones bien y evitar multas.'],
@@ -1322,7 +1322,7 @@ const newForm=()=>({tema:'',dato:'',alts:['','',''],dec:'',why:'',firma:''});
 const newCart=()=>({inst:'',det:'',qty:'',unit:'Unid',max:'',req:''});
 const newOf=()=>({cartel:'',price:'',cost:'',iva:13,plazo:'15',vig:'30',gar:'6',firma:'',ok:false});
 const newAf=()=>({date:dayKey(),tema:'',con:'',res:''});
-view.gr='act';view.gcf=newCart();view.gform=newForm();view.gof=newOf();view.gaf=newAf();view.gerr=[];
+view.gr='act';view.glg='';view.gcf=newCart();view.gform=newForm();view.gof=newOf();view.gaf=newAf();view.gerr=[];
 const gd=s=>s?String(s).split('-').reverse().join('/'):'—';
 const pad3=n=>String(n).padStart(3,'0');
 const gOpts=(arr,v)=>arr.map(o=>{const a=Array.isArray(o)?o:[o,o];return `<option value="${esc(a[0])}"${String(a[0])===String(v)?' selected':''}>${esc(a[1])}</option>`}).join('');
@@ -1457,7 +1457,7 @@ function gCierre(){const g=S.ger,e=g.equipo,ch=gChecks();
   <div class="btnrow" style="margin-top:14px"><button type="button" class="btn" data-g="pdf-port">Descargar portafolio (PDF)</button></div></div>`}
 function renderGer(){ensureGer();const el=$('#dept-ger');if(!el)return;el.className='v-ger';
  const nav=GNAV.map(n=>`<button type="button" data-g="nav" data-v="${n[0]}" aria-pressed="${view.gr===n[0]}">${n[1]}</button>`).join('');
- const body=({act:()=>actPage('ger'),ficha:gFicha,org:gOrg,kpi:gKpi,areas:()=>gdPage('plan_ger'),riesgos:()=>gdPage('riesgos'),obl:()=>gdPage('obligaciones'),neg:()=>gdPage('neg_ger'),tab:gTab,estado:gEstado,actas:gActas,ase:()=>gAse()+'<div style="height:20px"></div>'+gdPage('asesoria'),prov:()=>provHTML('ger'),cierre:gCierre}[view.gr]||(()=>actPage('ger')))();
+ const body=({act:()=>actPage('ger'),ficha:gFicha,legal:gLegal,org:gOrg,kpi:gKpi,areas:()=>gdPage('plan_ger'),riesgos:()=>gdPage('riesgos'),obl:()=>gdPage('obligaciones'),neg:()=>gdPage('neg_ger'),tab:gTab,estado:gEstado,actas:gActas,ase:()=>gAse()+'<div style="height:20px"></div>'+gdPage('asesoria'),prov:()=>provHTML('ger'),cierre:gCierre}[view.gr]||(()=>actPage('ger')))();
  el.innerHTML=`<div class="seg" role="group" aria-label="Secciones de Gerencia">${nav}</div>${view.gr==='ficha'||view.gr==='org'||view.gr==='tab'||view.gr==='cierre'?gErrHTML():''}${body}`}
 /* ---- acciones ---- */
 const gShowErr=()=>{renderGer();const x=$('#gErr')||$('#dept-ger .alert');if(x&&x.scrollIntoView)x.scrollIntoView({block:'center'})};
@@ -2486,6 +2486,76 @@ GDOCS.cafeteria={dept:'mkt',title:'Registrar ventas',
  ej:'Fecha: 27/10 · Producto: Empanada de queso · Cantidad: 3 · Precio: ₡1 500 · Pago: Efectivo · Total: ₡4 500',
  secs:[{t:'Ventas registradas',l:{k:'ventas',add:'Agregar venta',cols:[{k:'fecha',l:'Fecha',t:'d'},{k:'prod',l:'Producto vendido'},{k:'cant',l:'Cantidad',t:'n'},{k:'precio',l:'Precio de cada uno (₡)',t:'n'},{k:'pago',l:'Forma de pago',t:'s',o:['Efectivo','SINPE Móvil','Tarjeta','Transferencia']},{k:'tot',l:'Total (₡)',t:'c',c:(r)=>fmt(r2(num(r.cant)*num(r.precio)))},{k:'quien',l:'Quién vendió'}]}},
   {t:'Cierre del día',f:[{k:'obs',l:'Observaciones: ¿qué se vendió más? ¿Qué faltó? ¿Qué mejoramos?',t:'a'}]}]};
+/* ---- Mi estructura legal: formularios simulados (práctica escolar, no oficiales) ---- */
+const LEGAL=[
+ {k:'legal_not',n:'1. Escritura de constitución',e:'Notario público',c:'#5b4b8a',h:'Se hace con una persona que sea abogada y notaria. Ahí nace la sociedad.'},
+ {k:'legal_rn',n:'2. Inscripción de la sociedad',e:'Registro Nacional',c:'#1f5f8b',h:'Se inscribe la escritura. La sociedad recibe su cédula jurídica y su correo oficial.'},
+ {k:'legal_hac',n:'3. Inscripción como contribuyente',e:'Ministerio de Hacienda',c:'#2e6b3a',h:'La empresa queda registrada para pagar impuestos y emitir factura electrónica.'},
+ {k:'legal_mun',n:'4. Uso de suelo y patente comercial',e:'Municipalidad',c:'#8a5a1f',h:'La municipalidad dice si el negocio puede estar en ese lugar y da la patente.'},
+ {k:'legal_sal',n:'5. Permiso sanitario de funcionamiento',e:'Ministerio de Salud',c:'#0f6f78',h:'Revisa que el local sea seguro e higiénico. Se pide si la actividad lo exige.'},
+ {k:'legal_ccss',n:'6. Inscripción como patrono',e:'CCSS',c:'#a03d3d',h:'Se hace al contratar a la primera persona. Se pagan cuotas cada mes.'},
+ {k:'legal_ins',n:'7. Póliza de riesgos del trabajo',e:'INS',c:'#555f6e',h:'Protege a las personas trabajadoras si sufren un accidente en el trabajo.'}];
+const LEG_SIM='Simulación educativa. Es una práctica escolar y no es un documento oficial.';
+const LEG_NOTE='Los campos se parecen a los que pide el trámite real, pero el formulario oficial lo encuentras en la página de la institución.';
+const FP={k:'fecha',l:'Fecha',t:'d'};
+GDOCS.legal_not={dept:'ger',legal:'Notario público',title:'Escritura de constitución de la sociedad',
+ steps:['Presiona "Traer datos de la portada" para llenar nombre, actividad y dirección.','Elige el tipo de sociedad y escribe el capital social.','Anota a cada socio con su aporte. El total se suma solo.','Escribe quién será la persona representante legal y qué puede hacer.','Anota el nombre de la persona notaria (puede ser inventado) y la fecha.'],
+ ej:'Tipo: Sociedad de Responsabilidad Limitada · Capital: 100000 · Socio 1: Ana Mora, aporte 50000 · Representante: gerente',
+ secs:[{t:'Datos de la sociedad',f:[{k:'tipo',l:'Tipo de sociedad',t:'x',o:['Sociedad de Responsabilidad Limitada','Sociedad Anónima','Empresa Individual de Responsabilidad Limitada']},{k:'nombre',l:'Nombre de la sociedad',src:'name'},{k:'dom',l:'Domicilio social',src:'dir',t:'a'},{k:'plazo',l:'Plazo social',ph:'Ej.: 100 años'},{k:'obj',l:'Objeto o actividad principal',src:'act',t:'a'},{k:'cap',l:'Capital social (₡)',t:'n'}]},
+  {t:'Socios y aportes',l:{k:'socios',add:'Agregar socio',sum:'ap',cols:[{k:'n',l:'Nombre completo'},{k:'ced',l:'Cédula'},{k:'nac',l:'Nacionalidad'},{k:'prof',l:'Profesión u oficio'},{k:'ap',l:'Aporte (₡)',t:'n'}]}},
+  {t:'Administración',f:[{k:'rep',l:'Persona representante legal'},{k:'repced',l:'Cédula de la persona representante'},{k:'puesto',l:'Puesto',t:'x',o:['Gerente','Presidente','Apoderado generalísimo']},{k:'fac',l:'¿Qué puede hacer esta persona en nombre de la empresa?',t:'a'},{k:'mail',l:'Correo electrónico oficial de la sociedad',src:'mail'}]},
+  {t:'Notario',f:[{k:'not',l:'Nombre de la persona notaria (inventado)'},{k:'carne',l:'Carné (inventado)'},FP]}]};
+GDOCS.legal_rn={dept:'ger',legal:'Registro Nacional',title:'Inscripción de la sociedad en el Registro Nacional',
+ steps:['Escribe los datos de la escritura que hicieron con el notario.','Anota el número de cédula jurídica y el correo oficial de la sociedad.','Revisa que tienes los documentos que se piden.','Anota las personas que son dueñas reales de la empresa (beneficiarios finales).'],
+ ej:'Presentación: 2026-12345 · Cédula jurídica: 3-102-123456 · Documento: testimonio de la escritura · Beneficiario: Ana Mora, 50 %',
+ secs:[{t:'Datos de la presentación',f:[{k:'pres',l:'N.º de presentación (inventado)'},FP,{k:'nombre',l:'Nombre de la sociedad',src:'name'},{k:'ced',l:'Cédula jurídica',src:'ced'},{k:'rep',l:'Representante legal'},{k:'mail',l:'Correo oficial de la sociedad (para notificaciones)',src:'mail'}]},
+  {t:'Documentos que se presentan',f:[{k:'d1',l:'Testimonio de la escritura',t:'x',o:['Sí','No']},{k:'d2',l:'Timbres y pago del trámite',t:'x',o:['Sí','No']},{k:'d3',l:'Libros legales (actas y registro de socios)',t:'x',o:['Sí','No']}]},
+  {t:'Beneficiarios finales: ¿quiénes son las personas dueñas?',l:{k:'bf',add:'Agregar persona',cols:[{k:'n',l:'Nombre completo'},{k:'ced',l:'Cédula'},{k:'p',l:'% de participación',t:'n'},{k:'ctrl',l:'Tipo de control',t:'s',o:['Propiedad directa','Propiedad indirecta','Control por otros medios']}]}}]};
+GDOCS.legal_hac={dept:'ger',legal:'Ministerio de Hacienda',title:'Inscripción como contribuyente',
+ steps:['Presiona "Traer datos de la portada".','Escribe la fecha en que empieza a operar la empresa. La inscripción se hace en los 10 días hábiles siguientes.','Elige la actividad económica y el régimen de la empresa.','Anota los locales y las obligaciones de impuestos.'],
+ ej:'Actividad: venta de comidas · Régimen: tradicional · Obligaciones: IVA mensual y renta anual · Factura electrónica: Sí',
+ secs:[{t:'Datos del contribuyente',f:[{k:'nombre',l:'Razón social',src:'name'},{k:'ced',l:'Cédula jurídica',src:'ced'},{k:'inicio',l:'Fecha de inicio de operaciones',t:'d'},{k:'rep',l:'Representante legal'},{k:'tel',l:'Teléfono',src:'tel'},{k:'mail',l:'Correo para notificaciones',src:'mail'}]},
+  {t:'Actividad económica',f:[{k:'act',l:'Actividad principal',src:'act',t:'a'},{k:'cod',l:'Código de actividad (búscalo en el catálogo de Hacienda)'},{k:'sec',l:'Otras actividades (opcional)',t:'a'},{k:'reg',l:'Régimen',t:'x',o:['Régimen tradicional','Régimen simplificado']}]},
+  {t:'Domicilio fiscal',f:[{k:'prov',l:'Provincia, cantón y distrito'},{k:'sen',l:'Otras señas',src:'dir',t:'a'}]},
+  {t:'Locales comerciales',l:{k:'loc',add:'Agregar local',cols:[{k:'n',l:'Nombre del local'},{k:'d',l:'Dirección',t:'a'}]}},
+  {t:'Obligaciones',f:[{k:'iva',l:'IVA mensual',t:'x',o:['Sí','No']},{k:'renta',l:'Renta anual',t:'x',o:['Sí','No']},{k:'fe',l:'Factura electrónica',t:'x',o:['Sí','No']}]}]};
+GDOCS.legal_mun={dept:'ger',legal:'Municipalidad',title:'Uso de suelo y patente comercial',
+ steps:['Primero pide el uso de suelo. Después el permiso sanitario si aplica. La patente va al final.','Escribe los datos del local: dirección, plano o finca, área y si es propio o alquilado.','Anota el resultado del uso de suelo.','Para la patente, marca los documentos que ya tienes.'],
+ ej:'Municipalidad: San José · Local: alquilado · Área: 40 m² · Uso de suelo: conforme · Patente: comercial',
+ secs:[{t:'Datos del local',f:[{k:'muni',l:'Municipalidad'},{k:'dir',l:'Dirección exacta del local',src:'dir',t:'a'},{k:'plano',l:'N.º de plano o de finca (inventado)'},{k:'area',l:'Área del local (m²)',t:'n'},{k:'prop',l:'El local es',t:'x',o:['Propio','Alquilado']},{k:'dueño',l:'Nombre de la persona dueña del inmueble'}]},
+  {t:'Solicitud de uso de suelo',f:[{k:'act',l:'Actividad que se hará en el local',src:'act',t:'a'},{k:'res',l:'Resultado',t:'x',o:['Conforme','No conforme','Pendiente']},{k:'fres',l:'Fecha del resultado',t:'d'}]},
+  {t:'Solicitud de patente comercial',f:[{k:'nc',l:'Nombre comercial',src:'name'},{k:'hor',l:'Horario de atención'},{k:'emp',l:'Cantidad de personas empleadas',t:'n'},{k:'cap',l:'Capital invertido (₡)',t:'n'},{k:'r1',l:'Uso de suelo favorable',t:'x',o:['Sí','No']},{k:'r2',l:'Permiso sanitario (si aplica)',t:'x',o:['Sí','No','No aplica']},{k:'r3',l:'Personería jurídica',t:'x',o:['Sí','No']},{k:'r4',l:'Comprobante de CCSS al día',t:'x',o:['Sí','No']}]}]};
+GDOCS.legal_sal={dept:'ger',legal:'Ministerio de Salud',title:'Permiso sanitario de funcionamiento',
+ steps:['Se pide después del uso de suelo favorable.','Describe la actividad y el local.','Elige el nivel de riesgo y explica cómo cuidan la higiene y los residuos.','Si la empresa maneja alimentos, anota si el personal tiene su carné de manipulación.'],
+ ej:'Actividad: venta de empanadas · Riesgo: medio · Residuos: separados y recolectados · Carné de manipulación: Sí',
+ secs:[{t:'Datos del establecimiento',f:[{k:'nombre',l:'Nombre del establecimiento',src:'name'},{k:'ced',l:'Cédula jurídica',src:'ced'},{k:'dir',l:'Dirección',src:'dir',t:'a'},{k:'act',l:'Actividad',src:'act',t:'a'},{k:'area',l:'Área (m²)',t:'n'},{k:'emp',l:'Personas que trabajan allí',t:'n'}]},
+  {t:'Condiciones del local',f:[{k:'riesgo',l:'Nivel de riesgo de la actividad',t:'x',o:['Bajo','Medio','Alto']},{k:'agua',l:'¿Tiene agua potable?',t:'x',o:['Sí','No']},{k:'serv',l:'Cantidad de servicios sanitarios',t:'n'},{k:'res',l:'¿Cómo manejan los residuos?',t:'a'},{k:'hig',l:'¿Cómo cuidan la higiene del local?',t:'a'}]},
+  {t:'Alimentos',f:[{k:'ali',l:'¿Manipulan alimentos?',t:'x',o:['Sí','No']},{k:'carne',l:'¿El personal tiene carné de manipulación de alimentos?',t:'x',o:['Sí','No','No aplica']},{k:'us',l:'Uso de suelo favorable adjunto',t:'x',o:['Sí','No']}]}]};
+GDOCS.legal_ccss={dept:'ger',legal:'CCSS',title:'Inscripción como patrono',
+ steps:['Esto se hace cuando contratan a la primera persona.','Escribe los datos de la empresa y la fecha del primer trabajador.','Anota a cada persona trabajadora con su salario bruto. El total mensual se suma solo.','Recuerden: cada mes se presenta la planilla y se pagan las cuotas.'],
+ ej:'Primer trabajador: 1 de noviembre · Persona: Luis Rojas · Puesto: vendedor · Salario: 350000',
+ secs:[{t:'Datos del patrono',f:[{k:'nombre',l:'Razón social',src:'name'},{k:'ced',l:'Cédula jurídica',src:'ced'},{k:'act',l:'Actividad',src:'act',t:'a'},{k:'dir',l:'Dirección',src:'dir',t:'a'},{k:'tel',l:'Teléfono',src:'tel'},{k:'mail',l:'Correo',src:'mail'},{k:'rep',l:'Representante legal'},{k:'prim',l:'Fecha del primer trabajador',t:'d'}]},
+  {t:'Personas trabajadoras',l:{k:'trab',add:'Agregar persona',sum:'sal',cols:[{k:'n',l:'Nombre completo'},{k:'ced',l:'Cédula'},{k:'pu',l:'Puesto'},{k:'ing',l:'Fecha de ingreso',t:'d'},{k:'sal',l:'Salario bruto mensual (₡)',t:'n'}]}},
+  {t:'Pago de cuotas',f:[{k:'fre',l:'¿Cuándo se presenta la planilla y se pagan las cuotas?',ph:'Ej.: cada mes'},{k:'res',l:'¿Quién se encarga en la empresa?'}]}]};
+GDOCS.legal_ins={dept:'ger',legal:'INS',title:'Póliza de riesgos del trabajo',
+ steps:['La póliza es obligatoria si la empresa tiene personas trabajadoras.','Escribe la actividad y cuántas personas cubre.','Anota la planilla mensual. La prima depende de la actividad y de esa planilla.','Anota la vigencia y quién reporta la planilla cada mes.'],
+ ej:'Personas cubiertas: 3 · Planilla mensual: 900000 · Prima estimada: 15000 · Vigencia: 1 año',
+ secs:[{t:'Datos del asegurado',f:[{k:'nombre',l:'Razón social',src:'name'},{k:'ced',l:'Cédula jurídica',src:'ced'},{k:'act',l:'Actividad',src:'act',t:'a'},{k:'dir',l:'Dirección',src:'dir',t:'a'},{k:'mail',l:'Correo',src:'mail'}]},
+  {t:'Póliza',f:[{k:'per',l:'Personas que cubre la póliza',t:'n'},{k:'plan',l:'Planilla mensual (₡)',t:'n'},{k:'pri',l:'Prima estimada (₡)',t:'n'},{k:'ini',l:'Inicio de vigencia',t:'d'},{k:'fin',l:'Fin de vigencia',t:'d'}]},
+  {t:'Control',f:[{k:'rep',l:'¿Quién reporta la planilla cada mes y quién paga?'},{k:'acc',l:'¿Qué hace la empresa si alguien sufre un accidente?',t:'a'}]}]};
+const legPct=()=>LEGAL.map(x=>gdPct(x.k));
+function gLegal(){const g=view.glg,x=LEGAL.find(i=>i.k===g);
+ const sim=`<div class="alert warn" role="note"><strong>${esc(LEG_SIM)}</strong> ${esc(LEG_NOTE)}</div>`;
+ if(x){const ico='<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" aria-hidden="true"><path d="M3 21h18M5 21V8l7-4 7 4v13M9 21v-6h6v6M9 11h.01M15 11h.01"/></svg>';
+  const hd=`<div class="btnrow" style="margin-bottom:12px"><button type="button" class="btn sec sm" data-lg="back">Volver a la lista de trámites</button><button type="button" class="btn sec sm" data-gdc="imp-legal" data-k="${x.k}">Traer datos de la portada</button></div><div style="display:flex;gap:12px;align-items:center;background:${x.c};color:#fff;border-radius:10px;padding:12px 16px;margin-bottom:12px">${ico}<div><strong style="font-size:1.05em">${esc(x.e)}</strong><div style="opacity:.9;font-size:.9em">${esc(x.n)} · Formulario de práctica</div></div></div>${sim}`;
+  return gdPage(x.k,hd,'')}
+ const pc=legPct(),done=pc.filter(p=>p>=80).length;
+ const rows=LEGAL.map((i,n)=>`<tr><td><strong>${esc(i.n)}</strong><span class="sub" style="display:block">${esc(i.h)}</span></td><td><span style="display:inline-block;border-left:6px solid ${i.c};padding-left:8px">${esc(i.e)}</span></td><td><span class="pill ${pc[n]>=80?'ok':pc[n]>0?'info':''}">${pc[n]} %</span></td><td><button type="button" class="btn sm" data-lg="open" data-v="${i.k}">Abrir</button></td></tr>`).join('');
+ return `<div class="card"><div class="head-row"><h2>Mi estructura legal</h2><span class="pill ${done===LEGAL.length?'ok':'info'}">${done} de ${LEGAL.length} trámites completos</span></div>
+ <p>Para crear una empresa en Costa Rica hay que pasar por varias instituciones. Aquí practican esos trámites en orden. Cada uno tiene un formulario de práctica y un PDF con la hoja membretada de su empresa.</p>${sim}
+ <div class="tscroll" style="margin-top:12px"><table class="mv" style="min-width:560px"><thead><tr><th>Trámite</th><th>Institución</th><th>Avance</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
+ <p class="hint" style="margin-top:10px">Cuando terminen un trámite, márquenlo como hecho en <em>Ficha y puesta en operación</em>. El orden recomendado es el de la lista: el uso de suelo y el permiso sanitario van antes de la patente.</p></div>`}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-lg]');if(!b)return;const a=b.dataset.lg;if(a==='open')view.glg=b.dataset.v;else if(a==='back')view.glg='';renderGer();const el=$('#dept-ger');if(el&&el.scrollIntoView)el.scrollIntoView({block:'start'})});
 function cafTotals(){const rows=gdRows('cafeteria','ventas'),t={total:0,n:0,unid:0,pago:{},prod:{}};
  rows.forEach(r=>{const v=r2(num(r.cant)*num(r.precio));if(!(v>0))return;t.total+=v;t.n++;t.unid+=num(r.cant);const pg=r.pago||'Sin indicar';t.pago[pg]=(t.pago[pg]||0)+v;const pn=String(r.prod||'').trim()||'Sin nombre';t.prod[pn]=(t.prod[pn]||0)+v});
  t.total=r2(t.total);return t}
@@ -2506,6 +2576,7 @@ function gdPct(k){const d=GDOCS[k];let t=0,n=0;d.secs.forEach(s=>{if(s.f)s.f.for
 function gdField(k,f){const v=gdR(k)[f.k]||'',id='gd-'+k+'-'+f.k,at=`id="${id}" data-gd="${k}|${f.k}"`;
  let inp;if(f.t==='a')inp=`<textarea ${at} maxlength="700" placeholder="${esc(f.ph||'')}">${esc(v)}</textarea>`;
  else if(f.t==='p')inp=`<select ${at}><option value="">— Elige —</option>${gOpts(prItems().map(i=>i.name),v)}</select>`;
+ else if(f.t==='x')inp=`<select ${at}><option value="">— Elige —</option>${gOpts(f.o,v)}</select>`;
  else inp=`<input ${at} type="${f.t==='d'?'date':f.t==='n'?'number':'text'}"${f.t==='n'?' class="mono" min="0" step="any"':' maxlength="120"'} placeholder="${esc(f.ph||'')}" value="${esc(v)}" autocomplete="off">`;
  return `<div class="field ${f.t==='a'?'wide':''}"><label for="${id}">${esc(f.l)}</label>${inp}</div>`}
 function gdCell(k,l,r,i,c){const at=`data-gd="${k}|${l.k}|${i}|${c.k}" aria-label="${esc(c.l)}"`,v=r[c.k]==null?'':r[c.k];
@@ -2535,6 +2606,7 @@ function gdBind(e){const t=e.target;if(!t.dataset||!t.dataset.gd)return;if(cloud
 document.addEventListener('input',gdBind);document.addEventListener('change',gdBind);
 const gdRender=k=>{const d=GDOCS[k].dept;if(d==='fin')renderFinGest();else if(d==='ger')renderGer();else if(d==='th')renderTh();else if(d==='mkt')renderMk();else renderPr()};
 function gdBuild(k){const st=gPdf();if(!st)return null;const d=GDOCS[k];st.head();st.title(d.title,S.company.name+' · '+gd(dayKey()));
+ if(d.legal){st.p(LEG_SIM.toUpperCase(),{b:1,s:9,c:[160,40,40],gap:1});st.kv('Institución',d.legal+' (formulario de práctica)')}
  if(gdR(k).resp)st.kv('Responsable',gdR(k).resp);st.y+=1;
  d.secs.forEach(s=>{st.h2(s.t);
   if(s.f)s.f.forEach(f=>{st.p(f.l,{b:1,s:9,c:PC.mut,gap:.4});st.p(String(gdR(k)[f.k]||'')||'-',{gap:3})});
@@ -2551,6 +2623,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-gdc]');if(
  const d=gdW(k),l=b.dataset.l;
  if(a==='add'){if(!Array.isArray(d[l]))d[l]=[];d[l].push({});save();gdRender(k);return}
  if(a==='rm'){if(Array.isArray(d[l]))d[l].splice(+b.dataset.i,1);save();gdRender(k);return}
+ if(a==='imp-legal'){let n=0;GDOCS[k].secs.forEach(sc=>(sc.f||[]).forEach(f=>{if(f.src&&!String(d[f.k]||'').trim()&&S.company[f.src]){d[f.k]=S.company[f.src];n++}}));save();gdRender(k);toast(n?'Traímos '+n+' dato(s) de la portada.':'No había datos nuevos para traer.');return}
  if(a==='imp-presup'){const src=gdRows('presup','meses');if(!Array.isArray(d[l]))d[l]=[];const have=d[l].map(r=>String(r.mes||'').trim().toLowerCase());let n=0;src.forEach(r=>{const mm=String(r.mes||'').trim();if(mm&&!have.includes(mm.toLowerCase())){d[l].push({mes:mm,cob:r.ventas||'',pag:r2(num(r.costo)+num(r.sal)+num(r.alq)+num(r.pub)+num(r.otros))||''});have.push(mm.toLowerCase());n++}});save();gdRender(k);toast(n?'Traímos '+n+' mes(es). Ajusta los cobros y pagos si no todo es de contado.':'No hay meses nuevos en el presupuesto.');return}
  if(a==='imp-manual'){if(!Array.isArray(d[l]))d[l]=[];const have=d[l].map(r=>String(r.puesto||'').trim().toLowerCase());let n=0;((S.th&&S.th.staff)||[]).forEach(s=>{if(s.puesto&&!have.includes(s.puesto.trim().toLowerCase())){d[l].push({puesto:s.puesto,area:DNAME[s.dept]||'',func:s.funciones||''});have.push(s.puesto.trim().toLowerCase());n++}});save();gdRender(k);toast(n?'Traímos '+n+' puesto(s).':'No hay puestos nuevos en Colaboradores.');return}
  if(a==='imp-pasos'){const it=prItems().find(x=>x.name===d.prod)||prItems()[0];if(!it){toast('Primero agrega tu producto en Producción, actividad 1.');return}
