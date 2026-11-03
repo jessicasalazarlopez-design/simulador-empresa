@@ -297,7 +297,7 @@ section[data-locked]{display:none!important}
       </div>
     </div>
     <p class="flag">Simulación educativa<br>No es dinero real ni tiene validez tributaria</p>
-    <p class="sub" id="verTag" style="position:absolute;right:16px;top:4px;font-size:11px;opacity:.7">Versión 29-oct-2026 (v15)</p>
+    <p class="sub" id="verTag" style="position:absolute;right:16px;top:4px;font-size:11px;opacity:.7">Versión 29-oct-2026 (v21)</p>
   </header>
   <div class="cloudbar" id="cloudBar" aria-live="polite"></div>
 
@@ -496,7 +496,7 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
 const TY={'01':{n:'Factura electrónica',s:'FE'},'03':{n:'Nota de crédito electrónica',s:'NC'},'04':{n:'Tiquete electrónico',s:'TE'}};
 const COND={'01':'Contado','02':'Crédito'};
 const PAGO={'01':'Efectivo','02':'Tarjeta','03':'Cheque','04':'Transferencia','05':'Recaudado por terceros'};
-const UNITS=[['Unid','Unidad'],['Sp','Servicios profesionales'],['Os','Otros servicios'],['h','Hora'],['kg','Kilogramo'],['m','Metro'],['l','Litro']];
+const UNITS=[['Unid','Unidad'],['Sp','Servicios profesionales'],['Os','Otros servicios'],['h','Hora'],['kg','Kilogramo'],['g','Gramo'],['m','Metro'],['l','Litro'],['ml','Mililitro']];
 const IVAS=[[13,'13% · General'],[4,'4% · Reducida'],[2,'2% · Reducida'],[1,'1% · Reducida'],[0,'0% · Exento']];
 const ID_RULES={'01':{n:'Cédula física',re:/^\d{9}$/,h:'9 dígitos'},'02':{n:'Cédula jurídica',re:/^\d{10}$/,h:'10 dígitos'},'03':{n:'DIMEX',re:/^\d{11,12}$/,h:'11 o 12 dígitos'},'04':{n:'NITE',re:/^\d{10}$/,h:'10 dígitos'},'05':{n:'Extranjero no domiciliado',re:/^[A-Za-z0-9]{1,20}$/,h:'hasta 20 letras o números'},'06':{n:'No contribuyente',re:/^[A-Za-z0-9]{1,20}$/,h:'hasta 20 letras o números'}};
 const SERVICES=[{id:'luz',n:'Electricidad (ejemplo)'},{id:'agua',n:'Agua potable (ejemplo)'},{id:'tel',n:'Teléfono e internet (ejemplo)'},{id:'muni',n:'Impuesto municipal (ejemplo)'}];
@@ -2484,9 +2484,9 @@ AREAS.forEach(a=>{GDOCS['plan_'+a[0]]={dept:a[0],title:'Plan del área: '+a[1],
   {t:'Actividades',l:{k:'acts',add:'Agregar actividad',cols:[{k:'a',l:'Actividad',t:'a'},{k:'r',l:'Responsable'},{k:'f',l:'Fecha',t:'d'},{k:'rec',l:'Recursos'}]}},
   {t:'Presupuesto y riesgos',f:[{k:'pres',l:'Presupuesto estimado (₡)',t:'n'},{k:'rie',l:'Riesgos y cómo los evitamos',t:'a'}]}]}});
 GDOCS.cafeteria={dept:'mkt',title:'Registrar ventas',
- steps:['Cada vez que venden algo, agrega una línea nueva.','Escribe la fecha, qué vendiste, cuántos y el precio de cada uno (con IVA incluido).','Elige cómo pagó el cliente y quién vendió. El total sale solo.','Al final del día mira el resumen de ingresos y escribe tus observaciones.'],
+ steps:['Cada vez que venden algo, agrega una línea nueva.','Escribe la fecha, qué vendiste, cuántos y el precio de cada uno (con IVA incluido).','Elige cómo pagó el cliente y quién vendió. El total sale solo.','Si el cliente pagó al momento (efectivo, SINPE Móvil, tarjeta o transferencia), presiona "Ingresar al banco" en la sección "Enviar las ventas".','Si el cliente pidió factura a crédito, escribe su nombre en "Cliente" y presiona "Enviar a Contabilidad". Contabilidad la emite y registra el cobro.','Al final del día mira el resumen de ingresos y escribe tus observaciones.'],
  ej:'Fecha: 27/10 · Producto: Empanada de queso · Cantidad: 3 · Precio: ₡1 500 · Pago: Efectivo · Total: ₡4 500',
- secs:[{t:'Ventas registradas',l:{k:'ventas',add:'Agregar venta',cols:[{k:'fecha',l:'Fecha',t:'d'},{k:'prod',l:'Producto vendido'},{k:'cant',l:'Cantidad',t:'n'},{k:'precio',l:'Precio de cada uno (₡)',t:'n'},{k:'pago',l:'Forma de pago',t:'s',o:['Efectivo','SINPE Móvil','Tarjeta','Transferencia']},{k:'tot',l:'Total (₡)',t:'c',c:(r)=>fmt(r2(num(r.cant)*num(r.precio)))},{k:'quien',l:'Quién vendió'}]}},
+ secs:[{t:'Ventas registradas',l:{k:'ventas',add:'Agregar venta',cols:[{k:'fecha',l:'Fecha',t:'d'},{k:'prod',l:'Producto vendido'},{k:'cant',l:'Cantidad',t:'n'},{k:'precio',l:'Precio de cada uno (₡)',t:'n'},{k:'pago',l:'Forma de pago',t:'s',o:['Efectivo','SINPE Móvil','Tarjeta','Transferencia','Factura a crédito']},{k:'cli',l:'Cliente (si pide factura)'},{k:'tot',l:'Total (₡)',t:'c',c:(r)=>fmt(r2(num(r.cant)*num(r.precio)))},{k:'quien',l:'Quién vendió'},{k:'est',l:'Estado',t:'c',c:r=>cafEst(r)}]}},
   {t:'Cierre del día',f:[{k:'obs',l:'Observaciones: ¿qué se vendió más? ¿Qué faltó? ¿Qué mejoramos?',t:'a'}]}]};
 /* ---- Mi estructura legal: formularios simulados (práctica escolar, no oficiales) ---- */
 const LEGAL=[
@@ -2498,6 +2498,19 @@ const LEGAL=[
  {k:'legal_pat',n:'6. Solicitud de patente comercial',e:'Municipalidad',c:'#9a6a2f',h:'Es el permiso de la municipalidad para vender o dar el servicio. Va después del uso de suelo y del permiso sanitario.'},
  {k:'legal_ccss',n:'7. Inscripción como patrono',e:'CCSS',c:'#a03d3d',h:'Se hace al contratar a la primera persona. Se pagan cuotas cada mes.'},
  {k:'legal_ins',n:'8. Solicitud de seguro de riesgos del trabajo',e:'INS',c:'#555f6e',h:'Protege a las personas trabajadoras si sufren un accidente en el trabajo.'}];
+const LEG_ICO={
+ legal_not:'<path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 12h7M9 15.5h5"/><circle cx="14.5" cy="18.5" r="1.6"/>',
+ legal_rn:'<path d="M12 3v18M7 21h10M4 7h16"/><path d="M4 7l-2.5 6a2.8 2.8 0 0 0 5 0zM20 7l-2.5 6a2.8 2.8 0 0 0 5 0z"/>',
+ legal_hac:'<path d="M3 10l9-6 9 6M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 21h18"/>',
+ legal_suelo:'<path d="M12 21s-6-5.5-6-11a6 6 0 0 1 12 0c0 5.5-6 11-6 11z"/><circle cx="12" cy="10" r="2.2"/>',
+ legal_sal:'<path d="M10 4h4v6h6v4h-6v6h-4v-6H4v-4h6z"/>',
+ legal_pat:'<path d="M4 9l1.5-5h13L20 9M4 9v11h16V9M4 9c0 2 3 2 4 0 1 2 3 2 4 0 1 2 3 2 4 0 1 2 4 2 4 0M9.5 20v-5.5h5V20"/>',
+ legal_ccss:'<circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6"/><circle cx="17" cy="9" r="2.4"/><path d="M16.5 14.3c2.9 0 4.8 2 4.8 5"/>',
+ legal_ins:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2.2 2.2L15.5 10"/>'};
+const legSvg=(k,sz)=>`<svg width="${sz}" height="${sz}" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${LEG_ICO[k]||''}</svg>`;
+function legPng(){LEGAL.forEach(i=>{try{const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 24 24"><rect width="24" height="24" rx="5" fill="${i.c}"/><g transform="translate(3.6 3.6) scale(.7)" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${LEG_ICO[i.k]}</g></svg>`;
+ const im=new Image();im.onload=()=>{try{const c=document.createElement('canvas');c.width=c.height=96;c.getContext('2d').drawImage(im,0,0,96,96);i.png=c.toDataURL('image/png')}catch(e){}};im.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg)}catch(e){}})}
+legPng();
 const LEG_SIM='Simulación educativa. Es una práctica escolar y no es un documento oficial.';
 const LEG_NOTE='Los campos siguen los de los formularios reales de cada institución. El formulario oficial siempre se descarga de su página.';
 const FP={k:'fecha',l:'Fecha',t:'d'},SN=['Sí','No'];
@@ -2508,13 +2521,22 @@ GDOCS.legal_not={dept:'legal',legal:'Notario público',title:'Escritura de const
   {t:'Socios y aportes',l:{k:'socios',add:'Agregar socio',sum:'ap',cols:[{k:'n',l:'Nombre completo'},{k:'ced',l:'Cédula'},{k:'nac',l:'Nacionalidad'},{k:'prof',l:'Profesión u oficio'},{k:'ap',l:'Aporte (₡)',t:'n'}]}},
   {t:'Administración',f:[{k:'rep',l:'Persona representante legal'},{k:'repced',l:'Cédula de la persona representante'},{k:'puesto',l:'Puesto',t:'x',o:['Gerente','Presidente','Apoderado generalísimo']},{k:'fac',l:'¿Qué puede hacer esta persona en nombre de la empresa?',t:'a'},{k:'mail',l:'Correo electrónico oficial de la sociedad',src:'mail'}]},
   {t:'Notario',f:[{k:'not',l:'Nombre de la persona notaria (inventado)'},{k:'carne',l:'Carné (inventado)'},FP]}]};
-GDOCS.legal_rn={dept:'legal',legal:'Registro Nacional',title:'Solicitud de asignación de cédula jurídica',
- steps:['Escribe quién firma la solicitud, su identificación y en qué calidad actúa (por ejemplo, representante legal).','Anota el nombre completo de la entidad y, si ya la tiene, su cédula jurídica.','Escribe el correo para recibir notificaciones.','Anota el pago del arancel registral y quién autentica la firma (notario).','Al final anota las personas dueñas reales de la empresa (beneficiarios finales).'],
- ej:'Firma: Ana Mora · Calidad: representante legal · Entidad: Panadería La Espiga S.A. · Arancel: ₡2 000',
- secs:[{t:'Quien suscribe la solicitud',f:[FP,{k:'quien',l:'Nombre de quien suscribe'},{k:'doc',l:'N.º de documento de identidad'},{k:'cal',l:'En calidad de',ph:'Ej.: representante legal'}]},
-  {t:'Entidad que solicita la cédula',f:[{k:'ent',l:'Nombre completo de la entidad',src:'name',t:'a'},{k:'ced',l:'Cédula jurídica (si ya la tiene)',src:'ced'},{k:'mail',l:'Correo electrónico para notificaciones',src:'mail'}]},
-  {t:'Arancel y autenticación',f:[{k:'ar',l:'Arancel registral pagado (₡)',t:'n'},{k:'not',l:'Nombre de la persona notaria que autentica la firma (inventado)'},{k:'carne',l:'Carné (inventado)'}]},
-  {t:'Beneficiarios finales: ¿quiénes son las personas dueñas?',l:{k:'bf',add:'Agregar persona',cols:[{k:'n',l:'Nombre completo'},{k:'ced',l:'Cédula'},{k:'p',l:'% de participación',t:'n'},{k:'ctrl',l:'Tipo de control',t:'s',o:['Propiedad directa','Propiedad indirecta','Control por otros medios']}]}}]};
+GDOCS.legal_rn={dept:'legal',legal:'Registro Nacional',title:'Solicitud de asignación de cédula jurídica',pdfSkip:3,sign:[['quien','Firma de quien suscribe']],
+ steps:['Escribe la fecha y los datos de quien firma la solicitud: nombre, número de identificación y en qué calidad actúa (por ejemplo, representante legal).','Si quien firma representa a una entidad que ya existe, anota su nombre y su cédula jurídica. Si no, déjalo en blanco.','Escribe el nombre completo de la entidad a la que quieren que se le asigne la cédula jurídica y un correo para recibir notificaciones.','Anota el pago del arancel registral. En la vida real son ₡2 000.','Escribe quién autentica la firma (notario o notaria, puede ser inventado).','Anota las personas dueñas reales de la empresa (beneficiarios finales) y revisa los requisitos antes de entregar.'],
+ ej:'Quien firma: Ana Mora · Calidad: representante legal · Entidad: Panadería La Espiga S.A. · Arancel: ₡2 000',
+ secs:[{t:'1. Quien suscribe la solicitud',f:[FP,{k:'quien',l:'Nombre completo de quien suscribe'},{k:'doc',l:'N.º de documento de identidad'},{k:'cal',l:'En calidad de',ph:'Ej.: representante legal'},{k:'repr',l:'Entidad que representa (si ya existe)'},{k:'rced',l:'Cédula jurídica de esa entidad (si tiene)'}]},
+  {t:'2. Entidad a la que se le asigna la cédula jurídica',f:[{k:'ent',l:'Nombre completo de la entidad',src:'name',t:'a'},{k:'mail',l:'Correo electrónico para notificaciones',src:'mail'}]},
+  {t:'3. Arancel y autenticación de la firma',f:[{k:'ar',l:'Arancel registral pagado (₡)',t:'n'},{k:'not',l:'Nombre de la persona notaria que autentica (inventado)'},{k:'carne',l:'Carné del notario o notaria (inventado)'}]},
+  {t:'Beneficiarios finales: ¿quiénes son las personas dueñas?',l:{k:'bf',add:'Agregar persona',cols:[{k:'n',l:'Nombre completo'},{k:'ced',l:'Cédula'},{k:'p',l:'% de participación',t:'n'},{k:'ctrl',l:'Tipo de control',t:'s',o:['Propiedad directa','Propiedad indirecta','Control por otros medios']}]}},
+  {t:'Requisitos antes de entregar',f:[{k:'q1',l:'Nombre completo y cédula jurídica de la entidad (si ya tiene) y calidades completas de quien representa',t:'x',o:SN},{k:'q2',l:'Comprobante del pago del arancel registral',t:'x',o:SN},{k:'q3',l:'Firma autenticada por notario',t:'x',o:SN}]}],
+ pre:(st,r)=>{const v=(x,l)=>String(x||'').trim()||('['+l+']');
+  st.h2('Solicitud');
+  st.p('Fecha: '+(r.fecha?gd(r.fecha):'[fecha]'),{gap:2});
+  st.p('Quien suscribe '+v(r.quien,'nombre')+', con documento de identidad '+v(r.doc,'número')+', en mi calidad de '+v(r.cal,'calidad')+(String(r.repr||'').trim()?', de la entidad denominada '+r.repr.trim()+(String(r.rced||'').trim()?', con cédula jurídica '+r.rced.trim():''):'')+', solicito al Registro de Personas Jurídicas que se asigne el número de cédula jurídica a la siguiente entidad, denominada '+v(r.ent,'nombre de la entidad').replace(/\.$/,'')+'.',{gap:3});
+  st.p('Señalo como medio para atender notificaciones el siguiente correo electrónico: '+v(r.mail,'correo')+'.',{gap:3});
+  st.p('Se aporta el pago del arancel registral por '+(num(r.ar)>0?fmt(num(r.ar)):'[monto]')+'.',{gap:3});
+  st.p('En fe de lo anterior firmo.',{gap:2});
+  st.kv('Autenticación de la firma','Notario o notaria: '+v(r.not,'nombre')+' · Carné: '+v(r.carne,'carné'))}};
 GDOCS.legal_hac={dept:'legal',legal:'Ministerio de Hacienda',title:'Inscripción en el Registro Único Tributario (D-140)',
  steps:['Presiona "Traer datos de la portada".','Completa las 7 partes en orden: identificación, contacto, domicilio fiscal, actividad económica, actividad secundaria, establecimiento y representación legal.','Busca el código de actividad (CIIU 4) en el catálogo de Hacienda.','Revisa los documentos que lleva la persona que hace el trámite.'],
  ej:'Persona jurídica · Actividad: venta de comidas · Medio: presencial · Establecimiento principal',
@@ -2570,7 +2592,7 @@ const LEG_DEF={legal_not:'ger',legal_rn:'ger',legal_hac:'fin',legal_suelo:'ger',
 const legAsig=k=>{const a=gdR('legal_asig')[k];return DNAME[a]?a:(LEG_DEF[k]||'ger')};
 function gLegal(){const g=view.glg,x=LEGAL.find(i=>i.k===g);
  const sim=`<div class="alert warn" role="note"><strong>${esc(LEG_SIM)}</strong> ${esc(LEG_NOTE)}</div>`;
- if(x){const ico='<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" aria-hidden="true"><path d="M3 21h18M5 21V8l7-4 7 4v13M9 21v-6h6v6M9 11h.01M15 11h.01"/></svg>';
+ if(x){const ico=legSvg(x.k,30);
   const hd=`<div class="btnrow" style="margin-bottom:12px"><button type="button" class="btn sec sm" data-lg="back">Volver a la lista de trámites</button><button type="button" class="btn sec sm" data-gdc="imp-legal" data-k="${x.k}">Traer datos de la portada</button></div><div style="display:flex;gap:12px;align-items:center;background:${x.c};color:#fff;border-radius:10px;padding:12px 16px;margin-bottom:12px">${ico}<div><strong style="font-size:1.05em">${esc(x.e)}</strong><div style="opacity:.9;font-size:.9em">${esc(x.n)} · Formulario de práctica</div></div></div><p class="hint" style="margin-bottom:10px"><strong>Departamento responsable:</strong> ${esc(DNAME[legAsig(x.k)])}</p>${sim}`;
   return gdPage(x.k,hd,'')}
  const f=view.glf||'',pc=LEGAL.map(i=>gdPct(i.k)),done=pc.filter(p=>p>=80).length,mine=LEGAL.filter(i=>!f||legAsig(i.k)===f);
@@ -2584,13 +2606,29 @@ function gLegal(){const g=view.glg,x=LEGAL.find(i=>i.k===g);
 function renderLegal(){const el=$('#dept-legal');if(!el)return;el.className='v-ger';el.innerHTML=gLegal()}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-lg]');if(!b)return;const a=b.dataset.lg;if(a==='open')view.glg=b.dataset.v;else if(a==='back')view.glg='';else if(a==='flt')view.glf=b.dataset.v;renderLegal();window.scrollTo({top:0})});
 document.addEventListener('change',e=>{const t=e.target;if(!t.dataset||!t.dataset.la||cloud.ro)return;gdW('legal_asig')[t.dataset.la]=t.value;save();renderLegal()});
+const cafEst=r=>r.banco?'En el banco':r.fact?'Enviada a Contabilidad':'Pendiente';
+const cafTot=r=>r2(num(r.cant)*num(r.precio));
+function cafEnviarInner(){const rows=gdRows('cafeteria','ventas'),pend=rows.map((r,i)=>({r,i})).filter(x=>cafTot(x.r)>0);
+ const body=pend.map(({r,i})=>{const cred=r.pago==='Factura a crédito',done=r.banco||r.fact;
+  return `<tr><td>${esc(r.fecha?gd(r.fecha):'-')}</td><td>${esc(r.prod||'-')}</td><td class="r">${fmt(cafTot(r))}</td><td>${esc(r.pago||'Sin indicar')}</td><td>${esc(cafEst(r))}</td><td>${done?'':cred?`<button type="button" class="btn sm" data-caf="fact" data-i="${i}">Enviar a Contabilidad</button>`:`<button type="button" class="btn sm" data-caf="bank" data-i="${i}">Ingresar al banco</button>`}</td></tr>`}).join('');
+ return `<h3>Enviar las ventas</h3><p class="hint" style="margin-bottom:12px">Las ventas pagadas al momento se ingresan al banco. Las ventas con factura a crédito se envían a Contabilidad para que las facture y cobre.</p>`+(body?`<div class="tscroll"><table class="mv" style="min-width:560px"><thead><tr><th>Fecha</th><th>Producto</th><th class="r">Total</th><th>Forma de pago</th><th>Estado</th><th></th></tr></thead><tbody>${body}</tbody></table></div>`:'<p class="hint">Cuando anoten una venta con cantidad y precio, aparece aquí.</p>')}
+function cafAccion(kind,i){if(cloud.ro){toast('Vista de docente: solo lectura.');return}
+ const rows=gdRows('cafeteria','ventas'),r=rows[i];if(!r||r.banco||r.fact)return;const t=cafTot(r);
+ if(!(t>0)){toast('Escribe la cantidad y el precio de la venta.');return}
+ if(kind==='bank'){const acc=S.accounts[0];addMove(acc,'Venta · '+(String(r.prod||'').trim()||'sin nombre')+' x'+r.cant+' · '+(r.pago||'pago al momento'),0,t,'VTA'+S.nextId++);r.banco=true;save();
+  try{renderAccts();renderMoves();renderAcct()}catch(e){}gdRender('cafeteria');toast('Ingresado al banco: '+fmt(t)+'.');return}
+ const dr=S.draft;if(dr&&(dr.rec.name||dr.lines.some(l=>l.det||l.price))){toast('Contabilidad tiene una factura en borrador. Esperen a que la emita y vuelvan a intentar.');return}
+ const base=r2(num(r.precio)/1.13);
+ S.draft={type:'01',rec:{name:String(r.cli||'').trim(),idType:'02',id:'',mail:''},cond:'02',plazo:'30',pago:'04',obs:'Venta registrada por Marketing y ventas',lines:[{det:String(r.prod||'').trim()||'Venta',code:'',qty:num(r.cant),unit:'Unid',price:base,disc:0,iva:13}]};
+ r.fact=true;save();try{renderTaxForm();renderPreview()}catch(e){}gdRender('cafeteria');toast('Enviada a Contabilidad. Aparece como borrador en Factura electrónica.')}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-caf]');if(b)cafAccion(b.dataset.caf,+b.dataset.i)});
 function cafTotals(){const rows=gdRows('cafeteria','ventas'),t={total:0,n:0,unid:0,pago:{},prod:{}};
  rows.forEach(r=>{const v=r2(num(r.cant)*num(r.precio));if(!(v>0))return;t.total+=v;t.n++;t.unid+=num(r.cant);const pg=r.pago||'Sin indicar';t.pago[pg]=(t.pago[pg]||0)+v;const pn=String(r.prod||'').trim()||'Sin nombre';t.prod[pn]=(t.prod[pn]||0)+v});
  t.total=r2(t.total);return t}
 function cafResumenInner(){const t=cafTotals(),tile=(l,v)=>`<div class="tile"><span class="sub">${l}</span><strong>${v}</strong></div>`,
   pg=Object.keys(t.pago).map(k=>`<tr><td>${esc(k)}</td><td class="r">${fmt(r2(t.pago[k]))}</td></tr>`).join(''),
   pr=Object.keys(t.prod).sort((a,b)=>t.prod[b]-t.prod[a]).slice(0,5).map(k=>`<tr><td>${esc(k)}</td><td class="r">${fmt(r2(t.prod[k]))}</td></tr>`).join('');
- return `<h3>Resumen de ventas</h3><p class="hint" style="margin-bottom:12px">Se calcula solo con las ventas de la tabla de arriba.</p>
+ return `${cafEnviarInner()}<div style="height:20px"></div><h3>Resumen de ventas</h3><p class="hint" style="margin-bottom:12px">Se calcula solo con las ventas de la tabla de arriba.</p>
  <div class="tiles">${tile('Total vendido',fmt(t.total))}${tile('Ventas anotadas',String(t.n))}${tile('Unidades vendidas',String(t.unid))}${tile('Venta promedio',fmt(t.n?r2(t.total/t.n):0))}</div>
  <div class="cols" style="margin-top:12px"><div class="card"><h3 style="margin-bottom:8px">Por forma de pago</h3>${pg?`<table class="mv" style="min-width:0"><tbody>${pg}</tbody></table>`:'<p class="hint">Aún no hay ventas.</p>'}</div>
  <div class="card"><h3 style="margin-bottom:8px">Lo que más se vende</h3>${pr?`<table class="mv" style="min-width:0"><tbody>${pr}</tbody></table>`:'<p class="hint">Aún no hay ventas.</p>'}</div></div>`}
@@ -2625,7 +2663,7 @@ function gdPage(k,before,after){const d=GDOCS[k],p=gdPct(k);
  ${d.secs.map(s=>`<section class="gdsec"><h3>${esc(s.t)}</h3>${s.f?`<div class="grid">${s.f.map(f=>gdField(k,f)).join('')}</div>`:''}${s.l?gdList(k,s.l):''}</section>`).join('')}${after||''}</div>`}
 function gdUpdate(k){document.querySelectorAll('[data-gdcalc^="'+k+'|"]').forEach(td=>{const q=td.dataset.gdcalc.split('|'),l=GDOCS[k].secs.map(s=>s.l).find(x=>x&&x.k===q[1]),r=gdRows(k,q[1])[+q[2]],c=l&&l.cols.find(x=>x.k===q[3]);if(r&&c)td.textContent=c.c(r,c,gdRows(k,q[1]),+q[2])});
  if(k==='presup'){const e=document.getElementById('presupRes');if(e)e.innerHTML=presupResumenInner()}
- if(k==='cafeteria'){const e=document.getElementById('cafRes');if(e)e.innerHTML=cafResumenInner()}
+ if(k==='cafeteria'){const e=document.getElementById('cafRes');if(e){const h=cafResumenInner();if(e.dataset.h!==h){e.innerHTML=h;e.dataset.h=h}}}
  document.querySelectorAll('[data-gdsum^="'+k+'|"]').forEach(b=>{const q=b.dataset.gdsum.split('|'),l=GDOCS[k].secs.map(s=>s.l).find(x=>x&&x.k===q[1]);if(l)b.textContent=gdSum(k,l)});
  const pp=document.querySelector('[data-gdpct="'+k+'"]');if(pp){const p=gdPct(k);pp.textContent=p+' % completo';pp.className='pill '+(p>=80?'ok':p>0?'info':'')}}
 function gdBind(e){const t=e.target;if(!t.dataset||!t.dataset.gd)return;if(cloud.ro)return;const q=t.dataset.gd.split('|'),k=q[0];if(!GDOCS[k])return;const d=gdW(k);
@@ -2633,11 +2671,21 @@ function gdBind(e){const t=e.target;if(!t.dataset||!t.dataset.gd)return;if(cloud
  save();gdUpdate(k)}
 document.addEventListener('input',gdBind);document.addEventListener('change',gdBind);
 const gdRender=k=>{const d=GDOCS[k].dept;if(d==='fin')renderFinGest();else if(d==='ger')renderGer();else if(d==='legal')renderLegal();else if(d==='th')renderTh();else if(d==='mkt')renderMk();else renderPr()};
+function legFields(st,k,fields){const doc=st.doc,M=st.M,half=(216-2*M)/2-4,r=gdR(k);
+ const val=f=>{const v=r[f.k];if(v==null||String(v).trim()==='')return '-';return f.t==='d'?gd(v):String(v)};
+ const meas=(f,w)=>{pfnt(doc,'bold',8.2,PC.mut);const a=doc.splitTextToSize(pdfSafe(f.l),w);pfnt(doc,'normal',9.6,PC.ink);const b=doc.splitTextToSize(pdfSafe(val(f)),w);return{a,b}};
+ const draw=(m,x,y)=>{pfnt(doc,'bold',8.2,PC.mut);doc.text(m.a,x,y);pfnt(doc,'normal',9.6,PC.ink);doc.text(m.b,x,y+m.a.length*3.5+0.6)};
+ const hh=m=>m.a.length*3.5+m.b.length*4.3+2.2;
+ for(let i=0;i<fields.length;i++){const f=fields[i],g=fields[i+1];
+  if(f.t==='a'||!g||g.t==='a'){const m=meas(f,216-2*M);st.need(hh(m)+2);draw(m,M,st.y);st.y+=hh(m)+1.5}
+  else{const m1=meas(f,half),m2=meas(g,half),h=Math.max(hh(m1),hh(m2));st.need(h+2);draw(m1,M,st.y);draw(m2,M+half+8,st.y);st.y+=h+1.5;i++}}
+ st.y+=1}
 function gdBuild(k){const st=gPdf();if(!st)return null;const d=GDOCS[k];st.head();st.title(d.title,S.company.name+' · '+gd(dayKey()));
- if(d.legal){st.p(LEG_SIM.toUpperCase(),{b:1,s:9,c:[160,40,40],gap:1});st.kv('Institución',d.legal+' (formulario de práctica)')}
+ if(d.legal){st.p(LEG_SIM.toUpperCase(),{b:1,s:9,c:[160,40,40],gap:1});st.kv('Institución',d.legal+' (formulario de práctica)');{const it=LEGAL.find(z=>z.k===k);if(it&&it.png){try{st.doc.addImage(it.png,'PNG',st.W-st.M-13,st.y-15,12,12)}catch(e){}}}}
  if(gdR(k).resp)st.kv('Responsable',gdR(k).resp);st.y+=1;
- d.secs.forEach(s=>{st.h2(s.t);
-  if(s.f)s.f.forEach(f=>{st.p(f.l,{b:1,s:9,c:PC.mut,gap:.4});st.p(String(gdR(k)[f.k]||'')||'-',{gap:3})});
+ if(d.pre)d.pre(st,gdR(k));
+ d.secs.slice(d.pdfSkip||0).forEach(s=>{st.h2(s.t);
+  if(s.f){if(d.legal&&k!=='legal_rn')legFields(st,k,s.f);else s.f.forEach(f=>{st.p(f.l,{b:1,s:9,c:PC.mut,gap:.4});st.p(String(gdR(k)[f.k]||'')||'-',{gap:3})})}
   if(s.l){const l=s.l,rows=gdRows(k,l.k),wt=c=>c.t==='a'?2.2:c.t==='n'||c.t==='c'||c.t==='d'?.9:1.3,cols=l.cols.slice(),tot=cols.reduce((a,c)=>a+wt(c),0)+(l.num?.5:0),sc=180/tot;
    const defs=(l.num?[{h:'N.º',w:.5*sc}]:[]).concat(cols.map(c=>({h:c.l,w:wt(c)*sc,a:c.t==='n'||c.t==='c'?'r':undefined})));
    const data=rows.map((r,i)=>(l.num?[String(i+1)]:[]).concat(cols.map(c=>c.t==='c'?c.c(r,c,rows,i):c.t==='d'?gd(r[c.k]):String(r[c.k]==null?'':r[c.k]))));
@@ -2909,7 +2957,7 @@ function onRemote(snap){
     if(!cloud.ro&&getV(S,k)!==undefined&&enc(k)!==cloud.last[k])return;
     let v;try{v=JSON.parse(raw)}catch(e){return}
     setV(S,k,v);cloud.last[k]=raw;changed=true});
-  if(changed){const ch=Object.keys(d).filter(f=>f.slice(0,2)==='k_'&&SPLIT.indexOf(f.slice(2))<0).length;try{const now=Date.now();if(!cloud.ro&&now-(cloud.lastNote||0)>6000){cloud.lastNote=now;toast('Llegaron cambios de otra computadora del equipo.')}}catch(e){}normalizeS();if(!cloud.ro)lsSet(KEY+':'+cloud.code,JSON.stringify(S));scheduleRender();if(!cloud.ro)cloudPush()}
+  if(changed){const ch=Object.keys(d).filter(f=>f.slice(0,2)==='k_'&&SPLIT.indexOf(f.slice(2))<0).length;normalizeS();if(!cloud.ro)lsSet(KEY+':'+cloud.code,JSON.stringify(S));scheduleRender();if(!cloud.ro)cloudPush()}
   if(cloud.status==='err'||cloud.status==='busy'&&!isDirty())setStatus('ok')}
 function applyFull(d){
   const n=defaults();n.draft=(S&&S.draft)||n.draft;cloud.last={};
