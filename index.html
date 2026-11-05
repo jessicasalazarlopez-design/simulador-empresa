@@ -101,6 +101,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 
 .alert{--c:var(--muted);border:1px solid color-mix(in srgb,var(--c) 55%,transparent);background:color-mix(in srgb,var(--c) 10%,transparent);border-radius:var(--r);padding:12px 14px;margin-bottom:16px}
 .alert.bad{--c:var(--bad)} .alert.ok{--c:var(--ok)} .alert.warn{--c:var(--warn)}
+.alert.info{--c:var(--accent)} .alert.dep{margin:0 0 14px;font-size:.95rem} .alert.dep ul{margin:6px 0 0;padding-left:18px} .alert.dep li{margin:3px 0}
 .alert ul,.alert ol{margin:6px 0 0;padding-left:20px}
 .pill{--c:var(--muted);display:inline-flex;align-items:center;padding:1px 10px;border-radius:999px;font:700 .76rem/1.6 var(--f-body);color:var(--c);border:1px solid color-mix(in srgb,var(--c) 55%,transparent);background:color-mix(in srgb,var(--c) 12%,transparent);white-space:nowrap}
 .pill.ok{--c:var(--ok)} .pill.warn{--c:var(--warn)} .pill.bad{--c:var(--bad)} .pill.info{--c:var(--accent)}
@@ -387,6 +388,7 @@ section[data-locked]{display:none!important}
   </div>
 
   <main>
+    <div id="depFin"></div>
     <section id="v-acts" class="v-acct" role="tabpanel" aria-labelledby="tab-acts"><div id="finActs"></div></section>
     <section id="v-bank" class="v-bank" role="tabpanel" aria-labelledby="tab-bank" hidden>
       <details class="tip">
@@ -907,7 +909,7 @@ function notaCredito(id){const o=S.invoices.find(x=>x.id===id);if(!o||o.type==='
   toast(o.paid?'Nota de crédito emitida. Si ya cobraste, devuelve el dinero con una transferencia.':'Nota de crédito emitida. La factura quedó anulada.')}
 
 /* ---------- Eventos ---------- */
-function setTab(t){view.tab=t;if(['presup','pol','plan','neg'].indexOf(t)>=0)renderFinGest();if(t==='acts')renderFinActs();['acts','bank','tax','acct','presup','pol','plan','neg'].forEach(k=>{$('#v-'+k).hidden=k!==t;$('#tab-'+k).setAttribute('aria-selected',String(k===t))})}
+function setTab(t){view.tab=t;if(['presup','pol','plan','neg'].indexOf(t)>=0)renderFinGest();if(t==='acts')renderFinActs();['acts','bank','tax','acct','presup','pol','plan','neg'].forEach(k=>{$('#v-'+k).hidden=k!==t;$('#tab-'+k).setAttribute('aria-selected',String(k===t))});renderDepFin()}
 document.addEventListener('change',e=>{const t=e.target;if(t&&t.id==='ac-prov'){const c=S.contacts[+t.value];readPF();if(t.value!==''&&c)Object.assign(view.pf,{name:c.name,ced:c.ced||'',iban:fmtIban(c.iban)});else Object.assign(view.pf,{name:'',ced:'',iban:''});renderAcct()}});
 document.addEventListener('click',e=>{
   const tabBtn=e.target.closest('[data-tab]');if(tabBtn){setTab(tabBtn.dataset.tab);return}
@@ -1129,7 +1131,7 @@ function acDiario(){const E=journal();let n=0;
 const ACNAV=[['compras','Compras y gastos'],['iva','IVA e impuestos'],['diario','Libro diario']];
 function renderAcct(){const nav=$('#acctNav'),body=$('#acctBody');if(!nav||!body)return;
   nav.innerHTML=ACNAV.map(n=>`<button type="button" data-act="ac-nav" data-v="${n[0]}" aria-pressed="${view.ac===n[0]}">${n[1]}</button>`).join('');
-  body.innerHTML=({compras:acCompras,iva:acIva,diario:acDiario}[view.ac]||acCompras)()}
+  body.innerHTML=({compras:acCompras,iva:acIva,diario:acDiario}[view.ac]||acCompras)();renderDepFin()}
 
 /*PDFSTART*/
 const PC={ink:[21,33,46],mut:[86,102,119],acc:[10,106,98]};
@@ -1332,6 +1334,66 @@ function gRoot(p){if(p.startsWith('f.'))return[view.gform,p.slice(2)];if(p.start
 function gSet(p,v){const r=gRoot(p),ks=r[1].split('.'),last=ks.pop();const o=ks.reduce((a,b)=>a[b],r[0]);o[last]=v}
 const gPersist=p=>!/^[foac]\./.test(p);
 const DNAME={ger:'Gerencia',mkt:'Marketing y ventas',th:'Talento Humano',prod:'Producción',fin:'Contabilidad y finanzas'};
+
+/* ===== Avisos de dependencia: qué viene de otra área o de un paso anterior (solo informan, no bloquean) ===== */
+const DEP_PROV=[['Se usa después en','La factura queda por pagar en Contabilidad y finanzas, que es quien la paga.']];
+const DEP_NEG=[['Con otra empresa','Pónganse de acuerdo con la otra empresa del grupo (producto, precio y plazo) antes de firmar el contrato.']];
+const DEPS={
+ ger:{
+  ficha:[['Necesitas antes','Los datos de la empresa de la Portada (nombre, cédula, teléfono y correo).'],['Se usa después en','Compras del Estado: para ofertar deben estar marcados "Empresa registrada", "Inscrita en Hacienda" y "Inscrita como patrono en la CCSS".']],
+  org:[['Necesitas antes','Acordar en el equipo quién es la persona responsable de cada departamento.'],['Se usa después en','Cada departamento muestra ese nombre como "Responsable del departamento".']],
+  kpi:[['Viene de otras áreas','Las métricas automáticas (ventas, compras, bancos y producción) salen de lo que hagan Marketing y ventas, Producción y Contabilidad. Úsalas en la columna "Lo actual".']],
+  areas:[['Viene de otras áreas','Revisa el plan de área de los otros departamentos para que las metas de Gerencia sean coherentes con las de ellos.']],
+  tab:[['Viene de otras áreas','Se llena solo con el trabajo de los demás: facturas y bancos (Contabilidad), ventas (Marketing y ventas), producción y órdenes (Producción) y trámites (Gerencia). Si ves vacío, falta que esos departamentos registren su trabajo.']],
+  estado:[['Necesitas antes','Ficha y puesta en operación: empresa registrada, Hacienda y CCSS marcados como hechos.'],['Viene de otras áreas','El costo de tu producto (Producción, Costos) para saber si ganas o pierdes con tu precio.']],
+  actas:[['Viene de otras áreas','El dato que apoya la decisión sale de las alertas y métricas del Centro de operaciones, que dependen de lo que hicieron los demás departamentos.']],
+  ase:[['Antes de la reunión','Escriban las preguntas más importantes, con datos de su empresa de otros departamentos si los necesitan.']],
+  riesgos:[['Viene de otras áreas','Cada departamento conoce sus propios riesgos (compras, producción, personal, dinero). Pide a cada responsable que aporte los suyos.']],
+  obl:[['Viene de otras áreas','Las fechas de IVA y de cargas sociales las trabajan Contabilidad y finanzas y Talento humano.']],
+  neg:DEP_NEG,
+  prov:DEP_PROV,
+  cierre:[['Viene de otras áreas','Resume lo que hizo cada departamento (actividades, facturas, ventas y producción). Conviene hacerlo al final, cuando los demás ya entregaron.']]},
+ mkt:{
+  prod:[['Se usa después en','Lo que agregues aquí aparece en el Catálogo y en las Cotizaciones, y se puede traer a la Factura electrónica (Contabilidad) con un clic.']],
+  precio:[['Viene de otras áreas','El costo de producir: consulta a Producción (hoja de Costos) para no vender por debajo del costo.']],
+  plan:[['Necesitas antes','Las actividades anteriores de esta pestaña: marca y cliente, producto, precio, plaza y promoción.']],
+  publi:[['Se usa después en','La factura del gasto (por ejemplo, el proveedor de la publicidad) se registra y queda por pagar en Contabilidad y finanzas.']],
+  neg:DEP_NEG,
+  cat:[['Necesitas antes','Producto (1.ª P): el catálogo se arma con los productos o servicios que ya agregaste.']],
+  cot:[['Necesitas antes','Producto (1.ª P): primero agrega tus productos o servicios.'],['Se usa después en','Si el cliente acepta la cotización, Producción puede crear las órdenes de producción desde ella (botón "Crear órdenes").']],
+  ventas:[['Viene de otras áreas','Se llena solo con las facturas que se emiten en Contabilidad y finanzas. Si ves vacío, falta emitir facturas allá.']],
+  prov:DEP_PROV},
+ th:{
+  staff:[['Se usa después en','Los colaboradores que registres se usan en la Planilla y, con el botón para traer puestos, en el Manual de funciones.']],
+  plan:[['Necesitas antes','Colaboradores y contratos: la planilla se calcula con las personas que ya registraste.'],['Se usa después en','Contabilidad y finanzas (Banco): ahí se pagan las cargas sociales.']],
+  cargas:[['Necesitas antes','Planilla y boletas: las cargas se calculan sobre los salarios de la planilla.'],['Se usa después en','Contabilidad y finanzas (Banco): ahí se pagan las cargas sociales (CCSS e INS).']],
+  manual:[['Necesitas antes','Colaboradores y contratos: con el botón para traer puestos se copian los que ya registraste.']],
+  neg:DEP_NEG,
+  prov:DEP_PROV},
+ prod:{
+  prods:[['Independiente','Esta lista es solo de Producción y no depende de otros departamentos. Todo lo demás de Producción se arma con tu producto.']],
+  plan:[['Necesitas antes','Actividad 1: tu producto o servicio.']],
+  proc:[['Necesitas antes','Actividad 1: tu producto o servicio.']],
+  mat:[['Necesitas antes','Actividad 1 (tu producto) y los materiales por unidad que anotas en Plan y proceso.'],['Se usa después en','Contabilidad y finanzas: la factura del proveedor se registra en "Facturas de proveedores" y queda por pagar allá.']],
+  ord:[['Necesitas antes','Actividad 1 (tu producto) y actividad 3 (materiales): la orden te avisa qué materiales faltan.'],['Viene de otras áreas','Las cotizaciones aceptadas en Marketing y ventas pueden convertirse en órdenes. También puedes crear una orden tú mismo.']],
+  cal:[['Necesitas antes','Una orden marcada como Terminada en la actividad 4 (Producción).']],
+  desp:[['Necesitas antes','Producto terminado en bodega (órdenes terminadas) y, antes de despachar, la revisión de calidad (actividad 5).']],
+  costo:[['Necesitas antes','Los materiales con su costo (actividad 3) y el plan de producción.'],['Se usa después en','Marketing y ventas puede usar tu costo para fijar el precio.']],
+  inv:[['Viene de este mismo proceso','Se mueve con lo que se produce (órdenes terminadas), se despacha y se rechaza en control de calidad.']],
+  estrella:[['Necesitas antes','Plan y proceso: con el botón para traer pasos se copian los de tu producto.']],
+  neg:DEP_NEG,
+  prov:DEP_PROV},
+ fin:{
+  bank:[['Se usa después en','Aquí se pagan las facturas de proveedores de los demás departamentos, las cargas sociales de Talento humano y el IVA.']],
+  tax:[['Viene de otras áreas','Los productos del Catálogo de Marketing y ventas se pueden traer con un clic.'],['Se usa después en','Las facturas que emitas llenan "Ventas y clientes" de Marketing y el IVA de Contabilidad.']],
+  'acct:compras':[['Viene de otras áreas','Las facturas que los demás departamentos registran en su pestaña "Facturas de proveedores" quedan aquí por pagar.']],
+  'acct:iva':[['Necesitas antes','Facturas emitidas (Factura electrónica) y compras registradas.'],['Se usa después en','Banco: la declaración presentada se paga ahí.']],
+  'acct:diario':[['Viene de otras áreas','Se llena con lo que ya registraron en Factura electrónica, Compras y gastos y Banco.']],
+  presup:[['Viene de otras áreas','La columna "Real (simulador)" se llena con las facturas, compras y bancos que ya registraron.']],
+  neg:DEP_NEG}};
+const depHTML=(d,k)=>{const x=(DEPS[d]||{})[k];if(!x||!x.length)return '';
+ return `<div class="alert info dep" role="note"><strong>De qué depende esta actividad</strong><ul>${x.map(i=>`<li><strong>${esc(i[0])}:</strong> ${esc(i[1])}</li>`).join('')}</ul></div>`};
+function renderDepFin(){const el=document.getElementById('depFin');if(!el)return;const t=view.tab,k=t==='acct'?'acct:'+view.ac:t;el.innerHTML=depHTML('fin',k)}
 const deptOpts=v=>gOpts(Object.keys(DNAME).map(k=>[k,DNAME[k]]),v);
 function gMetrics(){const t=totals(),iv=ivaPeriod(dayKey().slice(0,7)),g=S.ger;
  return{t,iva:iv.result,plan:{t:g.plan.length,d:g.plan.filter(x=>x.st==='Listo').length},tram:{t:TRAM.length,d:TRAM.filter(x=>g.tram[x.k].done).length},docs:{t:g.docs.length,d:g.docs.filter(x=>x.st!=='falta').length}}}
@@ -1460,7 +1522,7 @@ function gCierre(){const g=S.ger,e=g.equipo,ch=gChecks();
 function renderGer(){ensureGer();const el=$('#dept-ger');if(!el)return;el.className='v-ger';
  const nav=GNAV.map(n=>`<button type="button" data-g="nav" data-v="${n[0]}" aria-pressed="${view.gr===n[0]}">${n[1]}</button>`).join('');
  const body=({act:()=>actPage('ger'),ficha:gFicha,org:gOrg,kpi:gKpi,areas:()=>gdPage('plan_ger'),riesgos:()=>gdPage('riesgos'),obl:()=>gdPage('obligaciones'),neg:()=>gdPage('neg_ger'),tab:gTab,estado:gEstado,actas:gActas,ase:()=>gAse()+'<div style="height:20px"></div>'+gdPage('asesoria'),prov:()=>provHTML('ger'),cierre:gCierre}[view.gr]||(()=>actPage('ger')))();
- el.innerHTML=`<div class="seg" role="group" aria-label="Secciones de Gerencia">${nav}</div>${view.gr==='ficha'||view.gr==='org'||view.gr==='tab'||view.gr==='cierre'?gErrHTML():''}${body}`}
+ el.innerHTML=`<div class="seg" role="group" aria-label="Secciones de Gerencia">${nav}</div>${view.gr==='ficha'||view.gr==='org'||view.gr==='tab'||view.gr==='cierre'?gErrHTML():''}${depHTML('ger',view.gr)}${body}`}
 /* ---- acciones ---- */
 const gShowErr=()=>{renderGer();const x=$('#gErr')||$('#dept-ger .alert');if(x&&x.scrollIntoView)x.scrollIntoView({block:'center'})};
 function gSaveActa(){const f=view.gform,e=[];
@@ -1705,7 +1767,7 @@ function tCult(){const C=S.th.cult,k=view.tkf,avg=tClimaAvg();
 function renderTh(){ensureTh();const el=$('#dept-th');if(!el)return;el.className='v-th';
  const nav=THNAV.map(n=>`<button type="button" data-t="nav" data-v="${n[0]}" aria-pressed="${view.tr===n[0]}">${n[1]}</button>`).join('');
  const who=(S.ger&&S.ger.org&&S.ger.org.th)||'';
- el.innerHTML=`<div class="seg" role="group" aria-label="Secciones de Talento Humano">${nav}</div>${who?`<p class="hint" style="margin:-6px 0 14px">Responsable del departamento: <strong>${esc(who)}</strong></p>`:''}`+({act:()=>actPage('th'),recl:()=>gdPage('reclutamiento'),salud:()=>gdPage('salud'),parea:()=>gdPage('plan_th'),staff:tStaff,plan:tPlan,cargas:tCargas,reg:tReg,manual:()=>gdPage('manual'),capac:()=>gdPage('capac'),neg:()=>gdPage('neg_th'),cult:tCult,prov:()=>provHTML('th')}[view.tr]||tStaff)()}
+ el.innerHTML=`<div class="seg" role="group" aria-label="Secciones de Talento Humano">${nav}</div>${who?`<p class="hint" style="margin:-6px 0 14px">Responsable del departamento: <strong>${esc(who)}</strong></p>`:''}`+depHTML('th',view.tr)+({act:()=>actPage('th'),recl:()=>gdPage('reclutamiento'),salud:()=>gdPage('salud'),parea:()=>gdPage('plan_th'),staff:tStaff,plan:tPlan,cargas:tCargas,reg:tReg,manual:()=>gdPage('manual'),capac:()=>gdPage('capac'),neg:()=>gdPage('neg_th'),cult:tCult,prov:()=>provHTML('th')}[view.tr]||tStaff)()}
 /* ---- PDF ---- */
 function thAddContrato(st,s){const e=S.company;
  st.title('Contrato individual de trabajo',e.name+' · Documento de práctica, sin validez legal');
@@ -1929,7 +1991,7 @@ function mVentas(){const s=mkSales(),t=totals(),mx=Math.max(1,...s.prod.map(p=>p
 function renderMk(){ensureMk();const el=$('#dept-mkt');if(!el)return;el.className='v-mkt';
  const nav=MKNAV.map(n=>`<button type="button" data-m="nav" data-v="${n[0]}" aria-pressed="${view.mr===n[0]}">${n[1]}</button>`).join('');
  const who=(S.ger&&S.ger.org&&S.ger.org.mkt)||'';
- el.innerHTML=`<div class="seg" role="group" aria-label="Secciones de Marketing y ventas">${nav}</div>${who?`<p class="hint" style="margin:-6px 0 14px">Responsable del departamento: <strong>${esc(who)}</strong></p>`:''}`+({act:()=>actPage('mkt'),parea:()=>gdPage('plan_mkt'),marca:mMarca,prod:mProd,precio:mPrecio,plaza:mPlaza,promo:mPromo,plan:()=>gdPage('plan_mk'),publi:()=>gdPage('publi'),neg:()=>gdPage('neg_mkt'),cat:mCat,cot:mCot,caf:()=>gdPage('cafeteria',null,cafResumen()),prov:()=>provHTML('mkt'),ventas:mVentas}[view.mr]||mMarca)()}
+ el.innerHTML=`<div class="seg" role="group" aria-label="Secciones de Marketing y ventas">${nav}</div>${who?`<p class="hint" style="margin:-6px 0 14px">Responsable del departamento: <strong>${esc(who)}</strong></p>`:''}`+depHTML('mkt',view.mr)+({act:()=>actPage('mkt'),parea:()=>gdPage('plan_mkt'),marca:mMarca,prod:mProd,precio:mPrecio,plaza:mPlaza,promo:mPromo,plan:()=>gdPage('plan_mk'),publi:()=>gdPage('publi'),neg:()=>gdPage('neg_mkt'),cat:mCat,cot:mCot,caf:()=>gdPage('cafeteria',null,cafResumen()),prov:()=>provHTML('mkt'),ventas:mVentas}[view.mr]||mMarca)()}
 /* ---- PDF ---- */
 function mkAddPlan(st){const M=S.mk,c=S.company;st.title('Plan de marketing: las 4 P',c.name);
  st.h2('Marca y cliente');if(c.lema)st.kv('Lema',c.lema);st.kv('Cliente ideal',M.marca.cliente);st.kv('Propuesta de valor',M.marca.propuesta);st.kv('Mensaje',M.marca.mensaje);st.y+=2;
@@ -2243,7 +2305,7 @@ function pCal(){const it=prCur();if(!it)return prNone();const qc=prQc(it.id),f=v
 function renderPr(){ensurePr();ensureMk();const el=$('#dept-prod');if(!el)return;el.className='v-prod';
  const nav=PRNAV.map(n=>`<button type="button" data-pr="nav" data-v="${n[0]}" aria-pressed="${view.pr===n[0]}">${n[1]}</button>`).join('');
  const who=(S.ger&&S.ger.org&&S.ger.org.prod)||'';
- el.innerHTML=`<div class="seg" role="group" aria-label="Secciones de Producción">${nav}</div>${who?`<p class="hint" style="margin:-6px 0 14px">Responsable del departamento: <strong>${esc(who)}</strong></p>`:''}`+({act:()=>actPage('prod'),parea:()=>gdPage('plan_prod'),ruta:pRuta,prods:pProds,plan:pPlan,proc:pPlan,mat:pMat,costo:pCosto,inv:pInv,ord:pOrd,cal:pCal,desp:pDesp,inf:pInf,procs:()=>gdPage('procesos'),estrella:()=>gdPage('estrella'),neg:()=>gdPage('neg_prod'),prov:()=>provHTML('prod')}[view.pr]||pRuta)()}
+ el.innerHTML=`<div class="seg" role="group" aria-label="Secciones de Producción">${nav}</div>${who?`<p class="hint" style="margin:-6px 0 14px">Responsable del departamento: <strong>${esc(who)}</strong></p>`:''}`+depHTML('prod',view.pr)+({act:()=>actPage('prod'),parea:()=>gdPage('plan_prod'),ruta:pRuta,prods:pProds,plan:pPlan,proc:pPlan,mat:pMat,costo:pCosto,inv:pInv,ord:pOrd,cal:pCal,desp:pDesp,inf:pInf,procs:()=>gdPage('procesos'),estrella:()=>gdPage('estrella'),neg:()=>gdPage('neg_prod'),prov:()=>provHTML('prod')}[view.pr]||pRuta)()}
 /* ---- PDF ---- */
 function prAddProc(st){st.title('Fichas del proceso de producción',S.company.name);
  prItems().forEach(it=>{const s=prSteps(it.id);st.h2(it.name);st.table([{h:'N.º',w:12},{h:'Paso',w:100},{h:'Responsable',w:44},{h:'Minutos',w:24,a:'r'}],s.map((x,i)=>[String(i+1),x.txt,x.resp,String(x.min)]));if(s.length)st.p('Tiempo total: '+s.reduce((a,x)=>a+num(x.min),0)+' minutos.',{c:PC.mut,s:9})})}
@@ -2755,6 +2817,14 @@ function informeBody(st){ensureGer();ensureTh();ensureMk();ensurePr();const c=S.
 /* informe general del docente: todos los equipos */
 function teamStats(){ensureGer();ensureTh();ensureMk();ensurePr();const m=gMetrics(),ks=Object.keys(GDOCS).filter(k=>k.indexOf('legal_')!==0),avg=Math.round(ks.reduce((a,k)=>a+gdPct(k),0)/ks.length);
  return{docs:avg,ruta:actTotal(),tram:m.tram.d+'/'+m.tram.t,nf:S.invoices.length,ventas:m.t.ventas,bancos:m.t.bancos}}
+/* informe del docente: las 12 actividades de cada departamento (responsable, ejecutada o no, % de avance) */
+function act12Report(st){ensureGer();const org=(S.ger&&S.ger.org)||{};
+ st.page();st.title('Mis 12 actividades por departamento',S.company.name+' · '+gd(dayKey()));
+ st.p('Ejecutada: el equipo marcó "PDF listo" en esa actividad. No ejecutada: todavía no la han marcado.',{c:PC.mut,s:8.5,i:1});
+ Object.keys(ACT12).forEach(d=>{const L=ACT12[d],A=(S.acts&&Array.isArray(S.acts[d]))?S.acts[d]:[],n=actCount(d);
+  st.h2(DNAME[d]+' · '+n+' de 12 ejecutadas · '+Math.round(n/12*100)+' % de avance');
+  st.p('Responsable del departamento: '+(String(org[d]||'').trim()||'Sin asignar'),{c:PC.mut,s:9});
+  st.table([{h:'N.º',w:12},{h:'Actividad',w:84},{h:'Responsable',w:48},{h:'Estado',w:36}],L.map((x,i)=>{const a=A[i]||{};return[String(i+1),x[0],String(a.r||'').trim()||'Sin asignar',a.d?'Ejecutada':'No ejecutada']}))})}
 async function docenteInforme(){
  if(!isDoc()){toast('Entra primero con tu cuenta de docente.');return}
  const list=docList();if(!list.length){toast('Primero agrega los códigos de los equipos.');return}
@@ -2774,8 +2844,13 @@ async function docenteInforme(){
   S=stub;st.h2('Resumen de los equipos');
   st.table([{h:'Equipo',w:28},{h:'Empresa',w:40},{h:'Actividades',w:24},{h:'Docs',w:16},{h:'Trámites',w:20},{h:'Facturas',w:18},{h:'Ventas',w:34,a:'r'}],rows);
   st.p('Actividades: PDF listos de las 60 actividades (12 por departamento). Docs: promedio de avance de los documentos de gestión. Trámites: puesta en operación.',{c:PC.mut,s:8.5,i:1});
+  st.h2('Avance de las 12 actividades por departamento');
+  const mrows=teams.map(t=>{S=Object.assign(defaults(),t.st);normalizeS();const cells=Object.keys(ACT12).map(d=>{const n=actCount(d);return n+'/12 ('+Math.round(n/12*100)+'%)'}),tot=actTotal();return[String(t.it.label||S.company.name||'—')].concat(cells,[tot+'/60 ('+Math.round(tot/60*100)+'%)'])});
+  S=stub;
+  st.table([{h:'Equipo',w:30},{h:'Gerencia',w:26},{h:'Marketing',w:26},{h:'Talento H.',w:26},{h:'Producción',w:26},{h:'Contabilidad',w:26},{h:'Total',w:20}],mrows);
+  st.p('Cada celda muestra las actividades ejecutadas (con "PDF listo") de las 12 del departamento y su porcentaje de avance. El detalle de cada actividad está en las páginas de cada equipo.',{c:PC.mut,s:8.5,i:1});
   if(miss.length)st.p('No se pudieron leer: '+miss.join(', ')+'.',{c:PC.mut,s:9});
-  teams.forEach(t=>{S=Object.assign(defaults(),t.st);normalizeS();st.page();st.p('Equipo: '+(t.it.label||'—')+' · código '+t.it.code,{b:1,s:9,c:PC.mut});informeBody(st)});
+  teams.forEach(t=>{S=Object.assign(defaults(),t.st);normalizeS();st.page();st.p('Equipo: '+(t.it.label||'—')+' · código '+t.it.code,{b:1,s:9,c:PC.mut});informeBody(st);act12Report(st)});
   S=stub;blob=st.finish('Informe general del docente · '+gd(dayKey()))
  }catch(e){blob=null}finally{S=keep;cloud.ro=hold}
  savePdf(blob,'informe-general-docente.pdf')}
